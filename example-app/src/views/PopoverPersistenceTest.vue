@@ -310,7 +310,7 @@ const asyncTourSteps: CoachMarkStep[] = [
       showProgress: true,
       nextBtnText: 'Load Dynamic Content',
       // Async callback that loads dynamic content
-      onAsyncNextClick: async (element, step, coachMark) => {
+      onAsyncNextClick: async ({ coachMark }) => {
         console.log('🔄 Loading dynamic content...')
 
         // Simulate async operation (e.g., API call)
@@ -328,7 +328,7 @@ const asyncTourSteps: CoachMarkStep[] = [
         coachMark.moveNext()
       },
       // Async close callback for testing
-      onAsyncCloseClick: async (element, step, coachMark) => {
+      onAsyncCloseClick: async ({ coachMark }) => {
         console.log('🔄 Async close operation...')
 
         // Simulate cleanup before closing
@@ -351,7 +351,7 @@ const asyncTourSteps: CoachMarkStep[] = [
       showProgress: true,
       prevBtnText: 'Async Previous',
       // Async previous callback for testing
-      onAsyncPreviousClick: async (element, step, coachMark) => {
+      onAsyncPreviousClick: async ({ coachMark }) => {
         console.log('🔄 Async previous operation...')
 
         // Simulate some async operation before going back
@@ -364,7 +364,7 @@ const asyncTourSteps: CoachMarkStep[] = [
       }
     },
     // Cleanup when leaving this step
-    onAsyncDeselected: async (element, step, coachMark) => {
+    onAsyncDeselected: async () => {
       console.log('🧹 Cleaning up dynamic element...')
 
       // Simulate cleanup operation

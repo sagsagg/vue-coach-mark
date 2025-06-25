@@ -506,7 +506,7 @@ const moveNext = async (): Promise<void> => {
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createDriverInterface())
+        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -564,7 +564,7 @@ const movePrevious = async (): Promise<void> => {
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createDriverInterface())
+        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -618,7 +618,7 @@ const moveTo = async (stepIndex: number): Promise<void> => {
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createDriverInterface())
+        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -661,7 +661,7 @@ const handleNext = async (): Promise<void> => {
       'next',
       element,
       step,
-      createDriverInterface(),
+      createCoachMarkInterface(),
       () => moveNext()
     )
   } else {
@@ -679,7 +679,7 @@ const handlePrevious = async (): Promise<void> => {
       'previous',
       element,
       step,
-      createDriverInterface(),
+      createCoachMarkInterface(),
       () => movePrevious()
     )
   } else {
@@ -697,7 +697,7 @@ const handleClose = async (): Promise<void> => {
       'close',
       element,
       step,
-      createDriverInterface(),
+      createCoachMarkInterface(),
       () => stopTour()
     )
   } else {
@@ -718,7 +718,7 @@ const handleSkip = async (): Promise<void> => {
       'skip',
       element,
       step,
-      createDriverInterface(),
+      createCoachMarkInterface(),
       () => {
         skipTour()
         stopTour()

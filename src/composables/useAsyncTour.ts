@@ -69,7 +69,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
       onAsyncOperationStart?.()
 
       // Execute the callback (may be sync or async)
-      const result = callback(element, step, coachMark)
+      const result = callback({ element, step, coachMark })
 
       // If it's a Promise, wait for it to complete
       if (result instanceof Promise) {

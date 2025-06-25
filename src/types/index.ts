@@ -89,11 +89,15 @@ export type CoachMarkHook = (
 ) => void | Promise<void>
 
 // Async tour hook type for step-level callbacks
-export type AsyncTourHook = (
+export type AsyncTourHook = ({
+  element,
+  step,
+  coachMark
+}: {
   element: Element | undefined,
   step: CoachMarkStep,
   coachMark: CoachMarkInstance
-) => void | Promise<void>
+}) => void | Promise<void>
 
 // Main configuration interface
 export interface CoachMarkConfig {

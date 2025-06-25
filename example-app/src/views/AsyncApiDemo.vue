@@ -266,7 +266,7 @@ const fetchTodosManually = async () => {
 }
 
 // Async tour step handlers
-const handleInitialDataFetch = async (element, step, coachMark): Promise<void> => {
+const handleInitialDataFetch = async ({ coachMark }): Promise<void> => {
   console.log('🚀 Step 1: Fetching initial todo data...')
   try {
     const data = await fetchTodos(5)
@@ -281,7 +281,7 @@ const handleInitialDataFetch = async (element, step, coachMark): Promise<void> =
   }
 }
 
-const handleFilteredDataFetch = async (): Promise<void> => {
+const handleFilteredDataFetch = async ({ coachMark }): Promise<void> => {
   console.log('🔍 Step 2: Fetching filtered data...')
   try {
     const data = await fetchTodos(15)
@@ -291,12 +291,14 @@ const handleFilteredDataFetch = async (): Promise<void> => {
     await nextTick()
     filterStatus.value = 'completed'
     console.log(`✅ Fetched ${data.length} todos and applied completed filter`)
+
+    coachMark.moveNext()
   } catch (err) {
     console.error('❌ Failed to fetch filtered data:', err)
   }
 }
 
-const handleFullDataFetch = async (): Promise<void> => {
+const handleFullDataFetch = async ({ coachMark }): Promise<void> => {
   console.log('📊 Step 3: Fetching complete dataset...')
   try {
     const data = await fetchTodos() // Fetch all todos
@@ -306,6 +308,8 @@ const handleFullDataFetch = async (): Promise<void> => {
     await nextTick()
     filterStatus.value = 'all'
     console.log(`✅ Fetched complete dataset: ${data.length} todos`)
+
+    coachMark.moveNext()
   } catch (err) {
     console.error('❌ Failed to fetch complete data:', err)
   }
