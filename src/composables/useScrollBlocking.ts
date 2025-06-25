@@ -104,13 +104,9 @@ export function useScrollBlocking(): UseScrollBlockingReturn {
    * 4. Maintains visual consistency
    */
   const blockScrolling = (): void => {
-    console.log('scrollBlockingState', scrollBlockingState)
     if (scrollBlockingState.isBlocked) {
-      console.log('🔒 Scroll blocking already active, skipping')
       return // Already blocked
     }
-
-    console.log('🔒 Blocking browser scrolling for step transition')
     
     // Store current scroll position
     scrollBlockingState.scrollPosition = {
@@ -147,11 +143,8 @@ export function useScrollBlocking(): UseScrollBlockingReturn {
    */
   const unblockScrolling = (): void => {
     if (!scrollBlockingState.isBlocked) {
-      console.log('🔓 Scroll blocking not active, skipping')
       return // Not blocked
     }
-
-    console.log('🔓 Unblocking browser scrolling after step transition')
 
     // Restore original body styles
     const body = document.body
@@ -185,7 +178,7 @@ export function useScrollBlocking(): UseScrollBlockingReturn {
    * state indicates it's not blocked. Useful for error recovery.
    */
   const forceUnblock = (): void => {
-    console.log('🚨 Force unblocking browser scrolling (emergency cleanup)')
+
 
     // Reset body styles to defaults
     const body = document.body

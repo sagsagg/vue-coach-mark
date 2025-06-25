@@ -68,7 +68,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
       isAsyncOperationInProgress.value = true
       onAsyncOperationStart?.()
 
-      console.log('🔄 Executing async callback for step:', step.popover?.title || 'Unknown')
+
 
       // Execute the callback (may be sync or async)
       const result = callback(element, step, driver)
@@ -76,9 +76,9 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
       // If it's a Promise, wait for it to complete
       if (result instanceof Promise) {
         await result
-        console.log('✅ Async callback completed successfully')
+        // Async callback completed successfully
       } else {
-        console.log('✅ Sync callback completed successfully')
+        // Sync callback completed successfully
       }
 
       return true
@@ -125,7 +125,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
 
     // If there's a custom callback, execute it instead of default action
     if (callback) {
-      console.log(`🎯 Custom ${direction} callback found, executing async operation`)
+
 
       const success = await executeAsyncCallback(callback, element, step, driver);
 
@@ -138,7 +138,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
 
     } else {
       // No custom callback, execute default action
-      console.log(`➡️ No custom ${direction} callback, executing default action`)
+
       defaultAction()
     }
   }
@@ -154,7 +154,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
     const callback = step.onAsyncDeselected
 
     if (callback) {
-      console.log('🧹 Async step deselection callback found, executing cleanup')
+
 
       await executeAsyncCallback(callback, element, step, driver)
     }

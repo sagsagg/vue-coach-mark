@@ -230,7 +230,7 @@ const createDriverInterface = (): CoachMarkDriver => {
     },
     highlight: (step: CoachMarkStep): void => {
       // This would be implemented by the highlight composable
-      console.warn('highlight method not implemented in component context')
+      // Method not implemented in component context
     },
     destroy
   }

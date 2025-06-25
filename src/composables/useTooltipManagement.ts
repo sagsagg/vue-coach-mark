@@ -134,14 +134,14 @@ export function useTooltipManagement(
       const isStepTransitionContext = context.includes('step-transition')
       if (!isStepTransitionContext) {
         displayState.debouncedCalls++
-        console.log(`🚫 Tooltip display blocked during step transition from: ${context}`)
+
         return
       }
     }
     
     // If another display operation is in progress, wait for it to complete
     if (displayState.isDisplaying) {
-      console.log('🔄 Tooltip display already in progress, queuing request:', displayId, 'from:', context)
+
       
       // Wait for current operation to complete
       while (displayState.isDisplaying) {
@@ -151,7 +151,7 @@ export function useTooltipManagement(
       // Check if this request is still the latest
       if (displayId !== displayState.pendingDisplayId) {
         displayState.debouncedCalls++
-        console.log('🚫 Tooltip display request superseded:', displayId, 'from:', context)
+
         return
       }
     }
@@ -160,13 +160,13 @@ export function useTooltipManagement(
     const timeSinceLastDisplay = now - displayState.lastDisplayTime
     if (timeSinceLastDisplay < displayState.debounceDelay) {
       const remainingDelay = displayState.debounceDelay - timeSinceLastDisplay
-      console.log(`⏳ Debouncing tooltip display for ${remainingDelay}ms from: ${context}`)
+
       await delay(remainingDelay)
       
       // Check if this request is still the latest after debounce
       if (displayId !== displayState.pendingDisplayId) {
         displayState.debouncedCalls++
-        console.log('🚫 Tooltip display request superseded after debounce:', displayId, 'from:', context)
+
         return
       }
     }
@@ -178,8 +178,7 @@ export function useTooltipManagement(
     displayState.lastExecutionContext = context
     
     try {
-      console.log('🎯 Executing debounced tooltip display:', displayId, 'from:', context,
-                 `(${displayState.executedCalls}/${displayState.totalCalls} executed)`)
+
       await showTooltipInternal()
     } finally {
       displayState.isDisplaying = false

@@ -318,12 +318,8 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   })
 
   // Watch for state changes using Vue's reactive system
-  watch(eventsInitialized, (newValue: boolean) => {
-    if (newValue) {
-      console.log('Events initialized')
-    } else {
-      console.log('Events destroyed')
-    }
+  watch(eventsInitialized, () => {
+    // Events state changed - no logging needed for production
   })
 
   return {

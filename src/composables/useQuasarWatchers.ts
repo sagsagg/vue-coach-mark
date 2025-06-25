@@ -95,21 +95,21 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
         return
       }
 
-      console.log('📍 Render popover requested for step:', renderData.step?.popover?.title)
+
 
       // Check if we're already showing the same step
       const currentPopoverStep = popoverState.value.step
       if (tooltipManagement.tooltipVisible.value && currentPopoverStep &&
           currentPopoverStep.element === renderData.step.element &&
           currentPopoverStep.popover?.title === renderData.step.popover?.title) {
-        console.log('📍 Same step already visible, skipping render')
+
         setState('shouldRenderPopover', undefined)
         return
       }
 
       // Immediately clear any existing popover state to prevent content flashing
       if (currentPopoverStep && currentPopoverStep !== renderData.step) {
-        console.log('🧹 Clearing previous popover state to prevent content flash')
+
         showPopoverCommunication(renderData.element, renderData.step)
       }
 
@@ -123,7 +123,7 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
         
         // Check if this request is still the latest
         if (currentRequestId !== renderRequestId) {
-          console.log('🚫 Render request superseded:', currentRequestId)
+
           return
         }
 
@@ -132,7 +132,7 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
         
         // Check if this request is still the latest after async operation
         if (currentRequestId !== renderRequestId) {
-          console.log('🚫 Render request superseded after tooltip hide:', currentRequestId)
+
           return
         }
 
@@ -144,7 +144,7 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
         
         // Check if this request is still the latest after processing
         if (currentRequestId !== renderRequestId) {
-          console.log('🚫 Render request superseded after processing:', currentRequestId)
+
           return
         }
 
@@ -185,7 +185,7 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
         return
       }
 
-      console.log('🔄 Reposition popover requested for step:', repositionData.step?.popover?.title)
+
 
       try {
         // Mark as processing to prevent race conditions
@@ -196,14 +196,14 @@ export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersRet
 
         // Only handle repositioning if tooltip is already visible
         if (tooltipManagement.tooltipVisible.value) {
-          console.log('🔄 Repositioning existing tooltip')
+
           
           // Use QTooltip's built-in repositioning by briefly toggling visibility
           tooltipManagement.hideTooltip()
           await nextTick()
           tooltipManagement.tooltipVisible.value = true
         } else {
-          console.log('🔄 Tooltip not visible, skipping reposition')
+
         }
 
       } catch (error) {
