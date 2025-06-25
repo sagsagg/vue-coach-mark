@@ -121,7 +121,7 @@ import type {
   CoachMarkStep,
   MintCoachMarkProps,
   MintCoachMarkEmits,
-  CoachMarkDriver,
+  CoachMarkInstance,
   QuasarAnchor
 } from '../types'
 
@@ -147,7 +147,7 @@ const {
   isActive,
   currentStepIndex,
   getActiveStep,
-  drive,
+  start,
   destroy,
   refresh,
   setSteps,
@@ -420,13 +420,13 @@ watch(() => currentStep.value, async (newStep, oldStep) => {
 })
 
 /**
- * Create a driver interface for hook callbacks
+ * Create a coach mark interface for hook callbacks
  */
-const createDriverInterface = (): CoachMarkDriver => {
+const createCoachMarkInterface = (): CoachMarkInstance => {
   return {
     isActive: () => isActive.value,
     refresh: () => refresh(),
-    drive: (stepIndex?: number) => drive(stepIndex),
+    start: (stepIndex?: number) => start(stepIndex),
     setConfig: (config) => setConfig(config),
     setSteps: (steps) => setSteps(steps),
     getConfig: () => getConfig(),
@@ -440,11 +440,11 @@ const createDriverInterface = (): CoachMarkDriver => {
     getPreviousStep: () => undefined,
     moveNext: () => moveNext(),
     movePrevious: () => movePrevious(),
-    moveTo: (index: number) => moveTo(index),
+    moveTo: (index: number) => start(index),
     skipTour: () => handleSkip(),
     hasNextStep: () => currentStepIndex.value !== undefined && currentStepIndex.value < totalSteps.value - 1,
     hasPreviousStep: () => currentStepIndex.value !== undefined && currentStepIndex.value > 0,
-    highlight: (step) => drive(props.steps.indexOf(step)),
+    highlight: (step) => start(props.steps.indexOf(step)),
     destroy: () => destroy()
   }
 }
@@ -461,7 +461,7 @@ const startTour = (stepIndex?: number): void => {
   // Block scrolling when starting the tour
   blockScrolling()
 
-  drive(stepIndex)
+  start(stepIndex)
   emit('update:modelValue', true)
   emit('tour-start')
 
@@ -514,7 +514,7 @@ const moveNext = async (): Promise<void> => {
 
       // 5. Perform step change
       const nextIndex = currentIndex + 1
-      drive(nextIndex)
+      start(nextIndex)
       emit('step-change', props.steps[nextIndex], nextIndex)
 
       // 6. Wait for all step processing to complete
@@ -572,7 +572,7 @@ const movePrevious = async (): Promise<void> => {
 
       // 5. Perform step change
       const prevIndex = currentIndex - 1
-      drive(prevIndex)
+      start(prevIndex)
       emit('step-change', props.steps[prevIndex], prevIndex)
 
       // 6. Wait for all step processing to complete
@@ -625,7 +625,7 @@ const moveTo = async (stepIndex: number): Promise<void> => {
       await ensureTooltipHidden()
 
       // 5. Perform step change
-      drive(stepIndex)
+      start(stepIndex)
       emit('step-change', props.steps[stepIndex], stepIndex)
 
       // 6. Wait for all step processing to complete

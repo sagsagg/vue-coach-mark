@@ -1,19 +1,19 @@
 /**
  * Main coach mark composable that orchestrates all functionality
- * Provides the same API as the original driver.js
+ * Provides an intuitive API for coach mark interactions
  */
 
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref } from 'vue'
 import { useCoachMarkState } from './useCoachMarkState'
 import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useCoachMarkEvents } from './useCoachMarkEvents'
 import { useOverlay } from './useOverlay'
 import { useHighlight } from './useHighlight'
-import type { CoachMarkConfig, CoachMarkStep, CoachMarkDriver, AllowedButtons } from '../types'
+import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons } from '../types'
 
 export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   const { getState, setState, resetState } = useCoachMarkState()
-  const { configure, getConfig, setCurrentDriver, getCurrentDriver } = useCoachMarkConfig()
+  const { configure, getConfig, setCurrentCoachMark, getCurrentCoachMark } = useCoachMarkConfig()
   const { listen, initEvents, destroyEvents, destroyEmitter } = useCoachMarkEvents()
   const { destroyOverlay } = useOverlay()
   const { highlight, refreshActiveHighlight, destroyHighlight } = useHighlight()
@@ -63,7 +63,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
 
     const nextStepIndex = activeIndex + 1
     if (steps[nextStepIndex]) {
-      drive(nextStepIndex)
+      startStep(nextStepIndex)
     } else {
       destroy()
     }
@@ -81,7 +81,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
 
     const previousStepIndex = activeIndex - 1
     if (steps[previousStepIndex]) {
-      drive(previousStepIndex)
+      startStep(previousStepIndex)
     } else {
       destroy()
     }
@@ -94,7 +94,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     const steps = getConfig('steps') || []
 
     if (steps[index]) {
-      drive(index)
+      startStep(index)
     } else {
       destroy()
     }
@@ -104,19 +104,18 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
    * Skip the entire tour
    */
   function skipTour() {
-    const activeIndex = getState('activeIndex')
     const activeStep = getState('currentActiveStep')
     const activeElement = getState('currentActiveElement')
 
     // Execute skip hook if provided
     const onSkipClick = getConfig('onSkipClick')
     if (onSkipClick) {
-      const driver = getCurrentDriver()
-      if (driver) {
+      const coachMark = getCurrentCoachMark()
+      if (coachMark) {
         onSkipClick(activeElement || undefined, activeStep || {} as CoachMarkStep, {
           config: getConfig(),
           state: getState(),
-          driver
+          coachMark
         })
       }
     }
@@ -143,12 +142,12 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
 
     const onPrevClick = activeStep.popover?.onPrevClick || getConfig('onPrevClick')
     if (onPrevClick) {
-      const driver = getCurrentDriver()
-      if (driver) {
+      const coachMark = getCurrentCoachMark()
+      if (coachMark) {
         return onPrevClick(activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
-          driver
+          coachMark
         })
       }
     }
@@ -174,12 +173,12 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
 
     const onNextClick = activeStep.popover?.onNextClick || getConfig('onNextClick')
     if (onNextClick) {
-      const driver = getCurrentDriver()
-      if (driver) {
+      const coachMark = getCurrentCoachMark()
+      if (coachMark) {
         return onNextClick(activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
-          driver
+          coachMark
         })
       }
     }
@@ -217,7 +216,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Start the tour at a specific step
    */
-  async function drive(stepIndex: number = 0) {
+  async function startStep(stepIndex: number = 0) {
     const steps = getConfig('steps')
     if (!steps) {
       console.error('No steps to drive through')
@@ -281,15 +280,15 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     const activeOnDestroyed = getState('internalActiveOnDestroyed')
 
     const onDestroyStarted = getConfig('onDestroyStarted')
-    const driver = getCurrentDriver()
-    
+    const coachMark = getCurrentCoachMark()
+
     // `onDestroyStarted` is used to confirm the exit of tour
-    if (withOnDestroyStartedHook && onDestroyStarted && driver) {
+    if (withOnDestroyStartedHook && onDestroyStarted && coachMark) {
       const isActiveDummyElement = !activeElement || activeElement?.id === 'mint-coach-mark-dummy-element'
       onDestroyStarted(isActiveDummyElement ? undefined : activeElement, activeStep!, {
         config: getConfig(),
         state: getState(),
-        driver
+        coachMark
       })
       return
     }
@@ -309,14 +308,14 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     isActive.value = false
     currentStepIndex.value = undefined
 
-    if (activeElement && activeStep && driver) {
+    if (activeElement && activeStep && coachMark) {
       const isActiveDummyElement = activeElement.id === 'mint-coach-mark-dummy-element'
-      
+
       if (onDeselected) {
         onDeselected(isActiveDummyElement ? undefined : activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
-          driver
+          coachMark
         })
       }
 
@@ -324,7 +323,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
         onDestroyed(isActiveDummyElement ? undefined : activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
-          driver
+          coachMark
         })
       }
     }
@@ -334,13 +333,13 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     }
   }
 
-  // Create the driver API
-  const api: CoachMarkDriver = {
+  // Create the coach mark API
+  const api: CoachMarkInstance = {
     isActive: () => getState('isInitialized') || false,
     refresh: refreshActiveHighlight,
-    drive: (stepIndex: number = 0) => {
+    start: (stepIndex: number = 0) => {
       init()
-      drive(stepIndex)
+      startStep(stepIndex)
     },
     setConfig: configure,
     setSteps: (steps: CoachMarkStep[]) => {
@@ -396,16 +395,16 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     }
   }
 
-  setCurrentDriver(api)
+  setCurrentCoachMark(api)
 
   return {
-    // Driver API
+    // Coach mark API
     ...api,
-    
+
     // Reactive state
     isActive,
     currentStepIndex,
-    
+
     // Internal methods for component use
     init,
     destroy

@@ -288,7 +288,7 @@ const config: CoachMarkConfig = {
 const {
   isActive,
   currentStepIndex,
-  drive,
+  start,
   destroy,
   moveNext,
   movePrevious,
@@ -318,7 +318,7 @@ watch(currentStepIndex, (newIndex, oldIndex) => {
 // Event handlers
 function startTour() {
   addLogEvent('success', '🚀 Tour started')
-  drive(0)
+  start(0)
 }
 
 function stopTour() {

@@ -180,18 +180,18 @@ npm run build:types
 
 ## 🤝 Migration from driver.js
 
-MintCoachMark maintains the same API surface as driver.js, making migration straightforward:
+MintCoachMark provides an intuitive API that's easy to migrate from driver.js:
 
 ```javascript
-// driver.js
+// driver.js (old)
 import { driver } from 'driver.js'
 const driverObj = driver({ steps })
 driverObj.drive()
 
-// MintCoachMark
+// MintCoachMark (new)
 import { useCoachMark } from 'mint-coach-mark'
 const coachMark = useCoachMark({ steps })
-coachMark.drive()
+coachMark.start()
 ```
 
 ## 📄 License

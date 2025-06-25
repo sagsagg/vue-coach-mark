@@ -84,7 +84,7 @@ export type CoachMarkHook = (
   context: {
     config: CoachMarkConfig
     state: CoachMarkState
-    driver: CoachMarkDriver
+    coachMark: CoachMarkInstance
   }
 ) => void | Promise<void>
 
@@ -92,7 +92,7 @@ export type CoachMarkHook = (
 export type AsyncTourHook = (
   element: Element | undefined,
   step: CoachMarkStep,
-  driver: CoachMarkDriver
+  coachMark: CoachMarkInstance
 ) => void | Promise<void>
 
 // Main configuration interface
@@ -144,7 +144,7 @@ export interface CoachMarkConfig {
     context: {
       config: CoachMarkConfig
       state: CoachMarkState
-      driver: CoachMarkDriver
+      coachMark: CoachMarkInstance
     }
   ) => void
 }
@@ -186,11 +186,11 @@ export interface PopoverDOM {
   closeBtn: HTMLElement
 }
 
-// Driver interface (similar to original driver.js API)
-export interface CoachMarkDriver {
+// CoachMark instance interface (provides intuitive API for coach mark interactions)
+export interface CoachMarkInstance {
   isActive: () => boolean
   refresh: () => void
-  drive: (stepIndex?: number) => void
+  start: (stepIndex?: number) => void
   setConfig: (config: CoachMarkConfig) => void
   setSteps: (steps: CoachMarkStep[]) => void
   getConfig: () => CoachMarkConfig

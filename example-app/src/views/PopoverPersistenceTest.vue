@@ -310,7 +310,7 @@ const asyncTourSteps: CoachMarkStep[] = [
       showProgress: true,
       nextBtnText: 'Load Dynamic Content',
       // Async callback that loads dynamic content
-      onAsyncNextClick: async (element, step, driver) => {
+      onAsyncNextClick: async (element, step, coachMark) => {
         console.log('🔄 Loading dynamic content...')
 
         // Simulate async operation (e.g., API call)
@@ -325,10 +325,10 @@ const asyncTourSteps: CoachMarkStep[] = [
         console.log('✅ Dynamic content loaded, proceeding to next step')
 
         // Manually proceed to next step
-        driver.moveNext()
+        coachMark.moveNext()
       },
       // Async close callback for testing
-      onAsyncCloseClick: async (element, step, driver) => {
+      onAsyncCloseClick: async (element, step, coachMark) => {
         console.log('🔄 Async close operation...')
 
         // Simulate cleanup before closing
@@ -337,7 +337,7 @@ const asyncTourSteps: CoachMarkStep[] = [
         console.log('✅ Async close complete, destroying tour')
 
         // Manually close the tour
-        driver.destroy()
+        coachMark.destroy()
       }
     }
   },
@@ -351,7 +351,7 @@ const asyncTourSteps: CoachMarkStep[] = [
       showProgress: true,
       prevBtnText: 'Async Previous',
       // Async previous callback for testing
-      onAsyncPreviousClick: async (element, step, driver) => {
+      onAsyncPreviousClick: async (element, step, coachMark) => {
         console.log('🔄 Async previous operation...')
 
         // Simulate some async operation before going back
@@ -360,11 +360,11 @@ const asyncTourSteps: CoachMarkStep[] = [
         console.log('✅ Async previous complete, going to previous step')
 
         // Manually go to previous step
-        driver.movePrevious()
+        coachMark.movePrevious()
       }
     },
     // Cleanup when leaving this step
-    onAsyncDeselected: async (element, step, driver) => {
+    onAsyncDeselected: async (element, step, coachMark) => {
       console.log('🧹 Cleaning up dynamic element...')
 
       // Simulate cleanup operation

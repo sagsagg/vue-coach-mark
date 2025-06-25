@@ -44,7 +44,7 @@ interface UseCoachMarkEventsReturn {
   readonly initEvents: () => void
   readonly destroyEvents: () => void
   readonly destroyEmitter: () => void
-  readonly onDriverClick: (
+  readonly onCoachMarkClick: (
     element: Element,
     listener: PointerEventHandler,
     shouldPreventDefault?: (target: HTMLElement) => boolean
@@ -82,8 +82,6 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   const isPointerEvent: EventTypeGuard<PointerEvent> = (event: Event): event is PointerEvent => {
     return event instanceof PointerEvent
   }
-
-
 
   /**
    * Register an event listener using Vue's reactive system
@@ -188,9 +186,9 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   }
 
   /**
-   * Handle clicks on driver elements with proper event handling using Vue patterns
+   * Handle clicks on coach mark elements with proper event handling using Vue patterns
    */
-  const onDriverClick = (
+  const onCoachMarkClick = (
     element: Element,
     listener: PointerEventHandler,
     shouldPreventDefault?: (target: HTMLElement) => boolean
@@ -329,7 +327,7 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
     initEvents,
     destroyEvents,
     destroyEmitter,
-    onDriverClick,
+    onCoachMarkClick,
 
     // State using Vue's computed property
     eventsInitialized: isEventsInitialized

@@ -266,7 +266,7 @@ const fetchTodosManually = async () => {
 }
 
 // Async tour step handlers
-const handleInitialDataFetch = async (element, step, driver): Promise<void> => {
+const handleInitialDataFetch = async (element, step, coachMark): Promise<void> => {
   console.log('🚀 Step 1: Fetching initial todo data...')
   try {
     const data = await fetchTodos(5)
@@ -275,7 +275,7 @@ const handleInitialDataFetch = async (element, step, driver): Promise<void> => {
 
     await nextTick()
 
-    driver.moveNext()
+    coachMark.moveNext()
   } catch (err) {
     console.error('❌ Failed to fetch initial data:', err)
   }

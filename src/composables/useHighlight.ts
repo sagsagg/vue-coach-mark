@@ -12,7 +12,7 @@ import type { CoachMarkStep } from '../types'
 
 export function useHighlight() {
   const { getState, setState } = useCoachMarkState()
-  const { getConfig, getCurrentDriver } = useCoachMarkConfig()
+  const { getConfig, getCurrentCoachMark } = useCoachMarkConfig()
   const { trackActiveElement, transitionStage, refreshOverlay } = useOverlay()
 
   // Animation state
@@ -60,23 +60,23 @@ export function useHighlight() {
 
     const config = getConfig()
     const state = getState()
-    const driver = getCurrentDriver()
+    const coachMark = getCurrentCoachMark()
 
     // Call deselected hook for previous element
-    if (!isFirstHighlight && deselectedHook && driver) {
+    if (!isFirstHighlight && deselectedHook && coachMark) {
       deselectedHook(isFromDummyElement ? undefined : fromElement, fromStep!, {
         config,
         state,
-        driver
+        coachMark
       })
     }
 
     // Call highlight started hook
-    if (highlightStartedHook && driver) {
+    if (highlightStartedHook && coachMark) {
       highlightStartedHook(isToDummyElement ? undefined : toElement, toStep, {
         config,
         state,
-        driver
+        coachMark
       })
     }
 
@@ -112,11 +112,11 @@ export function useHighlight() {
         // Animation complete
         trackActiveElement(toElement, toStep)
 
-        if (highlightedHook && driver) {
+        if (highlightedHook && coachMark) {
           highlightedHook(isToDummyElement ? undefined : toElement, toStep, {
             config: getConfig(),
             state: getState(),
-            driver
+            coachMark
           })
         }
 

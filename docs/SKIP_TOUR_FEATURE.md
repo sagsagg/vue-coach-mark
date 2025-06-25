@@ -22,10 +22,10 @@ The Skip Tour feature has been successfully implemented in the mint-coach-mark l
    - Added `skipBtnText` and `allowSkip` to configuration interfaces
    - Added `onSkipClick` hook to configuration and popover interfaces
    - Added `tour-skipped` event to component emits
-   - Added `skipTour()` method to driver interface
+   - Added `skipTour()` method to coach mark interface
 
 2. **Shared Composables**
-   - `useCoachMark.ts`: Core skip functionality and driver API
+   - `useCoachMark.ts`: Core skip functionality and coach mark API
    - `useCoachMarkConfig.ts`: Default configuration with skip options
    - `useAsyncTour.ts`: Async navigation support for skip actions
 

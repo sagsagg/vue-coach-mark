@@ -1,17 +1,17 @@
 /**
  * Async Tour Composable
- * 
- * Provides async tour functionality similar to driver.js, allowing steps to:
+ *
+ * Provides async tour functionality for coach marks, allowing steps to:
  * - Load data asynchronously before proceeding
  * - Override default navigation behavior with custom callbacks
  * - Handle step lifecycle events with async operations
  */
 
 import { ref, type Ref } from 'vue'
-import type { 
-  CoachMarkStep, 
-  CoachMarkDriver, 
-  AsyncTourHook 
+import type {
+  CoachMarkStep,
+  CoachMarkInstance,
+  AsyncTourHook
 } from '../types'
 
 export interface UseAsyncTourOptions {
@@ -26,19 +26,19 @@ export interface UseAsyncTourReturn {
     callback: AsyncTourHook,
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver
+    coachMark: CoachMarkInstance
   ) => Promise<boolean>
   handleAsyncNavigation: (
     direction: 'next' | 'previous' | 'close' | 'skip',
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver,
+    coachMark: CoachMarkInstance,
     defaultAction: () => void
   ) => Promise<void>
   handleStepDeselection: (
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver
+    coachMark: CoachMarkInstance
   ) => Promise<void>
 }
 
@@ -62,16 +62,14 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
     callback: AsyncTourHook,
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver
+    coachMark: CoachMarkInstance
   ): Promise<boolean> => {
     try {
       isAsyncOperationInProgress.value = true
       onAsyncOperationStart?.()
 
-
-
       // Execute the callback (may be sync or async)
-      const result = callback(element, step, driver)
+      const result = callback(element, step, coachMark)
 
       // If it's a Promise, wait for it to complete
       if (result instanceof Promise) {
@@ -101,7 +99,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
     direction: 'next' | 'previous' | 'close' | 'skip',
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver,
+    coachMark: CoachMarkInstance,
     defaultAction: () => void
   ): Promise<void> => {
     // Get the appropriate async callback based on direction
@@ -127,14 +125,14 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
     if (callback) {
 
 
-      const success = await executeAsyncCallback(callback, element, step, driver);
+      const success = await executeAsyncCallback(callback, element, step, coachMark);
 
       if (!success) {
         console.warn(`⚠️ Async ${direction} callback failed, falling back to default action`)
         defaultAction()
       }
-      // Note: If callback succeeds, it's responsible for calling the appropriate driver method
-      // (e.g., driver.moveNext(), driver.movePrevious(), driver.destroy())
+      // Note: If callback succeeds, it's responsible for calling the appropriate coach mark method
+      // (e.g., coachMark.moveNext(), coachMark.movePrevious(), coachMark.destroy())
 
     } else {
       // No custom callback, execute default action
@@ -149,14 +147,14 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
   const handleStepDeselection = async (
     element: Element | undefined,
     step: CoachMarkStep,
-    driver: CoachMarkDriver
+    coachMark: CoachMarkInstance
   ): Promise<void> => {
     const callback = step.onAsyncDeselected
 
     if (callback) {
 
 
-      await executeAsyncCallback(callback, element, step, driver)
+      await executeAsyncCallback(callback, element, step, coachMark)
     }
   }
 

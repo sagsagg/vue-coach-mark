@@ -95,7 +95,7 @@ import type {
   MintCoachMarkProps,
   MintCoachMarkEmits,
   PopoverDOM,
-  CoachMarkDriver
+  CoachMarkInstance
 } from '../types'
 
 const props = withDefaults(defineProps<MintCoachMarkProps>(), {
@@ -116,7 +116,7 @@ const mergedConfig: ComputedRef<CoachMarkConfig> = computed<CoachMarkConfig>(() 
 const {
   isActive,
   currentStepIndex: activeStepIndex,
-  drive,
+  start,
   destroy,
   moveNext,
   movePrevious,
@@ -193,13 +193,13 @@ watch(() => props.modelValue, (newValue) => {
 })
 
 /**
- * Create a driver interface for hook callbacks
+ * Create a coach mark interface for hook callbacks
  */
-const createDriverInterface = (): CoachMarkDriver => {
+const createCoachMarkInterface = (): CoachMarkInstance => {
   return {
     isActive: (): boolean => isActive.value,
     refresh: (): void => {}, // Will be implemented by highlight composable
-    drive,
+    start,
     setConfig,
     setSteps: (steps: CoachMarkStep[]): void => {
       setConfig({ ...getConfig(), steps })
@@ -218,7 +218,7 @@ const createDriverInterface = (): CoachMarkDriver => {
     getPreviousStep: () => getState('previousStep'),
     moveNext,
     movePrevious,
-    moveTo: (index: number): void => drive(index),
+    moveTo: (index: number): void => start(index),
     skipTour,
     hasNextStep: (): boolean => {
       const steps = props.steps || []
@@ -247,12 +247,12 @@ const handleNext = (): void => {
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onNextClick) {
-    const driver = createDriverInterface()
+    const coachMark = createCoachMarkInterface()
 
     activeStep.popover.onNextClick(activeElement, activeStep, {
       config: getConfig(),
       state: getState(),
-      driver
+      coachMark
     })
   } else {
     moveNext()
@@ -264,12 +264,12 @@ const handlePrevious = (): void => {
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onPrevClick) {
-    const driver = createDriverInterface()
+    const coachMark = createCoachMarkInterface()
 
     activeStep.popover.onPrevClick(activeElement, activeStep, {
       config: getConfig(),
       state: getState(),
-      driver
+      coachMark
     })
   } else {
     movePrevious()
@@ -281,12 +281,12 @@ const handleClose = (): void => {
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onCloseClick) {
-    const driver = createDriverInterface()
+    const coachMark = createCoachMarkInterface()
 
     activeStep.popover.onCloseClick(activeElement, activeStep, {
       config: getConfig(),
       state: getState(),
-      driver
+      coachMark
     })
   } else {
     stopTour()
@@ -304,12 +304,12 @@ const handleSkip = (): void => {
   }
 
   if (activeStep?.popover?.onSkipClick) {
-    const driver = createDriverInterface()
+    const coachMark = createCoachMarkInterface()
 
     activeStep.popover.onSkipClick(activeElement, activeStep, {
       config: getConfig(),
       state: getState(),
-      driver
+      coachMark
     })
   } else {
     skipTour()
@@ -358,12 +358,12 @@ const handlePopoverRendered = (popover: HTMLElement): void => {
   const config = getConfig()
   const onPopoverRender = config.onPopoverRender
   if (onPopoverRender) {
-    const driver = createDriverInterface()
+    const coachMark = createCoachMarkInterface()
 
     onPopoverRender(popoverDOM, {
       config,
       state: getState(),
-      driver
+      coachMark
     })
   }
 }
@@ -382,7 +382,7 @@ const startTour = (stepIndex: number = 0): void => {
 
   emit('tour-start')
   emit('update:modelValue', true)
-  drive(stepIndex)
+  start(stepIndex)
 }
 
 const stopTour = (): void => {

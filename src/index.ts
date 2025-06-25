@@ -38,7 +38,8 @@ export type {
   PopoverCommunication,
   MintPopoverProps,
   MintPopoverEmits,
-  UsePopoverCommunicationReturn
+  UsePopoverCommunicationReturn,
+  CoachMarkInstance
 } from './types'
 
 // Utilities

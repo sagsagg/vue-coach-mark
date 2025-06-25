@@ -4,7 +4,7 @@
  */
 
 import { reactive, computed, type ComputedRef } from 'vue'
-import type { CoachMarkConfig, CoachMarkDriver } from '../types'
+import type { CoachMarkConfig, CoachMarkInstance } from '../types'
 
 // Default configuration
 const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'onHighlightStarted' | 'onHighlighted' | 'onDeselected' | 'onDestroyStarted' | 'onDestroyed' | 'onNextClick' | 'onPrevClick' | 'onCloseClick' | 'onSkipClick' | 'onPopoverRender'>> = {
@@ -34,8 +34,8 @@ const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'onHighlightStarte
 // Global configuration instance
 const globalConfig = reactive<CoachMarkConfig>({ ...defaultConfig })
 
-// Current driver instance
-let currentDriver: CoachMarkDriver | null = null
+// Current coach mark instance
+let currentCoachMark: CoachMarkInstance | null = null
 
 export function useCoachMarkConfig() {
   /**
@@ -56,17 +56,17 @@ export function useCoachMarkConfig() {
   }
 
   /**
-   * Set current driver instance
+   * Set current coach mark instance
    */
-  function setCurrentDriver(driver: CoachMarkDriver): void {
-    currentDriver = driver
+  function setCurrentCoachMark(coachMark: CoachMarkInstance): void {
+    currentCoachMark = coachMark
   }
 
   /**
-   * Get current driver instance
+   * Get current coach mark instance
    */
-  function getCurrentDriver(): CoachMarkDriver | null {
-    return currentDriver
+  function getCurrentCoachMark(): CoachMarkInstance | null {
+    return currentCoachMark
   }
 
   // Computed properties for commonly used config values
@@ -109,9 +109,9 @@ export function useCoachMarkConfig() {
     // Configuration management
     configure,
     getConfig,
-    setCurrentDriver,
-    getCurrentDriver,
-    
+    setCurrentCoachMark,
+    getCurrentCoachMark,
+
     // Reactive config
     config: globalConfig,
     

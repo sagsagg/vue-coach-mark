@@ -140,7 +140,7 @@ const steps = [
 const {
   isActive,
   currentStepIndex,
-  drive,
+  start,
   destroy,
   moveNext,
   movePrevious,
@@ -153,7 +153,7 @@ const currentElement = computed(() => getActiveElement())
 const currentStep = computed(() => getActiveStep())
 
 function startTour() {
-  drive(0)
+  start(0)
 }
 
 function handleNext() {
@@ -337,7 +337,7 @@ const coach = useCoachMark({
 })
 
 // Start tour
-coach.drive(0)
+coach.start(0)
 
 // Navigate
 coach.moveNext()
