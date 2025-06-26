@@ -1,33 +1,117 @@
 /**
  * TypeScript type definitions for MintCoachMark
+ *
+ * Type Organization:
+ * 1. Basic primitive types
+ * 2. Core interfaces (no dependencies)
+ * 3. Retry mechanism types
+ * 4. Hook and callback types
+ * 5. Configuration interfaces
+ * 6. Main coach mark interfaces
+ * 7. Vue component interfaces
+ * 8. Popover system interfaces
+ * 9. Composable-specific types
  */
 
 import type { QTooltipProps } from 'quasar'
 
-// Basic types
+// =============================================================================
+// 1. BASIC PRIMITIVE TYPES
+// =============================================================================
+
 export type Side = 'top' | 'right' | 'bottom' | 'left' | 'over'
 export type Alignment = 'start' | 'center' | 'end'
 export type AllowedButtons = 'next' | 'previous' | 'close' | 'skip'
+export type PopoverProvider = 'mint' | 'quasar'
 
-// QTooltip configuration for step-level customization
-// Uses Quasar's official types to ensure consistency and automatic updates
-export interface QTooltipConfig {
-  anchor?: QTooltipProps['anchor']
-  self?: QTooltipProps['self']
-  offset?: QTooltipProps['offset']
-  class?: string // Keep as string since QTooltipProps doesn't expose class property directly
-}
+// =============================================================================
+// 2. CORE INTERFACES (NO DEPENDENCIES)
+// =============================================================================
 
 // Stage definition for overlay positioning
-export interface StageDefinition {
+export type StageDefinition = {
   x: number
   y: number
   width: number
   height: number
 }
 
+// QTooltip configuration for step-level customization
+// Uses Quasar's official types to ensure consistency and automatic updates
+export type QTooltipConfig = {
+  anchor?: QTooltipProps['anchor']
+  self?: QTooltipProps['self']
+  offset?: QTooltipProps['offset']
+  class?: string // Keep as string since QTooltipProps doesn't expose class property directly
+}
+
+// Popover DOM elements type
+export type PopoverDOM = {
+  wrapper: HTMLElement
+  arrow: HTMLElement
+  title: HTMLElement
+  description: HTMLElement
+  footer: HTMLElement
+  progress: HTMLElement
+  nextBtn: HTMLElement
+  prevBtn: HTMLElement
+  closeBtn: HTMLElement
+}
+
+// =============================================================================
+// 3. RETRY MECHANISM TYPES
+// =============================================================================
+
+// Retry configuration for element resolution
+export type RetryConfig = {
+  enabled?: boolean
+  maxAttempts?: number
+  delay?: number
+  exponentialBackoff?: boolean
+  onRetry?: (attempt: number, step: CoachMarkStep) => void
+  onMaxAttemptsReached?: (step: CoachMarkStep) => void
+}
+
+// Retry state information
+export type RetryState = {
+  isRetrying: boolean
+  currentAttempt: number
+  maxAttempts: number
+  lastAttemptTime: number
+}
+
+// =============================================================================
+// 4. HOOK AND CALLBACK TYPES
+// =============================================================================
+
+// Hook function type - supports both sync and async operations
+export type CoachMarkHook = (
+  element: Element | undefined,
+  step: CoachMarkStep,
+  context: {
+    config: CoachMarkConfig
+    state: CoachMarkState
+    coachMark: CoachMarkInstance
+  }
+) => void | Promise<void>
+
+// Async tour hook type for step-level callbacks
+export type AsyncTourHook = ({
+  element,
+  step,
+  coachMark
+}: {
+  element: Element | undefined,
+  step: CoachMarkStep,
+  coachMark: CoachMarkInstance
+}) => void | Promise<void>
+
+// =============================================================================
+// 5. CONFIGURATION TYPES
+// =============================================================================
+
 // Popover configuration
-export interface PopoverConfig {
+export type PopoverConfig = {
   title?: string
   description?: string
   side?: Side
@@ -61,18 +145,8 @@ export interface PopoverConfig {
   tooltip?: QTooltipConfig
 }
 
-// Retry configuration for element resolution
-export interface RetryConfig {
-  enabled?: boolean
-  maxAttempts?: number
-  delay?: number
-  exponentialBackoff?: boolean
-  onRetry?: (attempt: number, step: CoachMarkStep) => void
-  onMaxAttemptsReached?: (step: CoachMarkStep) => void
-}
-
 // Coach mark step definition
-export interface CoachMarkStep {
+export type CoachMarkStep = {
   element?: string | Element | (() => Element)
   popover?: PopoverConfig
   disableActiveInteraction?: boolean
@@ -89,30 +163,12 @@ export interface CoachMarkStep {
   onAsyncDeselected?: AsyncTourHook  // New async version
 }
 
-// Hook function type - supports both sync and async operations
-export type CoachMarkHook = (
-  element: Element | undefined,
-  step: CoachMarkStep,
-  context: {
-    config: CoachMarkConfig
-    state: CoachMarkState
-    coachMark: CoachMarkInstance
-  }
-) => void | Promise<void>
+// =============================================================================
+// 6. MAIN COACH MARK TYPES
+// =============================================================================
 
-// Async tour hook type for step-level callbacks
-export type AsyncTourHook = ({
-  element,
-  step,
-  coachMark
-}: {
-  element: Element | undefined,
-  step: CoachMarkStep,
-  coachMark: CoachMarkInstance
-}) => void | Promise<void>
-
-// Main configuration interface
-export interface CoachMarkConfig {
+// Main configuration type
+export type CoachMarkConfig = {
   steps?: CoachMarkStep[]
   animate?: boolean
   overlayColor?: string
@@ -147,7 +203,7 @@ export interface CoachMarkConfig {
 
   // Global retry configuration for element resolution
   retry?: boolean | RetryConfig
-  
+
   // Global hooks
   onHighlightStarted?: CoachMarkHook
   onHighlighted?: CoachMarkHook
@@ -168,8 +224,8 @@ export interface CoachMarkConfig {
   ) => void
 }
 
-// State interface
-export interface CoachMarkState {
+// State type
+export type CoachMarkState = {
   isInitialized?: boolean
   activeIndex?: number
   activeElement?: Element
@@ -192,21 +248,8 @@ export interface CoachMarkState {
   shouldRepositionPopover?: { element: Element; step: CoachMarkStep }
 }
 
-// Popover DOM elements
-export interface PopoverDOM {
-  wrapper: HTMLElement
-  arrow: HTMLElement
-  title: HTMLElement
-  description: HTMLElement
-  footer: HTMLElement
-  progress: HTMLElement
-  nextBtn: HTMLElement
-  prevBtn: HTMLElement
-  closeBtn: HTMLElement
-}
-
-// CoachMark instance interface (provides intuitive API for coach mark interactions)
-export interface CoachMarkInstance {
+// CoachMark instance type (provides intuitive API for coach mark interactions)
+export type CoachMarkInstance = {
   isActive: () => boolean
   refresh: () => void
   start: (stepIndex?: number) => void
@@ -231,10 +274,12 @@ export interface CoachMarkInstance {
   destroy: () => void
 }
 
-
+// =============================================================================
+// 7. VUE COMPONENT TYPES
+// =============================================================================
 
 // Vue component props
-export interface MintCoachMarkProps {
+export type MintCoachMarkProps = {
   steps?: CoachMarkStep[]
   config?: CoachMarkConfig
   modelValue?: boolean
@@ -242,7 +287,7 @@ export interface MintCoachMarkProps {
 }
 
 // Vue component emits
-export interface MintCoachMarkEmits {
+export type MintCoachMarkEmits = {
   'update:modelValue': [value: boolean]
   'tour-start': []
   'tour-complete': []
@@ -253,16 +298,18 @@ export interface MintCoachMarkEmits {
   'deselected': [element: Element | undefined, step: CoachMarkStep]
 }
 
-// Popover component types
-export type PopoverProvider = 'mint' | 'quasar'
+// =============================================================================
+// 8. POPOVER SYSTEM TYPES
+// =============================================================================
 
-export interface PopoverProviderConfig {
+// Popover provider configuration
+export type PopoverProviderConfig = {
   provider: PopoverProvider
   quasarOptions?: Record<string, unknown>
 }
 
-// Enhanced popover communication interface
-export interface PopoverCommunication {
+// Enhanced popover communication type
+export type PopoverCommunication = {
   visible: boolean
   targetElement: Element | null
   step: CoachMarkStep | null
@@ -275,7 +322,7 @@ export interface PopoverCommunication {
 }
 
 // Popover component props for decoupled architecture
-export interface MintPopoverProps {
+export type MintPopoverProps = {
   visible?: boolean
   targetElement?: Element | null
   step?: CoachMarkStep | null
@@ -294,7 +341,7 @@ export interface MintPopoverProps {
 }
 
 // Popover component emits
-export interface MintPopoverEmits {
+export type MintPopoverEmits = {
   (e: 'next'): void
   (e: 'previous'): void
   (e: 'close'): void
@@ -306,7 +353,7 @@ export interface MintPopoverEmits {
 
 
 // Communication composable return type
-export interface UsePopoverCommunicationReturn {
+export type UsePopoverCommunicationReturn = {
   readonly popoverState: import('vue').ComputedRef<PopoverCommunication>
   readonly updatePopoverState: (updates: Partial<PopoverCommunication>) => void
   readonly showPopover: (element: Element, step: CoachMarkStep, isPositioning?: boolean) => void
@@ -318,17 +365,17 @@ export interface UsePopoverCommunicationReturn {
 }
 
 // =============================================================================
-// COMPOSABLE-SPECIFIC TYPES
+// 9. COMPOSABLE-SPECIFIC TYPES
 // =============================================================================
 
 // Async Tour Composable Types
-export interface UseAsyncTourOptions {
+export type UseAsyncTourOptions = {
   onAsyncOperationStart?: () => void
   onAsyncOperationComplete?: () => void
   onAsyncOperationError?: (error: Error) => void
 }
 
-export interface UseAsyncTourReturn {
+export type UseAsyncTourReturn = {
   isAsyncOperationInProgress: import('vue').Ref<boolean>
   executeAsyncCallback: (
     callback: AsyncTourHook,
@@ -351,7 +398,7 @@ export interface UseAsyncTourReturn {
 }
 
 // Scroll Blocking Composable Types
-export interface UseScrollBlockingReturn {
+export type UseScrollBlockingReturn = {
   blockScrolling: () => void
   unblockScrolling: () => void
   isBlocked: import('vue').Ref<boolean>
@@ -360,7 +407,7 @@ export interface UseScrollBlockingReturn {
 }
 
 // Tooltip Management Composable Types
-export interface UseTooltipManagementReturn {
+export type UseTooltipManagementReturn = {
   tooltipVisible: import('vue').Ref<boolean>
   tooltipRefreshKey: import('vue').Ref<number>
   showTooltipIfReady: (context?: string) => Promise<void>
@@ -370,7 +417,7 @@ export interface UseTooltipManagementReturn {
   getDisplayStats: () => TooltipDisplayState
 }
 
-export interface TooltipDisplayState {
+export type TooltipDisplayState = {
   isDisplaying: boolean
   pendingDisplayId: number
   lastDisplayTime: number
@@ -383,23 +430,23 @@ export interface TooltipDisplayState {
 }
 
 // Quasar Watchers Composable Types
-export interface UseQuasarWatchersReturn {
+export type UseQuasarWatchersReturn = {
   initWatchers: () => void
   isProcessing: () => boolean
 }
 
-export interface PopoverState {
+export type PopoverState = {
   visible: boolean
   targetElement: Element | null
   step: CoachMarkStep | null
 }
 
 // Element Retry Composable Types
-export interface UseElementRetryOptions {
+export type UseElementRetryOptions = {
   defaultRetryConfig?: RetryConfig
 }
 
-export interface UseElementRetryReturn {
+export type UseElementRetryReturn = {
   resolveElementWithRetry: (
     elementRef: string | Element | (() => Element) | undefined,
     retryConfig?: boolean | RetryConfig,
