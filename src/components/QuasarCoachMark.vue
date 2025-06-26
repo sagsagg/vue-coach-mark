@@ -754,6 +754,7 @@ interface QuasarCoachMarkExposed {
   movePrevious: (options?: NavigationOptions) => void
   moveTo: (stepIndex: number, options?: NavigationOptions) => void
   skipTour: () => void
+  setSteps: (steps: CoachMarkStep[]) => void
   isActive: () => boolean
   getCurrentStep: () => CoachMarkStep | undefined
   getCurrentStepIndex: () => number | undefined
@@ -767,6 +768,7 @@ defineExpose<QuasarCoachMarkExposed>({
   movePrevious,
   moveTo,
   skipTour: handleSkip,
+  setSteps,
   isActive: (): boolean => isActive.value,
   getCurrentStep: (): CoachMarkStep | undefined => currentStep.value,
   getCurrentStepIndex: (): number | undefined => currentStepIndex.value
