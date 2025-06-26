@@ -61,11 +61,24 @@ export interface PopoverConfig {
   tooltip?: QTooltipConfig
 }
 
+// Retry configuration for element resolution
+export interface RetryConfig {
+  enabled?: boolean
+  maxAttempts?: number
+  delay?: number
+  exponentialBackoff?: boolean
+  onRetry?: (attempt: number, step: CoachMarkStep) => void
+  onMaxAttemptsReached?: (step: CoachMarkStep) => void
+}
+
 // Coach mark step definition
 export interface CoachMarkStep {
   element?: string | Element | (() => Element)
   popover?: PopoverConfig
   disableActiveInteraction?: boolean
+
+  // Retry configuration for element resolution
+  retry?: boolean | RetryConfig
 
   // Step lifecycle hooks
   onHighlightStarted?: CoachMarkHook
@@ -114,14 +127,14 @@ export interface CoachMarkConfig {
 
   disableActiveInteraction?: boolean
   allowKeyboardControl?: boolean
-  
+
   // Popover defaults
   popoverClass?: string
   popoverOffset?: number
   showButtons?: AllowedButtons[]
   disableButtons?: AllowedButtons[]
   showProgress?: boolean
-  
+
   // Button text defaults
   progressText?: string
   nextBtnText?: string
@@ -131,6 +144,9 @@ export interface CoachMarkConfig {
 
   // Skip tour configuration
   allowSkip?: boolean
+
+  // Global retry configuration for element resolution
+  retry?: boolean | RetryConfig
   
   // Global hooks
   onHighlightStarted?: CoachMarkHook
@@ -376,4 +392,20 @@ export interface PopoverState {
   visible: boolean
   targetElement: Element | null
   step: CoachMarkStep | null
+}
+
+// Element Retry Composable Types
+export interface UseElementRetryOptions {
+  defaultRetryConfig?: RetryConfig
+}
+
+export interface UseElementRetryReturn {
+  resolveElementWithRetry: (
+    elementRef: string | Element | (() => Element) | undefined,
+    retryConfig?: boolean | RetryConfig,
+    step?: CoachMarkStep
+  ) => Promise<Element | null>
+  isRetrying: import('vue').Ref<boolean>
+  currentAttempt: import('vue').Ref<number>
+  cancelRetry: () => void
 }

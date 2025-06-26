@@ -78,6 +78,13 @@ const navigationCategories: NavigationCategory[] = [
         component: 'QuasarCoachMark',
         description: 'Real API calls with async functionality'
       },
+      {
+        name: 'Retry Mechanism',
+        path: '/retry-mechanism',
+        icon: '🔄',
+        component: 'MintPopover',
+        description: 'Element retry for dynamic content'
+      },
       { 
         name: 'Programmatic', 
         path: '/programmatic', 

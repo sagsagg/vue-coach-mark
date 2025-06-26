@@ -4,10 +4,12 @@
  */
 
 import { ref, nextTick } from 'vue'
-import { getElement, createDummyElement, removeDummyElement, bringInView } from '../utils'
+import { createDummyElement, removeDummyElement, bringInView } from '../utils'
 import { useCoachMarkState } from './useCoachMarkState'
 import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useOverlay } from './useOverlay'
+import { useElementRetry } from './useElementRetry'
+import { extractRetryConfig } from './utils'
 import type { CoachMarkStep } from '../types'
 
 export const useHighlight = () => {
@@ -15,17 +17,25 @@ export const useHighlight = () => {
   const { getConfig, getCurrentCoachMark } = useCoachMarkConfig()
   const { trackActiveElement, transitionStage, refreshOverlay } = useOverlay()
 
+  // Initialize element retry with global configuration
+  const globalRetryConfig = getConfig('retry')
+  const { resolveElementWithRetry, cancelRetry } = useElementRetry({
+    defaultRetryConfig: extractRetryConfig(globalRetryConfig)
+  })
+
   // Animation state
   const isAnimating = ref(false)
 
   /**
-   * Highlight a step element
+   * Highlight a step element with retry mechanism
    */
   const highlight = async (step: CoachMarkStep): Promise<void> => {
-    const { element } = step
-    let elemObj = getElement(element)
+    const { element, retry } = step
 
-    // If the element is not found, we mount a 1px div
+    // Try to resolve element with retry mechanism
+    let elemObj = await resolveElementWithRetry(element, retry, step)
+
+    // If the element is not found after retries, we mount a 1px div
     // at the center of the screen to highlight and show
     // the popover on top of that. This is to show a
     // modal-like highlight.
@@ -191,11 +201,14 @@ export const useHighlight = () => {
   }
 
   /**
-   * Destroy highlighting
+   * Destroy highlighting and cancel any ongoing retries
    */
   const destroyHighlight = (): void => {
+    // Cancel any ongoing retry operations
+    cancelRetry()
+
     removeDummyElement()
-    
+
     document.querySelectorAll('.mint-coach-mark-active-element').forEach(element => {
       element.classList.remove('mint-coach-mark-active-element', 'mint-coach-mark-no-interaction')
       element.removeAttribute('aria-haspopup')

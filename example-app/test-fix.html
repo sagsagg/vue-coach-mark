@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fix</title>
+</head>
+<body>
+    <h1>Testing the Fix</h1>
+    <p>If you can see this page without errors, the fix is working!</p>
+    
+    <div id="test-element" style="padding: 20px; background: #f0f0f0; margin: 20px;">
+        Test Element for Coach Mark
+    </div>
+    
+    <button onclick="testCoachMark()">Test Coach Mark</button>
+    
+    <script type="module">
+        import { useCoachMark } from 'mint-coach-mark'
+        
+        window.testCoachMark = function() {
+            console.log('Testing coach mark...')
+            
+            const coachMark = useCoachMark()
+            
+            coachMark.setConfig({
+                steps: [
+                    {
+                        element: '#test-element',
+                        retry: {
+                            maxAttempts: 3,
+                            delay: 1000,
+                            onRetry: (attempt) => {
+                                console.log(`Retry attempt ${attempt}`)
+                            }
+                        },
+                        popover: {
+                            title: 'Test Element',
+                            description: 'This is a test of the retry mechanism.',
+                            showButtons: ['close']
+                        }
+                    }
+                ],
+                animate: true,
+                onHighlightStarted: () => {
+                    console.log('✅ Coach mark started successfully!')
+                }
+            })
+            
+            coachMark.start()
+        }
+    </script>
+</body>
+</html>

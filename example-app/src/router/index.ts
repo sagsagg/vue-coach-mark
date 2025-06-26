@@ -81,6 +81,14 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Async API Integration Demo'
     }
+  },
+  {
+    path: '/retry-mechanism',
+    name: 'RetryMechanism',
+    component: () => import('../views/RetryMechanismDemo.vue'),
+    meta: {
+      title: 'Element Retry Mechanism Demo'
+    }
   }
 ]
 

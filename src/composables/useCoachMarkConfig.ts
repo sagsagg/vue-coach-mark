@@ -7,7 +7,7 @@ import { reactive, computed, type ComputedRef } from 'vue'
 import type { CoachMarkConfig, CoachMarkInstance } from '../types'
 
 // Default configuration
-const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'onHighlightStarted' | 'onHighlighted' | 'onDeselected' | 'onDestroyStarted' | 'onDestroyed' | 'onNextClick' | 'onPrevClick' | 'onCloseClick' | 'onSkipClick' | 'onPopoverRender'>> = {
+const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'retry' | 'onHighlightStarted' | 'onHighlighted' | 'onDeselected' | 'onDestroyStarted' | 'onDestroyed' | 'onNextClick' | 'onPrevClick' | 'onCloseClick' | 'onSkipClick' | 'onPopoverRender'>> = {
   animate: true,
   overlayColor: '#000',
   overlayOpacity: 0.7,

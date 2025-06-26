@@ -24,7 +24,9 @@ export {
   isSVGPathElement,
   isFocusableElement,
   isAllowedButton,
-  isError
+  isError,
+  isRetryConfig,
+  extractRetryConfig
 } from './validationUtils'
 
 // Position calculation utilities

@@ -15,6 +15,7 @@ export {
   resetGlobalPopoverState
 } from './composables/usePopoverCommunication'
 export { useAsyncTour } from './composables/useAsyncTour'
+export { useElementRetry } from './composables/useElementRetry'
 export {
   hasAsyncNavigationCallbacks,
   hasAsyncLifecycleCallbacks,
@@ -39,7 +40,10 @@ export type {
   MintPopoverProps,
   MintPopoverEmits,
   UsePopoverCommunicationReturn,
-  CoachMarkInstance
+  CoachMarkInstance,
+  RetryConfig,
+  UseElementRetryOptions,
+  UseElementRetryReturn
 } from './types'
 
 // Utilities

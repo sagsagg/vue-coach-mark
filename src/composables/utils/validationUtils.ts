@@ -95,3 +95,42 @@ export const isAllowedButton = (value: unknown): value is import('../../types').
 export const isError = (error: unknown): error is Error => {
   return error instanceof Error
 }
+
+/**
+ * Type guard to check if a value is a RetryConfig object
+ */
+export const isRetryConfig = (value: unknown): value is import('../../types').RetryConfig => {
+  return typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    (
+      'enabled' in value ||
+      'maxAttempts' in value ||
+      'delay' in value ||
+      'exponentialBackoff' in value ||
+      'onRetry' in value ||
+      'onMaxAttemptsReached' in value
+    )
+}
+
+/**
+ * Safely extract RetryConfig from a boolean | RetryConfig | undefined value
+ */
+export const extractRetryConfig = (
+  value: boolean | import('../../types').RetryConfig | undefined
+): import('../../types').RetryConfig | undefined => {
+  if (value === true) {
+    // Return empty config to use defaults
+    return {}
+  }
+
+  if (value === false || value === undefined) {
+    return undefined
+  }
+
+  if (isRetryConfig(value)) {
+    return value
+  }
+
+  return undefined
+}
