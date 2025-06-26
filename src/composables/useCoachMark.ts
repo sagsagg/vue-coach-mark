@@ -9,6 +9,7 @@ import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useCoachMarkEvents } from './useCoachMarkEvents'
 import { useOverlay } from './useOverlay'
 import { useHighlight } from './useHighlight'
+import { isFocusableElement, isAllowedButton } from './utils'
 import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons } from '../types'
 
 export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
@@ -112,7 +113,15 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     if (onSkipClick) {
       const coachMark = getCurrentCoachMark()
       if (coachMark) {
-        onSkipClick(activeElement || undefined, activeStep || {} as CoachMarkStep, {
+        // Create a safe fallback step if activeStep is undefined
+        const safeActiveStep: CoachMarkStep = activeStep || {
+          element: '',
+          popover: {
+            title: 'Tour Skipped',
+            description: 'The tour was skipped by the user.'
+          }
+        }
+        onSkipClick(activeElement || undefined, safeActiveStep, {
           config: getConfig(),
           state: getState(),
           coachMark
@@ -231,7 +240,11 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       return
     }
 
-    setState('internalActiveOnDestroyed', document.activeElement as HTMLElement)
+    // Store the currently focused element if it's focusable
+    const currentActiveElement = document.activeElement
+    if (isFocusableElement(currentActiveElement)) {
+      setState('internalActiveOnDestroyed', currentActiveElement)
+    }
     setState('activeIndex', stepIndex)
     currentStepIndex.value = stepIndex
 
@@ -249,13 +262,22 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     const progressText = `${stepIndex + 1} / ${steps.length}`
 
     const configuredButtons = currentStep.popover?.showButtons || getConfig('showButtons')
-    const calculatedButtons: AllowedButtons[] = [
-      'next',
-      'previous',
-      ...(allowsClosing ? ['close' as AllowedButtons] : [])
-    ].filter(b => {
-      return !configuredButtons?.length || configuredButtons.includes(b as AllowedButtons)
-    }) as AllowedButtons[]
+
+    // Create base buttons array with proper typing
+    const baseButtons: AllowedButtons[] = ['next', 'previous']
+    if (allowsClosing) {
+      baseButtons.push('close')
+    }
+
+    // Filter buttons based on configuration with type safety
+    const calculatedButtons: AllowedButtons[] = baseButtons.filter(button => {
+      if (!configuredButtons?.length) {
+        return true
+      }
+      return configuredButtons.some(configButton =>
+        isAllowedButton(configButton) && configButton === button
+      )
+    })
 
     // Prepare step with calculated popover properties
     const stepWithPopover = {
@@ -263,7 +285,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       popover: currentStep.popover ? {
         showButtons: calculatedButtons,
         nextBtnText: !hasNextStep ? doneBtnText : currentStep.popover.nextBtnText,
-        disableButtons: [...(!hasPreviousStep ? ['previous' as AllowedButtons] : [])],
+        disableButtons: !hasPreviousStep ? (['previous'] as AllowedButtons[]) : ([] as AllowedButtons[]),
         showProgress: showProgress,
         progressText: progressText,
         ...currentStep.popover
@@ -330,8 +352,9 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       }
     }
 
-    if (activeOnDestroyed) {
-      (activeOnDestroyed as HTMLElement).focus()
+    // Restore focus to the previously active element if it's focusable
+    if (activeOnDestroyed && isFocusableElement(activeOnDestroyed)) {
+      activeOnDestroyed.focus()
     }
   }
 

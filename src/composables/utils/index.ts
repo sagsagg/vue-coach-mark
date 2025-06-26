@@ -20,7 +20,11 @@ export {
   isMouseEvent,
   isPointerEvent,
   isKeyboardEvent,
-  shouldPreventDefault
+  shouldPreventDefault,
+  isSVGPathElement,
+  isFocusableElement,
+  isAllowedButton,
+  isError
 } from './validationUtils'
 
 // Position calculation utilities
@@ -31,3 +35,8 @@ export {
   doRectsOverlap,
   calculateDistance
 } from './positionUtils'
+
+// State management utilities
+export {
+  isValidStateKey
+} from './stateUtils'

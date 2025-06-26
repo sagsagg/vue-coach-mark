@@ -66,3 +66,32 @@ export const shouldPreventDefault = (target: HTMLElement): boolean => {
   const interactiveElements = ['input', 'button', 'select', 'textarea', 'a']
   return !interactiveElements.includes(tagName)
 }
+
+/**
+ * Type guard to check if an element is an SVGPathElement
+ */
+export const isSVGPathElement = (element: unknown): element is SVGPathElement => {
+  return element instanceof SVGPathElement
+}
+
+/**
+ * Type guard to check if an element is focusable (has focus method)
+ */
+export const isFocusableElement = (element: unknown): element is HTMLElement & { focus(): void } => {
+  return isHTMLElement(element) && typeof element.focus === 'function'
+}
+
+/**
+ * Type guard to check if a value is an AllowedButtons type
+ */
+export const isAllowedButton = (value: unknown): value is import('../../types').AllowedButtons => {
+  return typeof value === 'string' &&
+    ['next', 'previous', 'close', 'skip'].includes(value)
+}
+
+/**
+ * Type guard to check if an error is an Error instance
+ */
+export const isError = (error: unknown): error is Error => {
+  return error instanceof Error
+}

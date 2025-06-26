@@ -4,10 +4,11 @@
  */
 
 import { ref, computed } from 'vue'
-import { easeInOutQuad, lerpRect, getEffectivePadding, getEffectiveRadius } from '../utils'
+import { easeInOutQuad, getEffectivePadding, getEffectiveRadius } from '../utils'
 import { useCoachMarkState } from './useCoachMarkState'
 import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useCoachMarkEvents } from './useCoachMarkEvents'
+import { isSVGPathElement } from './utils'
 import type { StageDefinition, CoachMarkStep } from '../types'
 
 export const useOverlay = () => {
@@ -118,12 +119,15 @@ export const useOverlay = () => {
       svg = createOverlay()
     }
 
-    const path = svg.querySelector('#mint-coach-mark-overlay-path') as SVGPathElement
-    if (!path) return
+    const pathElement = svg.querySelector('#mint-coach-mark-overlay-path')
+    if (!pathElement || !isSVGPathElement(pathElement)) {
+      console.warn('Could not find or access SVG path element for overlay')
+      return
+    }
 
     const pathData = generateOverlayPath(stage, radius)
-    path.setAttribute('d', pathData)
-    path.setAttribute('fill-rule', 'evenodd')
+    pathElement.setAttribute('d', pathData)
+    pathElement.setAttribute('fill-rule', 'evenodd')
 
     updateOverlayStyle()
     setState('currentActiveStagePosition', stage)

@@ -15,7 +15,7 @@ import type {
   UseAsyncTourOptions,
   UseAsyncTourReturn
 } from '../types'
-import { getAsyncCallbackForDirection } from './utils'
+import { getAsyncCallbackForDirection, isError } from './utils'
 
 /**
  * Composable for handling async tour operations
@@ -58,7 +58,15 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
 
     } catch (error) {
       console.error('❌ Error executing async callback:', error)
-      onAsyncOperationError?.(error as Error)
+      if (isError(error)) {
+        onAsyncOperationError?.(error)
+      } else {
+        // Create a proper Error object for non-Error exceptions
+        const errorObj = new Error(
+          typeof error === 'string' ? error : 'Unknown error occurred during async callback execution'
+        )
+        onAsyncOperationError?.(errorObj)
+      }
       return false
 
     } finally {

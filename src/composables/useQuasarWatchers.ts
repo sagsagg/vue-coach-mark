@@ -11,15 +11,19 @@ import type {
   UseTooltipManagementReturn,
   UseScrollBlockingReturn,
   UseQuasarWatchersReturn,
-  PopoverState
+  PopoverState,
+  CoachMarkState
 } from '../types'
 
 /**
  * Watcher management options
  */
 interface WatcherOptions {
-  getState: (key: string) => any
-  setState: (key: string, value: any) => void
+  getState: {
+    (): CoachMarkState
+    <K extends keyof CoachMarkState>(key: K): CoachMarkState[K]
+  }
+  setState: <K extends keyof CoachMarkState>(key: K, value: CoachMarkState[K]) => void
   showPopoverCommunication: (element: Element, step: CoachMarkStep) => void
   ensureTooltipHidden: () => Promise<void>
   ensureStepProcessingComplete: () => Promise<void>
