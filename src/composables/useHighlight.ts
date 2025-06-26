@@ -10,7 +10,7 @@ import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useOverlay } from './useOverlay'
 import type { CoachMarkStep } from '../types'
 
-export function useHighlight() {
+export const useHighlight = () => {
   const { getState, setState } = useCoachMarkState()
   const { getConfig, getCurrentCoachMark } = useCoachMarkConfig()
   const { trackActiveElement, transitionStage, refreshOverlay } = useOverlay()
@@ -21,7 +21,7 @@ export function useHighlight() {
   /**
    * Highlight a step element
    */
-  async function highlight(step: CoachMarkStep): Promise<void> {
+  const highlight = async (step: CoachMarkStep): Promise<void> => {
     const { element } = step
     let elemObj = getElement(element)
 
@@ -39,7 +39,7 @@ export function useHighlight() {
   /**
    * Transfer highlight from current element to new element
    */
-  async function transferHighlight(toElement: Element, toStep: CoachMarkStep): Promise<void> {
+  const transferHighlight = async (toElement: Element, toStep: CoachMarkStep): Promise<void> => {
     const duration = 400
     const start = Date.now()
 
@@ -153,7 +153,7 @@ export function useHighlight() {
   /**
    * Update element classes and ARIA attributes
    */
-  function updateElementHighlight(fromElement: Element, toElement: Element, toStep: CoachMarkStep): void {
+  const updateElementHighlight = (fromElement: Element, toElement: Element, toStep: CoachMarkStep): void => {
     // Remove classes from previous element
     fromElement.classList.remove('mint-coach-mark-active-element', 'mint-coach-mark-no-interaction')
     fromElement.removeAttribute('aria-haspopup')
@@ -175,7 +175,7 @@ export function useHighlight() {
   /**
    * Refresh active highlight (useful for window resize)
    */
-  function refreshActiveHighlight(): void {
+  const refreshActiveHighlight = (): void => {
     const activeHighlight = getState('currentActiveElement')
     const activeStep = getState('currentActiveStep')
 
@@ -193,7 +193,7 @@ export function useHighlight() {
   /**
    * Destroy highlighting
    */
-  function destroyHighlight(): void {
+  const destroyHighlight = (): void => {
     removeDummyElement()
     
     document.querySelectorAll('.mint-coach-mark-active-element').forEach(element => {

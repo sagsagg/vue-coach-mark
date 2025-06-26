@@ -45,7 +45,7 @@ export interface UseAsyncTourReturn {
 /**
  * Composable for handling async tour operations
  */
-export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourReturn {
+export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourReturn => {
   const {
     onAsyncOperationStart,
     onAsyncOperationComplete,
@@ -169,7 +169,7 @@ export function useAsyncTour(options: UseAsyncTourOptions = {}): UseAsyncTourRet
 /**
  * Utility function to check if a step has async navigation callbacks
  */
-export function hasAsyncNavigationCallbacks(step: CoachMarkStep): boolean {
+export const hasAsyncNavigationCallbacks = (step: CoachMarkStep): boolean => {
   return !!(
     step.popover?.onAsyncNextClick ||
     step.popover?.onAsyncPreviousClick ||
@@ -180,13 +180,13 @@ export function hasAsyncNavigationCallbacks(step: CoachMarkStep): boolean {
 /**
  * Utility function to check if a step has async lifecycle callbacks
  */
-export function hasAsyncLifecycleCallbacks(step: CoachMarkStep): boolean {
+export const hasAsyncLifecycleCallbacks = (step: CoachMarkStep): boolean => {
   return !!(step.onAsyncDeselected)
 }
 
 /**
  * Utility function to check if a step has any async callbacks
  */
-export function hasAsyncCallbacks(step: CoachMarkStep): boolean {
+export const hasAsyncCallbacks = (step: CoachMarkStep): boolean => {
   return hasAsyncNavigationCallbacks(step) || hasAsyncLifecycleCallbacks(step)
 }

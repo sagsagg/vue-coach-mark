@@ -11,7 +11,7 @@ import { useOverlay } from './useOverlay'
 import { useHighlight } from './useHighlight'
 import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons } from '../types'
 
-export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
+export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const { getState, setState, resetState } = useCoachMarkState()
   const { configure, getConfig, setCurrentCoachMark, getCurrentCoachMark } = useCoachMarkConfig()
   const { listen, initEvents, destroyEvents, destroyEmitter } = useCoachMarkEvents()
@@ -28,7 +28,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Handle close action
    */
-  function handleClose() {
+  const handleClose = (): void => {
     if (!getConfig('allowClose')) {
       return
     }
@@ -38,7 +38,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Handle overlay click
    */
-  function handleOverlayClick() {
+  const handleOverlayClick = (): void => {
     const overlayClickBehavior = getConfig('overlayClickBehavior')
 
     if (getConfig('allowClose') && overlayClickBehavior === 'close') {
@@ -54,7 +54,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Move to next step
    */
-  function moveNext() {
+  const moveNext = (): void => {
     const activeIndex = getState('activeIndex')
     const steps = getConfig('steps') || []
     if (typeof activeIndex === 'undefined') {
@@ -72,7 +72,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Move to previous step
    */
-  function movePrevious() {
+  const movePrevious = (): void => {
     const activeIndex = getState('activeIndex')
     const steps = getConfig('steps') || []
     if (typeof activeIndex === 'undefined') {
@@ -90,7 +90,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Move to specific step index
    */
-  function moveTo(index: number) {
+  const moveTo = (index: number): void => {
     const steps = getConfig('steps') || []
 
     if (steps[index]) {
@@ -103,7 +103,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Skip the entire tour
    */
-  function skipTour() {
+  const skipTour = (): void => {
     const activeStep = getState('currentActiveStep')
     const activeElement = getState('currentActiveElement')
 
@@ -127,7 +127,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Handle arrow key navigation
    */
-  function handleArrowLeft() {
+  const handleArrowLeft = (): void => {
     const isTransitioning = getState('internalTransitionCallback')
     if (isTransitioning) {
       return
@@ -144,11 +144,12 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     if (onPrevClick) {
       const coachMark = getCurrentCoachMark()
       if (coachMark) {
-        return onPrevClick(activeElement, activeStep, {
+        onPrevClick(activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
           coachMark
         })
+        return
       }
     }
 
@@ -158,7 +159,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Handle arrow key navigation
    */
-  function handleArrowRight() {
+  const handleArrowRight = (): void => {
     const isTransitioning = getState('internalTransitionCallback')
     if (isTransitioning) {
       return
@@ -175,11 +176,12 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
     if (onNextClick) {
       const coachMark = getCurrentCoachMark()
       if (coachMark) {
-        return onNextClick(activeElement, activeStep, {
+        onNextClick(activeElement, activeStep, {
           config: getConfig(),
           state: getState(),
           coachMark
         })
+        return
       }
     }
 
@@ -189,14 +191,14 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Initialize the coach mark system
    */
-  function init() {
+  const init = (): void => {
     if (getState('isInitialized')) {
       return
     }
 
     setState('isInitialized', true)
     isActive.value = true
-    
+
     // Add CSS classes to body
     document.body.classList.add(
       'mint-coach-mark-active',
@@ -216,7 +218,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Start the tour at a specific step
    */
-  async function startStep(stepIndex: number = 0) {
+  const startStep = async (stepIndex: number = 0): Promise<void> => {
     const steps = getConfig('steps')
     if (!steps) {
       console.error('No steps to drive through')
@@ -274,7 +276,7 @@ export function useCoachMark(initialConfig: CoachMarkConfig = {}) {
   /**
    * Destroy the coach mark
    */
-  function destroy(withOnDestroyStartedHook = true) {
+  const destroy = (withOnDestroyStartedHook = true): void => {
     const activeElement = getState('currentActiveElement')
     const activeStep = getState('currentActiveStep')
     const activeOnDestroyed = getState('internalActiveOnDestroyed')

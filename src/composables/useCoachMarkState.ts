@@ -28,27 +28,28 @@ const globalState = reactive<CoachMarkState>({
   internalOverlaySvg: undefined
 })
 
-export function useCoachMarkState() {
+export const useCoachMarkState = () => {
   /**
    * Set a state value
    */
-  function setState<K extends keyof CoachMarkState>(key: K, value: CoachMarkState[K]): void {
+  const setState = <K extends keyof CoachMarkState>(key: K, value: CoachMarkState[K]): void => {
     globalState[key] = value
   }
 
   /**
    * Get a state value or the entire state
    */
-  function getState(): CoachMarkState
-  function getState<K extends keyof CoachMarkState>(key: K): CoachMarkState[K]
-  function getState<K extends keyof CoachMarkState>(key?: K) {
+  const getState = ((key?: keyof CoachMarkState) => {
     return key ? globalState[key] : globalState
+  }) as {
+    (): CoachMarkState
+    <K extends keyof CoachMarkState>(key: K): CoachMarkState[K]
   }
 
   /**
    * Reset all state to initial values
    */
-  function resetState(): void {
+  const resetState = (): void => {
     Object.keys(globalState).forEach(key => {
       delete globalState[key as keyof CoachMarkState]
     })

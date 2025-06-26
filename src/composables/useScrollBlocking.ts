@@ -80,7 +80,7 @@ export interface UseScrollBlockingReturn {
  * 
  * @returns {UseScrollBlockingReturn} Scroll blocking API
  */
-export function useScrollBlocking(): UseScrollBlockingReturn {
+export const useScrollBlocking = (): UseScrollBlockingReturn => {
   // Internal state management
   const scrollBlockingState: ScrollBlockingState = {
     isBlocked: false,

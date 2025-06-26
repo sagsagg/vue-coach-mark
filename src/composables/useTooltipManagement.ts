@@ -74,9 +74,9 @@ export interface UseTooltipManagementReturn {
  * @param showTooltipInternal - Internal function to actually show the tooltip
  * @returns Tooltip management API
  */
-export function useTooltipManagement(
+export const useTooltipManagement = (
   showTooltipInternal: () => Promise<void>
-): UseTooltipManagementReturn {
+): UseTooltipManagementReturn => {
   
   // Reactive state
   const tooltipVisible: Ref<boolean> = ref(false)

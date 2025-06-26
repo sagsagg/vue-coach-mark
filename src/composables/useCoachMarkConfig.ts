@@ -37,11 +37,11 @@ const globalConfig = reactive<CoachMarkConfig>({ ...defaultConfig })
 // Current coach mark instance
 let currentCoachMark: CoachMarkInstance | null = null
 
-export function useCoachMarkConfig() {
+export const useCoachMarkConfig = () => {
   /**
    * Configure the coach mark with new options
    */
-  function configure(config: CoachMarkConfig = {}): void {
+  const configure = (config: CoachMarkConfig = {}): void => {
     // Merge with defaults and existing config
     Object.assign(globalConfig, defaultConfig, config)
   }
@@ -49,23 +49,24 @@ export function useCoachMarkConfig() {
   /**
    * Get configuration value(s)
    */
-  function getConfig(): CoachMarkConfig
-  function getConfig<K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K]
-  function getConfig<K extends keyof CoachMarkConfig>(key?: K) {
+  const getConfig = ((key?: keyof CoachMarkConfig) => {
     return key ? globalConfig[key] : globalConfig
+  }) as {
+    (): CoachMarkConfig
+    <K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K]
   }
 
   /**
    * Set current coach mark instance
    */
-  function setCurrentCoachMark(coachMark: CoachMarkInstance): void {
+  const setCurrentCoachMark = (coachMark: CoachMarkInstance): void => {
     currentCoachMark = coachMark
   }
 
   /**
    * Get current coach mark instance
    */
-  function getCurrentCoachMark(): CoachMarkInstance | null {
+  const getCurrentCoachMark = (): CoachMarkInstance | null => {
     return currentCoachMark
   }
 

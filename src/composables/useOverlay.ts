@@ -10,7 +10,7 @@ import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useCoachMarkEvents } from './useCoachMarkEvents'
 import type { StageDefinition, CoachMarkStep } from '../types'
 
-export function useOverlay() {
+export const useOverlay = () => {
   const { getState, setState } = useCoachMarkState()
   const { getConfig } = useCoachMarkConfig()
   const { emit } = useCoachMarkEvents()
@@ -21,7 +21,7 @@ export function useOverlay() {
   /**
    * Create and mount the overlay SVG
    */
-  function createOverlay(): SVGSVGElement {
+  const createOverlay = (): SVGSVGElement => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     svg.id = 'mint-coach-mark-overlay'
     svg.style.position = 'fixed'
@@ -64,7 +64,7 @@ export function useOverlay() {
   /**
    * Update overlay colors and opacity
    */
-  function updateOverlayStyle(): void {
+  const updateOverlayStyle = (): void => {
     const svg = getState('internalOverlaySvg')
     if (!svg) return
 
@@ -81,7 +81,7 @@ export function useOverlay() {
   /**
    * Generate SVG path for overlay with cutout
    */
-  function generateOverlayPath(stage: StageDefinition, radius?: number): string {
+  const generateOverlayPath = (stage: StageDefinition, radius?: number): string => {
     const { x, y, width, height } = stage
     const configRadius = getConfig('radius')
     const effectiveRadius = radius ?? (typeof configRadius === 'number' ? configRadius : 5)
@@ -111,7 +111,7 @@ export function useOverlay() {
   /**
    * Update overlay with new stage position
    */
-  function updateOverlay(stage: StageDefinition, radius?: number): void {
+  const updateOverlay = (stage: StageDefinition, radius?: number): void => {
     let svg = getState('internalOverlaySvg')
 
     if (!svg) {
@@ -132,7 +132,7 @@ export function useOverlay() {
   /**
    * Track active element and update overlay
    */
-  function trackActiveElement(element: Element, step?: CoachMarkStep): void {
+  const trackActiveElement = (element: Element, step?: CoachMarkStep): void => {
     // Get effective padding and radius values
     const globalPadding = getConfig('padding') || 10
     const globalRadius = getConfig('radius') || 5
@@ -164,14 +164,14 @@ export function useOverlay() {
   /**
    * Animate stage transition between elements
    */
-  function transitionStage(
+  const transitionStage = (
     elapsed: number,
     duration: number,
     fromElement: Element,
     toElement: Element,
     fromStep?: CoachMarkStep,
     toStep?: CoachMarkStep
-  ): void {
+  ): void => {
     const activeStagePosition = getState('currentActiveStagePosition')
 
     // Get effective padding for both steps
@@ -221,7 +221,7 @@ export function useOverlay() {
   /**
    * Refresh overlay (useful for window resize)
    */
-  function refreshOverlay(): void {
+  const refreshOverlay = (): void => {
     const activeElement = getState('currentActiveElement')
     const activeStep = getState('currentActiveStep')
     if (activeElement) {
@@ -232,7 +232,7 @@ export function useOverlay() {
   /**
    * Destroy overlay
    */
-  function destroyOverlay(): void {
+  const destroyOverlay = (): void => {
     const svg = getState('internalOverlaySvg')
     if (svg) {
       svg.remove()

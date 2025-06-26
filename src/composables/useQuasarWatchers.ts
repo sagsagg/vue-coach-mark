@@ -61,7 +61,7 @@ export interface UseQuasarWatchersReturn {
  * @param options - Configuration options
  * @returns Watcher management API
  */
-export function useQuasarWatchers(options: WatcherOptions): UseQuasarWatchersReturn {
+export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersReturn => {
   const {
     getState,
     setState,
