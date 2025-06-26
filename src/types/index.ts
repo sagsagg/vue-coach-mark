@@ -13,7 +13,8 @@
  * 9. Composable-specific types
  */
 
-import type { QTooltipProps } from 'quasar'
+import type { QTooltipProps } from 'quasar';
+import { type Ref, type ComputedRef } from 'vue'
 
 // =============================================================================
 // 1. BASIC PRIMITIVE TYPES
@@ -359,7 +360,7 @@ export type MintPopoverEmits = {
 
 // Communication composable return type
 export type UsePopoverCommunicationReturn = {
-  readonly popoverState: import('vue').ComputedRef<PopoverCommunication>
+  readonly popoverState: ComputedRef<PopoverCommunication>
   readonly updatePopoverState: (updates: Partial<PopoverCommunication>) => void
   readonly showPopover: (element: Element, step: CoachMarkStep, isPositioning?: boolean) => void
   readonly hidePopover: () => void
@@ -381,7 +382,7 @@ export type UseAsyncTourOptions = {
 }
 
 export type UseAsyncTourReturn = {
-  isAsyncOperationInProgress: import('vue').Ref<boolean>
+  isAsyncOperationInProgress: Ref<boolean>
   executeAsyncCallback: (
     callback: AsyncTourHook,
     element: Element | undefined,
@@ -406,15 +407,15 @@ export type UseAsyncTourReturn = {
 export type UseScrollBlockingReturn = {
   blockScrolling: () => void
   unblockScrolling: () => void
-  isBlocked: import('vue').Ref<boolean>
+  isBlocked: Ref<boolean>
   getScrollPosition: () => { x: number; y: number }
   forceUnblock: () => void
 }
 
 // Tooltip Management Composable Types
 export type UseTooltipManagementReturn = {
-  tooltipVisible: import('vue').Ref<boolean>
-  tooltipRefreshKey: import('vue').Ref<number>
+  tooltipVisible: Ref<boolean>
+  tooltipRefreshKey: Ref<number>
   showTooltipIfReady: (context?: string) => Promise<void>
   hideTooltip: () => void
   forceTooltipRefresh: () => void
@@ -457,7 +458,7 @@ export type UseElementRetryReturn = {
     retryConfig?: boolean | RetryConfig,
     step?: CoachMarkStep
   ) => Promise<Element | null>
-  isRetrying: import('vue').Ref<boolean>
-  currentAttempt: import('vue').Ref<number>
+  isRetrying: Ref<boolean>
+  currentAttempt: Ref<number>
   cancelRetry: () => void
 }
