@@ -85,6 +85,13 @@ const navigationCategories: NavigationCategory[] = [
         component: 'MintPopover',
         description: 'Element retry for dynamic content'
       },
+      {
+        name: 'Nested Component Demo',
+        path: '/nested-component',
+        icon: '🏗️',
+        component: 'MintCoachMark',
+        description: 'Async load in nested components'
+      },
       { 
         name: 'Programmatic', 
         path: '/programmatic', 

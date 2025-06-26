@@ -89,6 +89,14 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'Element Retry Mechanism Demo'
     }
+  },
+  {
+    path: '/nested-component',
+    name: 'NestedComponent',
+    component: () => import('../views/NestedComponentDemo.vue'),
+    meta: {
+      title: 'Nested Component Async Load Demo'
+    }
   }
 ]
 
