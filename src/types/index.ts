@@ -248,11 +248,16 @@ export type CoachMarkState = {
   shouldRepositionPopover?: { element: Element; step: CoachMarkStep }
 }
 
+// Navigation options for programmatic navigation
+export type NavigationOptions = {
+  autoScroll?: boolean
+}
+
 // CoachMark instance type (provides intuitive API for coach mark interactions)
 export type CoachMarkInstance = {
   isActive: () => boolean
   refresh: () => void
-  start: (stepIndex?: number) => void
+  start: (stepIndex?: number, options?: NavigationOptions) => void
   setConfig: (config: CoachMarkConfig) => void
   setSteps: (steps: CoachMarkStep[]) => void
   getConfig: () => CoachMarkConfig
@@ -264,9 +269,9 @@ export type CoachMarkInstance = {
   getActiveElement: () => Element | undefined
   getPreviousElement: () => Element | undefined
   getPreviousStep: () => CoachMarkStep | undefined
-  moveNext: () => void
-  movePrevious: () => void
-  moveTo: (index: number) => void
+  moveNext: (options?: NavigationOptions) => void
+  movePrevious: (options?: NavigationOptions) => void
+  moveTo: (index: number, options?: NavigationOptions) => void
   skipTour: () => void
   hasNextStep: () => boolean
   hasPreviousStep: () => boolean

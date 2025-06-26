@@ -79,7 +79,7 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
     if (scrollBlockingState.isBlocked) {
       return // Already blocked
     }
-    
+
     // Store current scroll position
     scrollBlockingState.scrollPosition = getCurrentScrollPosition()
 

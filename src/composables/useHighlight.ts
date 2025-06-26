@@ -10,7 +10,7 @@ import { useCoachMarkConfig } from './useCoachMarkConfig'
 import { useOverlay } from './useOverlay'
 import { useElementRetry } from './useElementRetry'
 import { extractRetryConfig } from './utils'
-import type { CoachMarkStep } from '../types'
+import type { CoachMarkStep, NavigationOptions } from '../types'
 
 export const useHighlight = () => {
   const { getState, setState } = useCoachMarkState()
@@ -29,7 +29,7 @@ export const useHighlight = () => {
   /**
    * Highlight a step element with retry mechanism
    */
-  const highlight = async (step: CoachMarkStep): Promise<void> => {
+  const highlight = async (step: CoachMarkStep, options?: NavigationOptions): Promise<void> => {
     const { element, retry } = step
 
     // Try to resolve element with retry mechanism
@@ -43,13 +43,13 @@ export const useHighlight = () => {
       elemObj = createDummyElement()
     }
 
-    await transferHighlight(elemObj, step)
+    await transferHighlight(elemObj, step, options)
   }
 
   /**
    * Transfer highlight from current element to new element
    */
-  const transferHighlight = async (toElement: Element, toStep: CoachMarkStep): Promise<void> => {
+  const transferHighlight = async (toElement: Element, toStep: CoachMarkStep, options?: NavigationOptions): Promise<void> => {
     const duration = 400
     const start = Date.now()
 
@@ -122,6 +122,19 @@ export const useHighlight = () => {
         // Animation complete
         trackActiveElement(toElement, toStep)
 
+        // Scroll element into view after overlay positioning is complete
+        // Check if autoScroll is explicitly enabled via options or if smoothScroll is globally enabled
+        const shouldAutoScroll = !!options?.autoScroll || (options?.autoScroll && getConfig('smoothScroll'));
+
+        if (!isToDummyElement && shouldAutoScroll) {
+          const smoothScroll = getConfig('smoothScroll')
+
+          // Add a small delay to ensure overlay positioning is fully complete
+          setTimeout(() => {
+            bringInView(toElement, smoothScroll)
+          }, 100)
+        }
+
         if (highlightedHook && coachMark) {
           highlightedHook(isToDummyElement ? undefined : toElement, toStep, {
             config: getConfig(),
@@ -146,9 +159,7 @@ export const useHighlight = () => {
     setState('internalTransitionCallback', animate)
     window.requestAnimationFrame(animate)
 
-    // Scroll element into view
-    const smoothScroll = getConfig('smoothScroll')
-    bringInView(toElement, smoothScroll)
+
 
     // Render popover immediately if not delayed
     if (!hasDelayedPopover && toStep.popover) {

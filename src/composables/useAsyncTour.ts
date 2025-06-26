@@ -119,8 +119,6 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     const callback = step.onAsyncDeselected
 
     if (callback) {
-
-
       await executeAsyncCallback(callback, element, step, coachMark)
     }
   }

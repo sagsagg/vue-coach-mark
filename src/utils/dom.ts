@@ -68,19 +68,72 @@ export function hasScrollableParent(element: Element): boolean {
  * @param shouldSmoothScroll - Whether to use smooth scrolling
  */
 export function bringInView(element: Element, shouldSmoothScroll = false): void {
-  if (!element || isElementInView(element)) {
+  if (!element) {
     return
   }
 
-  const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight
+  const isInView = isElementInView(element)
 
-  element.scrollIntoView({
-    // Removing the smooth scrolling for elements which exist inside the scrollable parent
-    // This was causing the highlight to not properly render
-    behavior: !shouldSmoothScroll || hasScrollableParent(element) ? 'auto' : 'smooth',
-    inline: 'center',
-    block: isTallerThanViewport ? 'start' : 'center'
-  })
+  if (isInView) {
+    return
+  }
+
+  const body = document.body
+  const isScrollBlocked = body.style.overflow === 'hidden' && body.style.position === 'fixed'
+
+  if (isScrollBlocked) {
+    // Temporarily restore scrolling to allow scrollIntoView to work
+    const originalOverflow = body.style.overflow
+    const originalPosition = body.style.position
+    const originalTop = body.style.top
+    const originalLeft = body.style.left
+
+    // Restore normal scrolling temporarily
+    body.style.overflow = ''
+    body.style.position = ''
+    body.style.top = ''
+    body.style.left = ''
+
+    // Get current scroll position from the fixed positioning
+    const currentScrollY = originalTop ? Math.abs(parseInt(originalTop)) : 0
+    const currentScrollX = originalLeft ? Math.abs(parseInt(originalLeft)) : 0
+
+    // Restore the scroll position
+    window.scrollTo(currentScrollX, currentScrollY)
+
+    // Now scroll the element into view
+    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight
+    const scrollOptions = {
+      behavior: !shouldSmoothScroll || hasScrollableParent(element) ? 'auto' : 'smooth',
+      inline: 'center',
+      block: isTallerThanViewport ? 'start' : 'center'
+    } as ScrollIntoViewOptions
+
+    element.scrollIntoView(scrollOptions)
+
+    // Wait a moment for scroll to complete, then re-apply scroll blocking
+    setTimeout(() => {
+      const newScrollY = window.scrollY
+      const newScrollX = window.scrollX
+
+      // Re-apply scroll blocking with new scroll position
+      body.style.overflow = originalOverflow
+      body.style.position = originalPosition
+      body.style.top = `-${newScrollY}px`
+      body.style.left = `-${newScrollX}px`
+    }, shouldSmoothScroll ? 300 : 50)
+
+  } else {
+    // Normal scrolling when not blocked
+    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight
+    const scrollOptions = {
+      behavior: !shouldSmoothScroll || hasScrollableParent(element) ? 'auto' : 'smooth',
+      inline: 'center',
+      block: isTallerThanViewport ? 'start' : 'center'
+    } as ScrollIntoViewOptions
+
+    element.scrollIntoView(scrollOptions)
+  }
 }
 
 /**

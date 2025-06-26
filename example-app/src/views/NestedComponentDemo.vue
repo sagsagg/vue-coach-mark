@@ -87,7 +87,7 @@ const coachMarkSteps = computed((): CoachMarkStep[] => [
     element: '#parent-intro',
     popover: {
       title: 'Welcome to Nested Component Demo',
-      description: 'This tour demonstrates how the retry mechanism handles elements in nested components with different visibility conditions. Click "Next" to automatically show the conditional component.',
+      description: 'This tour demonstrates how the retry mechanism handles elements in nested components with different visibility conditions.',
       showButtons: ['next', 'close'],
       onAsyncNextClick: async ({ element, step, coachMark }) => {
         addLog('🔄 Step 1: Automatically activating conditional component...')
@@ -96,17 +96,23 @@ const coachMarkSteps = computed((): CoachMarkStep[] => [
         // Allow a brief moment for the DOM to update
         await new Promise(resolve => setTimeout(resolve, 100))
 
-        coachMark.moveNext()
+        addLog('🎯 Step 1: Moving to next step with autoScroll enabled')
+        coachMark.moveNext({ autoScroll: true })
       }
     }
   },
   {
     element: '#conditional-element',
     retry: {
-      maxAttempts: 3,
+      maxAttempts: 10,
       delay: 500,
       onRetry: (attempt, step) => {
-        addLog(`🔄 Retry attempt ${attempt}/3 for conditional element (should be minimal due to automation)`)
+        if (attempt === 1 && !isActive.value) {
+          addLog('🔄 Conditional element not found - automatically activating component...')
+          isActive.value = true
+          addLog('✅ Conditional component activated for seamless tour flow')
+        }
+        addLog(`🔄 Retry attempt ${attempt}/10 for conditional element`)
       },
       onMaxAttemptsReached: (step) => {
         addLog('❌ Max attempts reached for conditional element - automation may have failed!')
@@ -114,7 +120,7 @@ const coachMarkSteps = computed((): CoachMarkStep[] => [
     },
     popover: {
       title: 'Conditional Element (v-if)',
-      description: 'This element was automatically rendered when you clicked "Next" on the previous step. The tour flow seamlessly activated the conditional component for you! Click "Next" to automatically load API data.',
+      description: 'This element was automatically rendered when the retry mechanism detected it was missing. The tour flow seamlessly activated the conditional component!',
       showButtons: ['next', 'previous', 'close'],
       onAsyncNextClick: async ({ element, step, coachMark }) => {
         addLog('🔄 Step 2: Automatically triggering API data load...')
@@ -127,7 +133,8 @@ const coachMarkSteps = computed((): CoachMarkStep[] => [
           addLog('✅ Step 2: API data already loaded, proceeding...')
         }
 
-        coachMark.moveNext()
+        addLog('🎯 Step 2: Moving to next step with autoScroll enabled')
+        coachMark.moveNext({ autoScroll: true })
       }
     }
   },
@@ -163,6 +170,7 @@ const coachMarkSteps = computed((): CoachMarkStep[] => [
 // Coach mark configuration (separate from steps)
 const coachMarkConfig = computed((): CoachMarkConfig => ({
   animate: true,
+  smoothScroll: true,
   onHighlightStarted: (element, step) => {
     addLog(`🎯 Highlighting element: ${step.element}`)
   }
@@ -189,10 +197,18 @@ const handleStepChange = (step: CoachMarkStep, index: number): void => {
 
 const handleHighlightStarted = (element: Element | undefined, step: CoachMarkStep): void => {
   addLog(`🎯 Highlighting element: ${step.element}`)
+  if (element) {
+    addLog(`📍 Element position: ${element.getBoundingClientRect().top}px from top`)
+  }
 }
 
 const handleHighlighted = (element: Element | undefined, step: CoachMarkStep): void => {
   addLog(`✨ Element highlighted: ${step.element}`)
+  if (element) {
+    const rect = element.getBoundingClientRect()
+    const isInView = rect.top >= 0 && rect.bottom <= window.innerHeight
+    addLog(`👁️ Element visibility: ${isInView ? 'In viewport' : 'Outside viewport'} (${rect.top}px from top)`)
+  }
 }
 
 const handleDeselected = (element: Element | undefined, step: CoachMarkStep): void => {

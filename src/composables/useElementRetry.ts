@@ -141,7 +141,7 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
 
       // Try to resolve element
       const element = getElement(elementRef)
-      
+
       if (element) {
         // Element found successfully
         isRetrying.value = false
@@ -155,6 +155,11 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
         if (config.onRetry && step) {
           try {
             config.onRetry(attempt, step)
+
+            // Add extra delay after first retry to allow DOM updates
+            if (attempt === 1) {
+              await sleep(200) // Extra time for DOM updates
+            }
           } catch (error) {
             console.warn('Error in retry callback:', error)
           }

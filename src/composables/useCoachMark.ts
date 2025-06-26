@@ -10,7 +10,7 @@ import { useCoachMarkEvents } from './useCoachMarkEvents'
 import { useOverlay } from './useOverlay'
 import { useHighlight } from './useHighlight'
 import { isFocusableElement, isAllowedButton } from './utils'
-import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons } from '../types'
+import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons, NavigationOptions } from '../types'
 
 export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const { getState, setState, resetState } = useCoachMarkState()
@@ -55,7 +55,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   /**
    * Move to next step
    */
-  const moveNext = (): void => {
+  const moveNext = (options?: NavigationOptions): void => {
     const activeIndex = getState('activeIndex')
     const steps = getConfig('steps') || []
     if (typeof activeIndex === 'undefined') {
@@ -64,7 +64,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
 
     const nextStepIndex = activeIndex + 1
     if (steps[nextStepIndex]) {
-      startStep(nextStepIndex)
+      startStep(nextStepIndex, options)
     } else {
       destroy()
     }
@@ -73,7 +73,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   /**
    * Move to previous step
    */
-  const movePrevious = (): void => {
+  const movePrevious = (options?: NavigationOptions): void => {
     const activeIndex = getState('activeIndex')
     const steps = getConfig('steps') || []
     if (typeof activeIndex === 'undefined') {
@@ -82,7 +82,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
 
     const previousStepIndex = activeIndex - 1
     if (steps[previousStepIndex]) {
-      startStep(previousStepIndex)
+      startStep(previousStepIndex, options)
     } else {
       destroy()
     }
@@ -91,11 +91,11 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   /**
    * Move to specific step index
    */
-  const moveTo = (index: number): void => {
+  const moveTo = (index: number, options?: NavigationOptions): void => {
     const steps = getConfig('steps') || []
 
     if (steps[index]) {
-      startStep(index)
+      startStep(index, options)
     } else {
       destroy()
     }
@@ -227,7 +227,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   /**
    * Start the tour at a specific step
    */
-  const startStep = async (stepIndex: number = 0): Promise<void> => {
+  const startStep = async (stepIndex: number = 0, options?: NavigationOptions): Promise<void> => {
     const steps = getConfig('steps')
     if (!steps) {
       console.error('No steps to drive through')
@@ -292,7 +292,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       } : undefined
     }
 
-    await highlight(stepWithPopover)
+    await highlight(stepWithPopover, options)
   }
 
   /**
@@ -362,9 +362,9 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const api: CoachMarkInstance = {
     isActive: () => getState('isInitialized') || false,
     refresh: refreshActiveHighlight,
-    start: (stepIndex: number = 0) => {
+    start: (stepIndex: number = 0, options?: NavigationOptions) => {
       init()
-      startStep(stepIndex)
+      startStep(stepIndex, options)
     },
     setConfig: configure,
     setSteps: (steps: CoachMarkStep[]) => {
@@ -387,9 +387,9 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     getActiveElement: () => getState('currentActiveElement'),
     getPreviousElement: () => getState('internalPreviousElement'),
     getPreviousStep: () => getState('internalPreviousStep'),
-    moveNext,
-    movePrevious,
-    moveTo,
+    moveNext: (options?: NavigationOptions) => moveNext(options),
+    movePrevious: (options?: NavigationOptions) => movePrevious(options),
+    moveTo: (index: number, options?: NavigationOptions) => moveTo(index, options),
     skipTour,
     hasNextStep: () => {
       const steps = getConfig('steps') || []

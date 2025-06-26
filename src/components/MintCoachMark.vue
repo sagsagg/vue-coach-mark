@@ -95,7 +95,8 @@ import type {
   MintCoachMarkProps,
   MintCoachMarkEmits,
   PopoverDOM,
-  CoachMarkInstance
+  CoachMarkInstance,
+  NavigationOptions
 } from '../types'
 
 const props = withDefaults(defineProps<MintCoachMarkProps>(), {
@@ -439,8 +440,8 @@ onUnmounted(() => {
 interface MintCoachMarkExposed {
   startTour: (stepIndex?: number) => void
   stopTour: () => void
-  moveNext: () => void
-  movePrevious: () => void
+  moveNext: (options?: NavigationOptions) => void
+  movePrevious: (options?: NavigationOptions) => void
   skipTour: () => void
   isActive: () => boolean
   getCurrentStep: () => CoachMarkStep | undefined

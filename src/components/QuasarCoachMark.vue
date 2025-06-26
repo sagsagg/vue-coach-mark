@@ -121,7 +121,8 @@ import type {
   CoachMarkStep,
   MintCoachMarkProps,
   MintCoachMarkEmits,
-  CoachMarkInstance
+  CoachMarkInstance,
+  NavigationOptions
 } from '../types'
 import type { QTooltipProps } from 'quasar'
 
@@ -439,9 +440,9 @@ const createCoachMarkInterface = (): CoachMarkInstance => {
     getActiveElement: () => popoverState.value.targetElement || undefined,
     getPreviousElement: () => undefined,
     getPreviousStep: () => undefined,
-    moveNext: () => moveNext(),
-    movePrevious: () => movePrevious(),
-    moveTo: (index: number) => start(index),
+    moveNext: (options?: NavigationOptions) => moveNext(options),
+    movePrevious: (options?: NavigationOptions) => movePrevious(options),
+    moveTo: (index: number, options?: NavigationOptions) => moveTo(index, options),
     skipTour: () => handleSkip(),
     hasNextStep: () => currentStepIndex.value !== undefined && currentStepIndex.value < totalSteps.value - 1,
     hasPreviousStep: () => currentStepIndex.value !== undefined && currentStepIndex.value > 0,
@@ -465,9 +466,6 @@ const startTour = (stepIndex?: number): void => {
   start(stepIndex)
   emit('update:modelValue', true)
   emit('tour-start')
-
-  // Unblock scrolling after initial step is positioned
-  // This will be handled by the step processing completion
 }
 
 /**
@@ -488,7 +486,7 @@ const stopTour = (): void => {
 /**
  * Move to next step
  */
-const moveNext = async (): Promise<void> => {
+const moveNext = async (options?: NavigationOptions): Promise<void> => {
   const currentIndex = currentStepIndex.value
   if (currentIndex !== undefined && currentIndex < totalSteps.value - 1) {
     try {
@@ -515,7 +513,8 @@ const moveNext = async (): Promise<void> => {
 
       // 5. Perform step change
       const nextIndex = currentIndex + 1
-      start(nextIndex)
+
+      start(nextIndex, options)
       emit('step-change', props.steps[nextIndex], nextIndex)
 
       // 6. Wait for all step processing to complete
@@ -546,7 +545,7 @@ const moveNext = async (): Promise<void> => {
 /**
  * Move to previous step
  */
-const movePrevious = async (): Promise<void> => {
+const movePrevious = async (options?: NavigationOptions): Promise<void> => {
   const currentIndex = currentStepIndex.value
   if (currentIndex !== undefined && currentIndex > 0) {
     try {
@@ -573,7 +572,8 @@ const movePrevious = async (): Promise<void> => {
 
       // 5. Perform step change
       const prevIndex = currentIndex - 1
-      start(prevIndex)
+
+      start(prevIndex, options)
       emit('step-change', props.steps[prevIndex], prevIndex)
 
       // 6. Wait for all step processing to complete
@@ -601,7 +601,7 @@ const movePrevious = async (): Promise<void> => {
 /**
  * Move to specific step
  */
-const moveTo = async (stepIndex: number): Promise<void> => {
+const moveTo = async (stepIndex: number, options?: NavigationOptions): Promise<void> => {
   if (stepIndex >= 0 && stepIndex < totalSteps.value) {
     try {
       // 1. Block scrolling immediately before any transition work
@@ -626,7 +626,7 @@ const moveTo = async (stepIndex: number): Promise<void> => {
       await ensureTooltipHidden()
 
       // 5. Perform step change
-      start(stepIndex)
+      start(stepIndex, options)
       emit('step-change', props.steps[stepIndex], stepIndex)
 
       // 6. Wait for all step processing to complete
@@ -750,9 +750,9 @@ const handleTooltipHide = (): void => {
 interface QuasarCoachMarkExposed {
   startTour: (stepIndex?: number) => void
   stopTour: () => void
-  moveNext: () => void
-  movePrevious: () => void
-  moveTo: (stepIndex: number) => void
+  moveNext: (options?: NavigationOptions) => void
+  movePrevious: (options?: NavigationOptions) => void
+  moveTo: (stepIndex: number, options?: NavigationOptions) => void
   skipTour: () => void
   isActive: () => boolean
   getCurrentStep: () => CoachMarkStep | undefined
