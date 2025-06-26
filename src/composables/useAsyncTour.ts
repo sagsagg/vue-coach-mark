@@ -11,36 +11,11 @@ import { ref, type Ref } from 'vue'
 import type {
   CoachMarkStep,
   CoachMarkInstance,
-  AsyncTourHook
+  AsyncTourHook,
+  UseAsyncTourOptions,
+  UseAsyncTourReturn
 } from '../types'
-
-export interface UseAsyncTourOptions {
-  onAsyncOperationStart?: () => void
-  onAsyncOperationComplete?: () => void
-  onAsyncOperationError?: (error: Error) => void
-}
-
-export interface UseAsyncTourReturn {
-  isAsyncOperationInProgress: Ref<boolean>
-  executeAsyncCallback: (
-    callback: AsyncTourHook,
-    element: Element | undefined,
-    step: CoachMarkStep,
-    coachMark: CoachMarkInstance
-  ) => Promise<boolean>
-  handleAsyncNavigation: (
-    direction: 'next' | 'previous' | 'close' | 'skip',
-    element: Element | undefined,
-    step: CoachMarkStep,
-    coachMark: CoachMarkInstance,
-    defaultAction: () => void
-  ) => Promise<void>
-  handleStepDeselection: (
-    element: Element | undefined,
-    step: CoachMarkStep,
-    coachMark: CoachMarkInstance
-  ) => Promise<void>
-}
+import { getAsyncCallbackForDirection } from './utils'
 
 /**
  * Composable for handling async tour operations
@@ -103,23 +78,7 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     defaultAction: () => void
   ): Promise<void> => {
     // Get the appropriate async callback based on direction
-    let callback: AsyncTourHook | undefined
-
-    switch (direction) {
-      case 'next':
-        callback = step.popover?.onAsyncNextClick
-        break
-      case 'previous':
-        callback = step.popover?.onAsyncPreviousClick
-        break
-      case 'close':
-        callback = step.popover?.onAsyncCloseClick
-        break
-      case 'skip':
-        // For skip, we can use the same callback as close or define a new one
-        callback = step.popover?.onAsyncCloseClick
-        break
-    }
+    const callback = getAsyncCallbackForDirection(direction, step)
 
     // If there's a custom callback, execute it instead of default action
     if (callback) {
@@ -166,27 +125,4 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
   }
 }
 
-/**
- * Utility function to check if a step has async navigation callbacks
- */
-export const hasAsyncNavigationCallbacks = (step: CoachMarkStep): boolean => {
-  return !!(
-    step.popover?.onAsyncNextClick ||
-    step.popover?.onAsyncPreviousClick ||
-    step.popover?.onAsyncCloseClick
-  )
-}
 
-/**
- * Utility function to check if a step has async lifecycle callbacks
- */
-export const hasAsyncLifecycleCallbacks = (step: CoachMarkStep): boolean => {
-  return !!(step.onAsyncDeselected)
-}
-
-/**
- * Utility function to check if a step has any async callbacks
- */
-export const hasAsyncCallbacks = (step: CoachMarkStep): boolean => {
-  return hasAsyncNavigationCallbacks(step) || hasAsyncLifecycleCallbacks(step)
-}

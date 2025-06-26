@@ -14,6 +14,12 @@ import {
 import { getFocusableElements } from '../utils'
 import { useCoachMarkState } from './useCoachMarkState'
 import { useCoachMarkConfig } from './useCoachMarkConfig'
+import {
+  isElement,
+  isHTMLElement,
+  isMouseEvent,
+  isPointerEvent
+} from './utils'
 
 // Event types with strict typing
 type AllowedEvents =
@@ -34,9 +40,7 @@ type KeyboardEventHandler = (event: KeyboardEvent) => void
 type GenericEventHandler = (event: Event) => void
 type PointerEventHandler = (event: MouseEvent | PointerEvent) => void
 
-// Type guards for DOM elements and events
-type ElementTypeGuard<T extends Element> = (element: unknown) => element is T
-type EventTypeGuard<T extends Event> = (event: Event) => event is T
+
 
 interface UseCoachMarkEventsReturn {
   readonly listen: (event: AllowedEvents, callback: EventCallback) => void
@@ -65,23 +69,7 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   // Computed property for events initialization status
   const isEventsInitialized: ComputedRef<boolean> = computed(() => eventsInitialized.value)
 
-  // Type guards for DOM elements
-  const isElement: ElementTypeGuard<Element> = (element: unknown): element is Element => {
-    return element instanceof Element
-  }
 
-  const isHTMLElement: ElementTypeGuard<HTMLElement> = (element: unknown): element is HTMLElement => {
-    return element instanceof HTMLElement
-  }
-
-  // Type guards for events
-  const isMouseEvent: EventTypeGuard<MouseEvent> = (event: Event): event is MouseEvent => {
-    return event instanceof MouseEvent
-  }
-
-  const isPointerEvent: EventTypeGuard<PointerEvent> = (event: Event): event is PointerEvent => {
-    return event instanceof PointerEvent
-  }
 
   /**
    * Register an event listener using Vue's reactive system

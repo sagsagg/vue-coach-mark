@@ -6,61 +6,7 @@
  */
 
 import { ref, type Ref } from 'vue'
-
-/**
- * Tooltip display state interface
- */
-interface TooltipDisplayState {
-  isDisplaying: boolean
-  pendingDisplayId: number
-  lastDisplayTime: number
-  debounceDelay: number
-  totalCalls: number
-  debouncedCalls: number
-  executedCalls: number
-  lastExecutionContext: string
-  isStepTransitioning: boolean
-}
-
-/**
- * Tooltip management composable return type
- */
-export interface UseTooltipManagementReturn {
-  /**
-   * Reactive tooltip visibility state
-   */
-  tooltipVisible: Ref<boolean>
-  
-  /**
-   * Tooltip refresh key for forcing re-renders
-   */
-  tooltipRefreshKey: Ref<number>
-  
-  /**
-   * Show tooltip with context awareness and debouncing
-   */
-  showTooltipIfReady: (context?: string) => Promise<void>
-  
-  /**
-   * Hide tooltip immediately
-   */
-  hideTooltip: () => void
-  
-  /**
-   * Force tooltip refresh (minimal usage)
-   */
-  forceTooltipRefresh: () => void
-  
-  /**
-   * Set step transition state
-   */
-  setStepTransitioning: (transitioning: boolean) => void
-  
-  /**
-   * Get display statistics for debugging
-   */
-  getDisplayStats: () => TooltipDisplayState
-}
+import type { UseTooltipManagementReturn, TooltipDisplayState } from '../types'
 
 /**
  * Tooltip management composable

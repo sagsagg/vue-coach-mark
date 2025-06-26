@@ -6,18 +6,13 @@
  */
 
 import { watch, nextTick } from 'vue'
-import type { CoachMarkStep } from '../types'
-import type { UseTooltipManagementReturn } from './useTooltipManagement'
-import type { UseScrollBlockingReturn } from './useScrollBlocking'
-
-/**
- * Popover state interface
- */
-interface PopoverState {
-  visible: boolean
-  targetElement: Element | null
-  step: CoachMarkStep | null
-}
+import type {
+  CoachMarkStep,
+  UseTooltipManagementReturn,
+  UseScrollBlockingReturn,
+  UseQuasarWatchersReturn,
+  PopoverState
+} from '../types'
 
 /**
  * Watcher management options
@@ -32,21 +27,6 @@ interface WatcherOptions {
   isTransitioning: { value: boolean }
   tooltipManagement: UseTooltipManagementReturn
   scrollBlocking: UseScrollBlockingReturn
-}
-
-/**
- * Watcher management composable return type
- */
-export interface UseQuasarWatchersReturn {
-  /**
-   * Initialize all watchers
-   */
-  initWatchers: () => void
-  
-  /**
-   * Check if watchers are processing
-   */
-  isProcessing: () => boolean
 }
 
 /**

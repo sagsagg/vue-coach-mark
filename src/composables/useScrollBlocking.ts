@@ -22,6 +22,8 @@
  */
 
 import { ref, type Ref } from 'vue'
+import type { UseScrollBlockingReturn } from '../types'
+import { getCurrentScrollPosition } from './utils'
 
 /**
  * Scroll blocking state interface
@@ -33,36 +35,6 @@ interface ScrollBlockingState {
   originalTop: string
   originalLeft: string
   scrollPosition: { x: number; y: number }
-}
-
-/**
- * Scroll blocking composable return type
- */
-export interface UseScrollBlockingReturn {
-  /**
-   * Block browser scrolling
-   */
-  blockScrolling: () => void
-  
-  /**
-   * Unblock browser scrolling and restore original position
-   */
-  unblockScrolling: () => void
-  
-  /**
-   * Check if scrolling is currently blocked
-   */
-  isBlocked: Ref<boolean>
-  
-  /**
-   * Get current scroll position (useful for debugging)
-   */
-  getScrollPosition: () => { x: number; y: number }
-  
-  /**
-   * Force unblock scrolling (emergency cleanup)
-   */
-  forceUnblock: () => void
 }
 
 /**
@@ -109,10 +81,7 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
     }
     
     // Store current scroll position
-    scrollBlockingState.scrollPosition = {
-      x: window.pageXOffset || document.documentElement.scrollLeft,
-      y: window.pageYOffset || document.documentElement.scrollTop
-    }
+    scrollBlockingState.scrollPosition = getCurrentScrollPosition()
 
     // Store original body styles
     const body = document.body

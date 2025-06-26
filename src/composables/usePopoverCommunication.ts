@@ -3,20 +3,21 @@
  * Manages communication between MintCoachMark and popover components
  */
 
-import { 
-  ref, 
-  computed, 
-  watch, 
+import {
+  ref,
+  computed,
+  watch,
   nextTick,
-  type Ref, 
-  type ComputedRef 
+  type Ref,
+  type ComputedRef
 } from 'vue'
-import type { 
-  PopoverCommunication, 
-  PopoverProvider, 
-  CoachMarkStep, 
-  UsePopoverCommunicationReturn 
+import type {
+  PopoverCommunication,
+  PopoverProvider,
+  CoachMarkStep,
+  UsePopoverCommunicationReturn
 } from '../types'
+import { isValidElement, isValidStep, calculateElementCenter } from './utils'
 
 // Global popover state for communication between components
 const globalPopoverState: Ref<PopoverCommunication> = ref<PopoverCommunication>({
@@ -53,19 +54,7 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
            globalPopoverState.value.targetElement === localTargetElement.value
   })
 
-  /**
-   * Type guard to check if element is valid
-   */
-  const isValidElement = (element: unknown): element is Element => {
-    return element instanceof Element
-  }
 
-  /**
-   * Type guard to check if step is valid
-   */
-  const isValidStep = (step: unknown): step is CoachMarkStep => {
-    return typeof step === 'object' && step !== null
-  }
 
   /**
    * Update the global popover state
@@ -103,11 +92,7 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     localStep.value = step
 
     // Calculate position
-    const rect = element.getBoundingClientRect()
-    const position = {
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2
-    }
+    const position = calculateElementCenter(element)
 
     // Update global state
     updatePopoverState({
@@ -159,11 +144,7 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     }
 
     nextTick(() => {
-      const rect = currentElement.getBoundingClientRect()
-      const position = {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
-      }
+      const position = calculateElementCenter(currentElement)
 
       updatePopoverState({
         position

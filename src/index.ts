@@ -14,12 +14,12 @@ export {
   getGlobalPopoverState,
   resetGlobalPopoverState
 } from './composables/usePopoverCommunication'
+export { useAsyncTour } from './composables/useAsyncTour'
 export {
-  useAsyncTour,
   hasAsyncNavigationCallbacks,
   hasAsyncLifecycleCallbacks,
   hasAsyncCallbacks
-} from './composables/useAsyncTour'
+} from './composables/utils'
 
 
 // Types

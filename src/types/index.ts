@@ -301,3 +301,80 @@ export interface UsePopoverCommunicationReturn {
   readonly completePositioning: () => void
   readonly setProvider: (provider: PopoverProvider) => void
 }
+
+// =============================================================================
+// COMPOSABLE-SPECIFIC TYPES
+// =============================================================================
+
+// Async Tour Composable Types
+export interface UseAsyncTourOptions {
+  onAsyncOperationStart?: () => void
+  onAsyncOperationComplete?: () => void
+  onAsyncOperationError?: (error: Error) => void
+}
+
+export interface UseAsyncTourReturn {
+  isAsyncOperationInProgress: import('vue').Ref<boolean>
+  executeAsyncCallback: (
+    callback: AsyncTourHook,
+    element: Element | undefined,
+    step: CoachMarkStep,
+    coachMark: CoachMarkInstance
+  ) => Promise<boolean>
+  handleAsyncNavigation: (
+    direction: 'next' | 'previous' | 'close' | 'skip',
+    element: Element | undefined,
+    step: CoachMarkStep,
+    coachMark: CoachMarkInstance,
+    defaultAction: () => void
+  ) => Promise<void>
+  handleStepDeselection: (
+    element: Element | undefined,
+    step: CoachMarkStep,
+    coachMark: CoachMarkInstance
+  ) => Promise<void>
+}
+
+// Scroll Blocking Composable Types
+export interface UseScrollBlockingReturn {
+  blockScrolling: () => void
+  unblockScrolling: () => void
+  isBlocked: import('vue').Ref<boolean>
+  getScrollPosition: () => { x: number; y: number }
+  forceUnblock: () => void
+}
+
+// Tooltip Management Composable Types
+export interface UseTooltipManagementReturn {
+  tooltipVisible: import('vue').Ref<boolean>
+  tooltipRefreshKey: import('vue').Ref<number>
+  showTooltipIfReady: (context?: string) => Promise<void>
+  hideTooltip: () => void
+  forceTooltipRefresh: () => void
+  setStepTransitioning: (transitioning: boolean) => void
+  getDisplayStats: () => TooltipDisplayState
+}
+
+export interface TooltipDisplayState {
+  isDisplaying: boolean
+  pendingDisplayId: number
+  lastDisplayTime: number
+  debounceDelay: number
+  totalCalls: number
+  debouncedCalls: number
+  executedCalls: number
+  lastExecutionContext: string
+  isStepTransitioning: boolean
+}
+
+// Quasar Watchers Composable Types
+export interface UseQuasarWatchersReturn {
+  initWatchers: () => void
+  isProcessing: () => boolean
+}
+
+export interface PopoverState {
+  visible: boolean
+  targetElement: Element | null
+  step: CoachMarkStep | null
+}
