@@ -2,21 +2,20 @@
  * TypeScript type definitions for MintCoachMark
  */
 
+import type { QTooltipProps } from 'quasar'
+
 // Basic types
 export type Side = 'top' | 'right' | 'bottom' | 'left' | 'over'
 export type Alignment = 'start' | 'center' | 'end'
 export type AllowedButtons = 'next' | 'previous' | 'close' | 'skip'
 
-// QTooltip positioning types
-export type QuasarAnchor = 'bottom middle' | 'top middle' | 'center right' | 'center left' | 'center middle' |
-                          'bottom left' | 'bottom right' | 'top left' | 'top right' | 'center start' | 'center end'
-
 // QTooltip configuration for step-level customization
+// Uses Quasar's official types to ensure consistency and automatic updates
 export interface QTooltipConfig {
-  anchor?: QuasarAnchor
-  self?: QuasarAnchor
-  offset?: [number, number]
-  class?: string
+  anchor?: QTooltipProps['anchor']
+  self?: QTooltipProps['self']
+  offset?: QTooltipProps['offset']
+  class?: string // Keep as string since QTooltipProps doesn't expose class property directly
 }
 
 // Stage definition for overlay positioning

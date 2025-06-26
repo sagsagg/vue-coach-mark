@@ -121,9 +121,9 @@ import type {
   CoachMarkStep,
   MintCoachMarkProps,
   MintCoachMarkEmits,
-  CoachMarkInstance,
-  QuasarAnchor
+  CoachMarkInstance
 } from '../types'
+import type { QTooltipProps } from 'quasar'
 
 // Define props with same interface as MintCoachMark
 const props = withDefaults(defineProps<MintCoachMarkProps>(), {
@@ -190,16 +190,17 @@ const isLastStep: ComputedRef<boolean> = computed(() =>
 )
 
 // QTooltip positioning configuration with step-level support
-const DEFAULT_ANCHOR: QuasarAnchor = 'bottom middle'
-const DEFAULT_SELF: QuasarAnchor = 'top middle'
-const DEFAULT_OFFSET: [number, number] = [0, 10]
+// Using Quasar's official types for better type safety and consistency
+const DEFAULT_ANCHOR: QTooltipProps['anchor'] = 'bottom middle'
+const DEFAULT_SELF: QTooltipProps['self'] = 'top middle'
+const DEFAULT_OFFSET: QTooltipProps['offset'] = [0, 10]
 const DEFAULT_CLASS = ''
 
-const quasarAnchor: ComputedRef<QuasarAnchor> = computed(() => {
+const quasarAnchor: ComputedRef<QTooltipProps['anchor']> = computed(() => {
   return currentStep.value?.popover?.tooltip?.anchor || DEFAULT_ANCHOR
 })
 
-const quasarSelf: ComputedRef<QuasarAnchor> = computed(() => {
+const quasarSelf: ComputedRef<QTooltipProps['self']> = computed(() => {
   return currentStep.value?.popover?.tooltip?.self || DEFAULT_SELF
 })
 
@@ -210,7 +211,7 @@ const quasarClass: ComputedRef<string> = computed(() => {
 })
 
 // Quasar offset calculation with step-level configuration support
-const quasarOffset: ComputedRef<[number, number]> = computed(() => {
+const quasarOffset: ComputedRef<QTooltipProps['offset']> = computed(() => {
   // Get effective padding value (used for both step-specific and calculated offsets)
   const config = getConfig()
   const globalPadding = config.padding || 10
