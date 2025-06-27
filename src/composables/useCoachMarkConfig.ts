@@ -17,6 +17,7 @@ const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'retry' | 'onHighl
   padding: 10,
   radius: 5,
   disableActiveInteraction: false,
+  keyboardControl: true,
   allowKeyboardControl: true,
   popoverClass: '',
   popoverOffset: 10,

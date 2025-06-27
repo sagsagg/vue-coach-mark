@@ -6,7 +6,7 @@ import type { CoachMarkStep, StepLifecycleEventContext, StepInteractionEventCont
  */
 export const findStepIndex = (
   step: CoachMarkStep,
-  steps: CoachMarkStep[],
+  steps: readonly CoachMarkStep[],
   currentStepIndex?: number
 ): number => {
   // First try direct object reference comparison
@@ -34,7 +34,7 @@ export const findStepIndex = (
  */
 export const createStepLifecycleContext = (
   step: CoachMarkStep,
-  steps: CoachMarkStep[],
+  steps: readonly CoachMarkStep[],
   currentStepIndex: number | undefined,
   coachMark: CoachMarkInstance,
   stepIndex?: number
@@ -61,7 +61,7 @@ export const createStepLifecycleContext = (
  */
 export const createStepInteractionContext = (
   step: CoachMarkStep,
-  steps: CoachMarkStep[],
+  steps: readonly CoachMarkStep[],
   currentStepIndex: number | undefined,
   coachMark: CoachMarkInstance,
   stepIndex?: number

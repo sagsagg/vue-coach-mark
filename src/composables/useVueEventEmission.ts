@@ -12,7 +12,7 @@ import { findStepIndex, createStepLifecycleContext, createStepInteractionContext
  */
 export type EnhancedConfigParams = {
   config: CoachMarkConfig
-  steps: CoachMarkStep[]
+  steps: readonly CoachMarkStep[]
   currentStepIndex: number | undefined
   coachMark: () => CoachMarkInstance
   emit?: SetupContext<MintCoachMarkEmits>['emit']
@@ -22,7 +22,7 @@ export type EnhancedConfigParams = {
  * Configuration object for event emitters
  */
 export type EventEmittersParams = {
-  steps: CoachMarkStep[]
+  steps: readonly CoachMarkStep[]
   currentStepIndex: number | undefined
   coachMark: () => CoachMarkInstance
   emit?: SetupContext<MintCoachMarkEmits>['emit']

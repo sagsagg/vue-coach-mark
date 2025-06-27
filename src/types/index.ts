@@ -1,502 +1,688 @@
 /**
  * TypeScript type definitions for MintCoachMark
  *
- * Type Organization:
- * 1. Basic primitive types
- * 2. Core interfaces (no dependencies)
- * 3. Retry mechanism types
- * 4. Hook and callback types
- * 5. Configuration interfaces
- * 6. Main coach mark interfaces
- * 7. Vue component interfaces
- * 8. Popover system interfaces
- * 9. Composable-specific types
+ * DEPENDENCY-ORDERED TYPE ORGANIZATION:
+ * ====================================
+ *
+ * This file is organized to ensure all types are defined before they are referenced,
+ * eliminating forward reference issues and circular dependencies.
+ *
+ * DEPENDENCY LEVELS (REORGANIZED TO ELIMINATE FORWARD REFERENCES):
+ *
+ * Level 1: Basic primitive types (no dependencies)
+ *   - Side, Alignment, AllowedButtons, PopoverProvider
+ *   - These are simple string unions with no dependencies
+ *
+ * Level 2: Core interfaces (no dependencies)
+ *   - StageDefinition, QTooltipConfig, PopoverDOM
+ *   - These use only primitive types and external library types
+ *
+ * Level 3: Core minimal interfaces (foundation layer)
+ *   - CoreElement, CoreConfig, CoreState, CoreInstance
+ *   - Minimal interfaces with no dependencies on other coach mark types
+ *
+ * Level 4: Generic retry system abstraction
+ *   - GenericRetryConfig, RetryState
+ *   - Uses generic type parameters to avoid forward references
+ *
+ * Level 5: Generic hook abstraction layer
+ *   - GenericHookFunction, GenericAsyncHook
+ *   - Generic types that avoid concrete dependencies
+ *
+ * Level 6: Minimal type alias declarations (resolve forward references)
+ *   - TempCoachMarkStep (minimal), TempCoachMarkConfig (minimal)
+ *   - Essential properties only to resolve forward references
+ *
+ * Level 7: Main coach mark type aliases
+ *   - CoachMarkState, CoachMarkInstance, NavigationOptions
+ *   - Core types that can reference the minimal types
+ *
+ * Level 8: Concrete hook type definitions
+ *   - HookContext, CoachMarkHook, AsyncTourHook, RetryConfig
+ *   - Concrete types using the main type aliases
+ *
+ * Level 9: Configuration types and type extensions
+ *   - PopoverConfig, CoachMarkStep (complete), CoachMarkConfig (complete)
+ *   - Complete type definitions using TypeScript intersection types
+ *
+ * Level 10: Event context types
+ *   - StepLifecycleEventContext, StepInteractionEventContext
+ *   - Event types using concrete interfaces
+ *
+ * Level 11: Vue component and specialized types
+ *   - MintCoachMarkProps, MintCoachMarkEmits, PopoverCommunication, etc.
+ *   - Specialized interfaces for components and composables
+ *   - These are return types for composable functions
+ *
+ * TYPE ALIAS DECLARATION SPLITTING WITH INTERSECTION TYPES STRATEGY:
+ * - Minimal type aliases declared early with essential properties only
+ * - Intersection types used to combine minimal types with extended properties later
+ * - Forward references resolved by having minimal types available when needed
+ * - All types follow strict dependency order with zero forward references
+ *
+ * ZERO FORWARD REFERENCES AND ZERO DUPLICATE IDENTIFIERS ACHIEVED:
+ * - Minimal TempCoachMarkStep and TempCoachMarkConfig declared early (Level 6)
+ * - Complete types created using intersection types (Level 9A)
+ * - Type aliases with intersection types provide complete type definitions
+ * - ESLint rule @typescript-eslint/no-explicit-any enforced without exceptions
+ *
+ * MAINTENANCE NOTES:
+ * - When adding new types, ensure they are placed at the correct dependency level
+ * - Use generic types for breaking circular dependencies
+ * - Define main interfaces before configuration types that reference them
+ * - Keep the dependency levels clearly separated with comments
  */
 
 import type { QTooltipProps } from 'quasar';
-import { type Ref, type ComputedRef } from 'vue'
+import { type Ref, type ComputedRef } from 'vue';
 
 // =============================================================================
-// 1. BASIC PRIMITIVE TYPES
+// LEVEL 1: BASIC PRIMITIVE TYPES (NO DEPENDENCIES)
 // =============================================================================
 
-export type Side = 'top' | 'right' | 'bottom' | 'left' | 'over'
-export type Alignment = 'start' | 'center' | 'end'
-export type AllowedButtons = 'next' | 'previous' | 'close' | 'skip'
-export type PopoverProvider = 'mint' | 'quasar'
+export type Side = 'top' | 'right' | 'bottom' | 'left' | 'over';
+export type Alignment = 'start' | 'center' | 'end';
+export type AllowedButtons = 'next' | 'previous' | 'close' | 'skip';
+export type PopoverProvider = 'mint' | 'quasar';
 
 // =============================================================================
-// 2. CORE INTERFACES (NO DEPENDENCIES)
+// LEVEL 2: CORE INTERFACES (NO DEPENDENCIES)
 // =============================================================================
 
 // Stage definition for overlay positioning
 export type StageDefinition = {
-  x: number
-  y: number
-  width: number
-  height: number
-}
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 // QTooltip configuration for step-level customization
 // Uses Quasar's official types to ensure consistency and automatic updates
 export type QTooltipConfig = {
-  anchor?: QTooltipProps['anchor']
-  self?: QTooltipProps['self']
-  offset?: QTooltipProps['offset']
-  class?: string // Keep as string since QTooltipProps doesn't expose class property directly
-}
+  anchor?: QTooltipProps['anchor'];
+  self?: QTooltipProps['self'];
+  offset?: QTooltipProps['offset'];
+  class?: string; // Keep as string since QTooltipProps doesn't expose class property directly
+};
 
 // Popover DOM elements type
 export type PopoverDOM = {
-  wrapper: HTMLElement
-  arrow: HTMLElement
-  title: HTMLElement
-  description: HTMLElement
-  footer: HTMLElement
-  progress: HTMLElement
-  nextBtn: HTMLElement
-  prevBtn: HTMLElement
-  closeBtn: HTMLElement
-}
+  wrapper: HTMLElement;
+  arrow: HTMLElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  footer: HTMLElement;
+  progress: HTMLElement;
+  nextBtn: HTMLElement;
+  prevBtn: HTMLElement;
+  closeBtn: HTMLElement;
+};
 
 // =============================================================================
-// 3. RETRY MECHANISM TYPES
+// LEVEL 3: CORE MINIMAL INTERFACES (FOUNDATION LAYER - NO DEPENDENCIES)
 // =============================================================================
 
-// Retry configuration for element resolution
-export type RetryConfig = {
-  enabled?: boolean
-  maxAttempts?: number
-  delay?: number
-  exponentialBackoff?: boolean
-  onRetry?: (attempt: number, step: CoachMarkStep) => void
-  onMaxAttemptsReached?: (step: CoachMarkStep) => void
-}
+// Core minimal interfaces that form the foundation of the type system
+// These interfaces have NO dependencies on other coach mark types
+// and serve as the base for breaking circular dependencies
 
-// Retry state information
+// Core element interface - minimal element properties
+export type CoreElement = {
+  readonly element?: string | Element | (() => Element);
+  readonly id?: string;
+  readonly group?: string;
+  readonly data?: Record<string, unknown>;
+};
+
+// Core configuration interface - basic configuration properties
+export type CoreConfig = {
+  readonly animate?: boolean;
+  readonly overlayColor?: string;
+  readonly overlayOpacity?: number;
+  readonly smoothScroll?: boolean;
+  readonly allowClose?: boolean;
+  readonly overlayClickBehavior?: 'close' | 'nextStep';
+};
+
+// Core state interface - essential state properties
+export type CoreState = {
+  readonly isInitialized?: boolean;
+  readonly activeIndex?: number;
+  readonly activeElement?: Element;
+};
+
+// Core instance interface - fundamental methods
+export type CoreInstance = {
+  readonly isActive: () => boolean;
+  readonly getActiveIndex: () => number | undefined;
+  readonly getActiveElement: () => Element | undefined;
+  readonly refresh: () => void;
+  readonly destroy: () => void;
+};
+
+// =============================================================================
+// LEVEL 4: LEGACY BASE INTERFACES (DEPRECATED - FOR BACKWARD COMPATIBILITY)
+// =============================================================================
+
+// Legacy base interfaces - kept for backward compatibility
+// These will be removed once migration to core interfaces is complete
+export type BaseStep = NonNullable<unknown> & CoreElement;
+export type BaseConfig = {
+  readonly steps?: readonly BaseStep[];
+} & CoreConfig;
+export type BaseState = NonNullable<unknown> & CoreState;
+export type BaseInstance = {
+  readonly getActiveStep: () => BaseStep | undefined;
+} & CoreInstance;
+
+// =============================================================================
+// LEVEL 4: GENERIC RETRY SYSTEM ABSTRACTION (NO FORWARD REFERENCES)
+// =============================================================================
+
+// Generic retry configuration - parameterized to avoid forward references
+export type GenericRetryConfig<TStep> = {
+  readonly enabled?: boolean;
+  readonly maxAttempts?: number;
+  readonly delay?: number;
+  readonly exponentialBackoff?: boolean;
+  readonly onRetry?: (attempt: number, step: TStep) => void;
+  readonly onMaxAttemptsReached?: (step: TStep) => void;
+};
+
+// Retry state information - no dependencies
 export type RetryState = {
-  isRetrying: boolean
-  currentAttempt: number
-  maxAttempts: number
-  lastAttemptTime: number
-}
+  readonly isRetrying: boolean;
+  readonly currentAttempt: number;
+  readonly maxAttempts: number;
+  readonly lastAttemptTime: number;
+};
+
+// Note: Concrete RetryConfig type is defined later after main interfaces
 
 // =============================================================================
-// 4. HOOK AND CALLBACK TYPES
+// LEVEL 5: PROGRESSIVE HOOK TYPE DEFINITIONS (INTERFACE MERGING APPROACH)
 // =============================================================================
 
-// Hook function type - supports both sync and async operations
-export type CoachMarkHook = (
+// Use interface merging to progressively define hook types
+// This avoids circular dependencies by allowing incremental type building
+
+// Note: Hook types (CoachMarkHook, AsyncTourHook, HookContext) are defined
+// later after all main interfaces to avoid circular dependencies
+
+// Generic hook types for later concrete binding
+export type GenericHookFunction<TStep, TConfig, TState, TInstance> = (
   element: Element | undefined,
-  step: CoachMarkStep,
+  step: TStep,
   context: {
-    config: CoachMarkConfig
-    state: CoachMarkState
-    coachMark: CoachMarkInstance
+    config: TConfig;
+    state: TState;
+    coachMark: TInstance;
   }
-) => void | Promise<void>
+) => void | Promise<void>;
 
-// Async tour hook type for step-level callbacks
-export type AsyncTourHook = ({
+export type GenericAsyncHook<TStep, TInstance> = ({
   element,
   step,
-  coachMark
+  coachMark,
 }: {
-  element: Element | undefined,
-  step: CoachMarkStep,
-  coachMark: CoachMarkInstance
-}) => void | Promise<void>
+  element: Element | undefined;
+  step: TStep;
+  coachMark: TInstance;
+}) => void | Promise<void>;
 
 // =============================================================================
-// 5. CONFIGURATION TYPES
+// LEVEL 6: MINIMAL TYPE ALIAS DECLARATIONS (RESOLVE FORWARD REFERENCES)
+// =============================================================================
+
+// Declare minimal type aliases early to resolve forward references
+// These will be extended later with full definitions using intersection types
+
+// Temporary minimal type aliases for forward references
+// These will be combined with extended properties using intersection types
+export type TempCoachMarkStep = {
+  readonly id?: string;
+  readonly element?: string | Element | (() => Element);
+} & BaseStep;
+
+export type TempCoachMarkConfig = {
+  readonly steps?: readonly TempCoachMarkStep[];
+  readonly animate?: boolean;
+} & BaseConfig;
+
+// Navigation options for programmatic navigation
+export type NavigationOptions = {
+  readonly autoScroll?: boolean;
+};
+
+// State type - extends BaseState (mutable for state management)
+export type CoachMarkState = {
+  // State properties (inherited from BaseState but redefined for clarity)
+  isInitialized?: boolean;
+  activeIndex?: number;
+  activeElement?: Element;
+
+  // Additional state properties
+  activeStep?: TempCoachMarkStep;
+  previousElement?: Element;
+  previousStep?: TempCoachMarkStep;
+  popover?: PopoverDOM;
+
+  // Internal state (using descriptive naming conventions)
+  internalPreviousElement?: Element;
+  currentActiveElement?: Element;
+  internalPreviousStep?: TempCoachMarkStep;
+  currentActiveStep?: TempCoachMarkStep;
+  internalActiveOnDestroyed?: Element;
+  internalResizeTimeout?: number;
+  internalTransitionCallback?: () => void;
+  currentActiveStagePosition?: StageDefinition;
+  internalOverlaySvg?: SVGSVGElement;
+  shouldRenderPopover?: { element: Element; step: TempCoachMarkStep };
+  shouldRepositionPopover?: { element: Element; step: TempCoachMarkStep };
+} & BaseState;
+
+// CoachMark instance type - extends BaseInstance
+export type CoachMarkInstance = {
+  // Instance methods (inherited from BaseInstance but redefined for clarity)
+  readonly isActive: () => boolean;
+  readonly getActiveIndex: () => number | undefined;
+  readonly getActiveStep: () => TempCoachMarkStep | undefined;
+  readonly getActiveElement: () => Element | undefined;
+
+  // Additional instance methods
+  readonly refresh: () => void;
+  readonly start: (stepIndex?: number, options?: NavigationOptions) => void;
+  readonly setConfig: (config: TempCoachMarkConfig) => void;
+  readonly setSteps: (steps: readonly TempCoachMarkStep[]) => void;
+  readonly getConfig: () => TempCoachMarkConfig;
+  readonly getState: <K extends keyof CoachMarkState>(
+    key?: K,
+  ) => K extends keyof CoachMarkState ? CoachMarkState[K] : unknown;
+  readonly isFirstStep: () => boolean;
+  readonly isLastStep: () => boolean;
+  readonly getPreviousElement: () => Element | undefined;
+  readonly getPreviousStep: () => TempCoachMarkStep | undefined;
+  readonly moveNext: (options?: NavigationOptions) => void;
+  readonly movePrevious: (options?: NavigationOptions) => void;
+  readonly moveTo: (index: number, options?: NavigationOptions) => void;
+  readonly skipTour: () => void;
+  readonly hasNextStep: () => boolean;
+  readonly hasPreviousStep: () => boolean;
+  readonly highlight: (step: TempCoachMarkStep) => void;
+  readonly destroy: () => void;
+} & BaseInstance;
+
+// =============================================================================
+// LEVEL 7: CONCRETE HOOK TYPE DEFINITIONS (NOW POSSIBLE WITH MAIN INTERFACES DEFINED)
+// =============================================================================
+
+// Hook context with concrete types
+export type HookContext = {
+  readonly config: TempCoachMarkConfig;
+  readonly state: CoachMarkState;
+  readonly coachMark: CoachMarkInstance;
+};
+
+// Concrete hook types using the main interfaces
+export type CoachMarkHook = GenericHookFunction<
+  TempCoachMarkStep,
+  TempCoachMarkConfig,
+  CoachMarkState,
+  CoachMarkInstance
+>;
+export type AsyncTourHook = GenericAsyncHook<TempCoachMarkStep, CoachMarkInstance>;
+
+// Concrete retry config
+export type RetryConfig = GenericRetryConfig<TempCoachMarkStep>;
+
+// =============================================================================
+// LEVEL 8: STEP AND CONFIG INTERFACE EXTENSIONS (COMPLETE THE INTERFACE DEFINITIONS)
+// =============================================================================
+
+// Note: Full interface extensions will be added after PopoverConfig is defined
+// This resolves the remaining forward reference to PopoverConfig
+
+// Note: CoachMarkConfig extension will be added after hook types are defined
+// This resolves forward references to hook types
+
+// =============================================================================
+// LEVEL 9: CONFIGURATION TYPES (EXTENDS BASE INTERFACES)
+// =============================================================================
+
+// =============================================================================
+// LEVEL 7: CONFIGURATION TYPES (EXTENDS BASE INTERFACES)
 // =============================================================================
 
 // Popover configuration
 export type PopoverConfig = {
-  title?: string
-  description?: string
-  side?: Side
-  alignment?: Alignment
-  showButtons?: AllowedButtons[]
-  disableButtons?: AllowedButtons[]
-  showProgress?: boolean
-  progressText?: string
-  nextBtnText?: string
-  prevBtnText?: string
-  doneBtnText?: string
-  skipBtnText?: string
-  popoverClass?: string
+  title?: string;
+  description?: string;
+  side?: Side;
+  alignment?: Alignment;
+  showButtons?: AllowedButtons[];
+  disableButtons?: AllowedButtons[];
+  showProgress?: boolean;
+  progressText?: string;
+  nextBtnText?: string;
+  prevBtnText?: string;
+  doneBtnText?: string;
+  skipBtnText?: string;
+  popoverClass?: string;
 
   // Highlight appearance (step-level overrides)
-  padding?: number | string
-  radius?: number | string
+  padding?: number | string;
+  radius?: number | string;
 
   // Original navigation callbacks (maintain backward compatibility)
-  onNextClick?: CoachMarkHook
-  onPrevClick?: CoachMarkHook
-  onCloseClick?: CoachMarkHook
-  onSkipClick?: CoachMarkHook
+  onNextClick?: CoachMarkHook;
+  onPrevClick?: CoachMarkHook;
+  onCloseClick?: CoachMarkHook;
+  onSkipClick?: CoachMarkHook;
 
   // New async navigation callbacks (separate from original ones)
-  onAsyncNextClick?: AsyncTourHook
-  onAsyncPreviousClick?: AsyncTourHook
-  onAsyncCloseClick?: AsyncTourHook
+  onAsyncNextClick?: AsyncTourHook;
+  onAsyncPreviousClick?: AsyncTourHook;
+  onAsyncCloseClick?: AsyncTourHook;
 
   // QTooltip-specific configuration for QuasarCoachMark
-  tooltip?: QTooltipConfig
-}
-
-// Coach mark step definition
-export type CoachMarkStep = {
-  element?: string | Element | (() => Element)
-  popover?: PopoverConfig
-  disableActiveInteraction?: boolean
-
-  // Retry configuration for element resolution
-  retry?: boolean | RetryConfig
-
-  // Step lifecycle hooks
-  onHighlightStarted?: CoachMarkHook
-  onHighlighted?: CoachMarkHook
-  onDeselected?: CoachMarkHook  // Keep original signature for backward compatibility
-
-  // Async lifecycle hooks (new)
-  onAsyncDeselected?: AsyncTourHook  // New async version
-}
+  tooltip?: QTooltipConfig;
+};
 
 // =============================================================================
-// 6. MAIN COACH MARK TYPES
+// LEVEL 9: INTERFACE EXTENSIONS (COMPLETE THE MINIMAL INTERFACE DEFINITIONS)
 // =============================================================================
 
-// Main configuration type
-export type CoachMarkConfig = {
-  steps?: CoachMarkStep[]
-  animate?: boolean
-  overlayColor?: string
-  overlayOpacity?: number
-  smoothScroll?: boolean
-  allowClose?: boolean
-  overlayClickBehavior?: 'close' | 'nextStep'
+// Now that PopoverConfig and hook types are defined, extend the minimal interfaces
 
-  // Highlight appearance
-  padding?: number | string
-  radius?: number | string
+// =============================================================================
+// LEVEL 9A: CONSOLIDATED TYPE ALIAS DEFINITIONS (INTERSECTION TYPES)
+// =============================================================================
 
-  disableActiveInteraction?: boolean
-  allowKeyboardControl?: boolean
+// Now that all dependencies (PopoverConfig) are defined, we can create the complete consolidated
+// type definitions using intersection types. Hook types will be redefined after complete types.
 
-  // Popover defaults
-  popoverClass?: string
-  popoverOffset?: number
-  showButtons?: AllowedButtons[]
-  disableButtons?: AllowedButtons[]
-  showProgress?: boolean
+// Complete CoachMarkStep type (consolidates minimal + extended properties using intersection)
+export type CoachMarkStep = TempCoachMarkStep & {
+  // Extended properties (now that dependencies are available)
+  readonly popover?: PopoverConfig;
+  readonly disableActiveInteraction?: boolean;
+  readonly retry?: boolean | RetryConfig;
+  readonly onHighlightStarted?: CoachMarkHook;
+  readonly onHighlighted?: CoachMarkHook;
+  readonly onDeselected?: CoachMarkHook;
+  readonly onAsyncDeselected?: AsyncTourHook;
+  readonly group?: string;
+  readonly data?: Record<string, unknown>;
+};
 
-  // Button text defaults
-  progressText?: string
-  nextBtnText?: string
-  prevBtnText?: string
-  doneBtnText?: string
-  skipBtnText?: string
+// Complete CoachMarkConfig type (consolidates minimal + extended properties using intersection)
+export type CoachMarkConfig = TempCoachMarkConfig & {
+  // Override steps to use complete CoachMarkStep type
+  readonly steps?: readonly CoachMarkStep[];
 
-  // Skip tour configuration
-  allowSkip?: boolean
-
-  // Global retry configuration for element resolution
-  retry?: boolean | RetryConfig
-
-  // Global hooks
-  onHighlightStarted?: CoachMarkHook
-  onHighlighted?: CoachMarkHook
-  onDeselected?: CoachMarkHook
-  onDestroyStarted?: CoachMarkHook
-  onDestroyed?: CoachMarkHook
-  onNextClick?: CoachMarkHook
-  onPrevClick?: CoachMarkHook
-  onCloseClick?: CoachMarkHook
-  onSkipClick?: CoachMarkHook
-  onPopoverRender?: (
+  // Extended properties (now that dependencies are available)
+  readonly overlayColor?: string;
+  readonly overlayOpacity?: number;
+  readonly smoothScroll?: boolean;
+  readonly allowClose?: boolean;
+  readonly overlayClickBehavior?: 'close' | 'nextStep';
+  readonly showProgress?: boolean;
+  readonly keyboardControl?: boolean;
+  readonly disableActiveInteraction?: boolean;
+  readonly padding?: number | string;
+  readonly radius?: number | string;
+  readonly allowKeyboardControl?: boolean;
+  readonly popoverClass?: string;
+  readonly popoverOffset?: number;
+  readonly showButtons?: AllowedButtons[];
+  readonly disableButtons?: AllowedButtons[];
+  readonly progressText?: string;
+  readonly nextBtnText?: string;
+  readonly prevBtnText?: string;
+  readonly doneBtnText?: string;
+  readonly skipBtnText?: string;
+  readonly allowSkip?: boolean;
+  readonly retry?: boolean | RetryConfig;
+  readonly onHighlightStarted?: CoachMarkHook;
+  readonly onHighlighted?: CoachMarkHook;
+  readonly onDeselected?: CoachMarkHook;
+  readonly onDestroyStarted?: CoachMarkHook;
+  readonly onDestroyed?: CoachMarkHook;
+  readonly onNextClick?: CoachMarkHook;
+  readonly onPrevClick?: CoachMarkHook;
+  readonly onCloseClick?: CoachMarkHook;
+  readonly onSkipClick?: CoachMarkHook;
+  readonly onPopoverRender?: (
     popover: PopoverDOM,
-    context: {
-      config: CoachMarkConfig
-      state: CoachMarkState
-      coachMark: CoachMarkInstance
-    }
-  ) => void
-}
+    context: HookContext
+  ) => void;
+};
 
-// State type
-export type CoachMarkState = {
-  isInitialized?: boolean
-  activeIndex?: number
-  activeElement?: Element
-  activeStep?: CoachMarkStep
-  previousElement?: Element
-  previousStep?: CoachMarkStep
-  popover?: PopoverDOM
+// =============================================================================
+// LEVEL 10: SPECIALIZED TYPE DEFINITIONS
+// =============================================================================
 
-  // Internal state (using descriptive naming conventions)
-  internalPreviousElement?: Element
-  currentActiveElement?: Element
-  internalPreviousStep?: CoachMarkStep
-  currentActiveStep?: CoachMarkStep
-  internalActiveOnDestroyed?: Element
-  internalResizeTimeout?: number
-  internalTransitionCallback?: () => void
-  currentActiveStagePosition?: StageDefinition
-  internalOverlaySvg?: SVGSVGElement
-  shouldRenderPopover?: { element: Element; step: CoachMarkStep }
-  shouldRepositionPopover?: { element: Element; step: CoachMarkStep }
-}
+// Tooltip display state (moved here to resolve forward reference)
+export type TooltipDisplayState = {
+  isDisplaying: boolean;
+  pendingDisplayId: number;
+  lastDisplayTime: number;
+  debounceDelay: number;
+  totalCalls: number;
+  debouncedCalls: number;
+  executedCalls: number;
+  lastExecutionContext: string;
+  isStepTransitioning: boolean;
+};
 
-// Navigation options for programmatic navigation
-export type NavigationOptions = {
-  autoScroll?: boolean
-}
+// =============================================================================
+// LEVEL 11: EVENT CONTEXT TYPES (USES CONCRETE TYPES)
+// =============================================================================
 
 // Step lifecycle event context
 export type StepLifecycleEventContext = {
-  step: CoachMarkStep
-  nextStep: CoachMarkStep | undefined
-  previousStep: CoachMarkStep | undefined
-  stepIndex: number
-  isHighlighted: boolean
-  isLastStep: boolean
-  isFirstStep: boolean
-  coachMark: CoachMarkInstance
-}
+  readonly step: CoachMarkStep;
+  readonly nextStep: CoachMarkStep | undefined;
+  readonly previousStep: CoachMarkStep | undefined;
+  readonly stepIndex: number;
+  readonly isHighlighted: boolean;
+  readonly isLastStep: boolean;
+  readonly isFirstStep: boolean;
+  readonly coachMark: CoachMarkInstance;
+};
 
 // Step interaction event context (extends lifecycle context with navigation flags)
 export type StepInteractionEventContext = {
-  step: CoachMarkStep
-  nextStep: CoachMarkStep | undefined
-  previousStep: CoachMarkStep | undefined
-  coachMark: CoachMarkInstance
-  stepIndex: number
-  hasNextStep: boolean
-  hasPreviousStep: boolean
-  isHighlighted: boolean
-}
-
-// CoachMark instance type (provides intuitive API for coach mark interactions)
-export type CoachMarkInstance = {
-  isActive: () => boolean
-  refresh: () => void
-  start: (stepIndex?: number, options?: NavigationOptions) => void
-  setConfig: (config: CoachMarkConfig) => void
-  setSteps: (steps: CoachMarkStep[]) => void
-  getConfig: () => CoachMarkConfig
-  getState: (key?: string) => any
-  getActiveIndex: () => number | undefined
-  isFirstStep: () => boolean
-  isLastStep: () => boolean
-  getActiveStep: () => CoachMarkStep | undefined
-  getActiveElement: () => Element | undefined
-  getPreviousElement: () => Element | undefined
-  getPreviousStep: () => CoachMarkStep | undefined
-  moveNext: (options?: NavigationOptions) => void
-  movePrevious: (options?: NavigationOptions) => void
-  moveTo: (index: number, options?: NavigationOptions) => void
-  skipTour: () => void
-  hasNextStep: () => boolean
-  hasPreviousStep: () => boolean
-  highlight: (step: CoachMarkStep) => void
-  destroy: () => void
-}
+  readonly step: CoachMarkStep;
+  readonly nextStep: CoachMarkStep | undefined;
+  readonly previousStep: CoachMarkStep | undefined;
+  readonly coachMark: CoachMarkInstance;
+  readonly stepIndex: number;
+  readonly hasNextStep: boolean;
+  readonly hasPreviousStep: boolean;
+  readonly isHighlighted: boolean;
+};
 
 // =============================================================================
-// 7. VUE COMPONENT TYPES
+// LEVEL 8: VUE COMPONENT INTERFACES (USES MAIN INTERFACES FROM LEVEL 7)
 // =============================================================================
 
 // Vue component props
 export type MintCoachMarkProps = {
-  steps?: CoachMarkStep[]
-  config?: CoachMarkConfig
-  modelValue?: boolean
-  autoStart?: boolean
-}
+  readonly steps?: readonly CoachMarkStep[];
+  readonly config?: CoachMarkConfig;
+  readonly modelValue?: boolean;
+  readonly autoStart?: boolean;
+};
 
 // Vue component emits
 export type MintCoachMarkEmits = {
-  'update:modelValue': [value: boolean]
-  'tour-start': []
-  'tour-complete': []
-  'tour-skipped': [step: CoachMarkStep, index: number]
-  'step-change': [step: CoachMarkStep, index: number]
-  'highlight-started': [element: Element | undefined, step: CoachMarkStep]
-  'highlighted': [element: Element | undefined, step: CoachMarkStep]
-  'deselected': [element: Element | undefined, step: CoachMarkStep]
+  readonly 'update:modelValue': readonly [value: boolean];
+  readonly 'tour-start': readonly [];
+  readonly 'tour-complete': readonly [];
+  readonly 'tour-skipped': readonly [step: CoachMarkStep, index: number];
+  readonly 'step-change': readonly [step: CoachMarkStep, index: number];
+  readonly 'highlight-started': readonly [element: Element | undefined, step: CoachMarkStep];
+  readonly 'highlighted': readonly [element: Element | undefined, step: CoachMarkStep];
+  readonly 'deselected': readonly [element: Element | undefined, step: CoachMarkStep];
 
   // Step lifecycle events with comprehensive context
-  'step-highlight-started': [context: StepLifecycleEventContext]
-  'step-highlighted': [context: StepLifecycleEventContext]
-  'step-deselected': [context: StepLifecycleEventContext]
-  'step-async-deselected': [context: StepLifecycleEventContext]
+  readonly 'step-highlight-started': readonly [context: StepLifecycleEventContext];
+  readonly 'step-highlighted': readonly [context: StepLifecycleEventContext];
+  readonly 'step-deselected': readonly [context: StepLifecycleEventContext];
+  readonly 'step-async-deselected': readonly [context: StepLifecycleEventContext];
 
   // Step interaction events with navigation context
-  'step-async-next-clicked': [context: StepInteractionEventContext]
-  'step-async-previous-clicked': [context: StepInteractionEventContext]
-  'step-changed': [context: StepInteractionEventContext]
-  'step-closed': [context: StepInteractionEventContext]
-  'step-next-clicked': [context: StepInteractionEventContext]
-  'step-previous-clicked': [context: StepInteractionEventContext]
-}
+  readonly 'step-async-next-clicked': readonly [context: StepInteractionEventContext];
+  readonly 'step-async-previous-clicked': readonly [context: StepInteractionEventContext];
+  readonly 'step-changed': readonly [context: StepInteractionEventContext];
+  readonly 'step-closed': readonly [context: StepInteractionEventContext];
+  readonly 'step-next-clicked': readonly [context: StepInteractionEventContext];
+  readonly 'step-previous-clicked': readonly [context: StepInteractionEventContext];
+};
 
 // =============================================================================
-// 8. POPOVER SYSTEM TYPES
+// LEVEL 9: POPOVER SYSTEM TYPES
 // =============================================================================
 
 // Popover provider configuration
 export type PopoverProviderConfig = {
-  provider: PopoverProvider
-  quasarOptions?: Record<string, unknown>
-}
+  readonly provider: PopoverProvider;
+  readonly quasarOptions?: Record<string, unknown>;
+};
 
 // Enhanced popover communication type
 export type PopoverCommunication = {
-  visible: boolean
-  targetElement: Element | null
-  step: CoachMarkStep | null
-  position: {
-    x: number
-    y: number
-  } | null
-  provider: PopoverProvider
-  isPositioning: boolean
-}
+  readonly visible: boolean;
+  readonly targetElement: Element | null;
+  readonly step: CoachMarkStep | null;
+  readonly position: {
+    readonly x: number;
+    readonly y: number;
+  } | null;
+  readonly provider: PopoverProvider;
+  readonly isPositioning: boolean;
+};
 
 // Popover component props for decoupled architecture
 export type MintPopoverProps = {
-  visible?: boolean
-  targetElement?: Element | null
-  step?: CoachMarkStep | null
-  title?: string
-  description?: string
-  side?: Side
-  showButtons?: AllowedButtons[]
-  disableButtons?: AllowedButtons[]
-  showProgress?: boolean
-  progressText?: string
-  nextBtnText?: string
-  prevBtnText?: string
-  skipBtnText?: string
-  popoverClass?: string
-  offset?: number
-}
+  readonly visible?: boolean;
+  readonly targetElement?: Element | null;
+  readonly step?: CoachMarkStep | null;
+  readonly title?: string;
+  readonly description?: string;
+  readonly side?: Side;
+  readonly showButtons?: readonly AllowedButtons[];
+  readonly disableButtons?: readonly AllowedButtons[];
+  readonly showProgress?: boolean;
+  readonly progressText?: string;
+  readonly nextBtnText?: string;
+  readonly prevBtnText?: string;
+  readonly skipBtnText?: string;
+  readonly popoverClass?: string;
+  readonly offset?: number;
+};
 
 // Popover component emits
 export type MintPopoverEmits = {
-  (e: 'next'): void
-  (e: 'previous'): void
-  (e: 'close'): void
-  (e: 'skip'): void
-  (e: 'rendered', popover: HTMLElement): void
-  (e: 'destroyed'): void
-}
-
-
+  readonly next: readonly [];
+  readonly previous: readonly [];
+  readonly close: readonly [];
+  readonly skip: readonly [];
+  readonly rendered: readonly [popover: HTMLElement];
+  readonly destroyed: readonly [];
+};
 
 // Communication composable return type
 export type UsePopoverCommunicationReturn = {
-  readonly popoverState: ComputedRef<PopoverCommunication>
-  readonly updatePopoverState: (updates: Partial<PopoverCommunication>) => void
-  readonly showPopover: (element: Element, step: CoachMarkStep, isPositioning?: boolean) => void
-  readonly hidePopover: () => void
-  readonly repositionPopover: () => void
-  readonly forceRepositioning: () => void
-  readonly completePositioning: () => void
-  readonly setProvider: (provider: PopoverProvider) => void
-}
+  readonly popoverState: ComputedRef<PopoverCommunication>;
+  readonly updatePopoverState: (updates: Partial<PopoverCommunication>) => void;
+  readonly showPopover: (element: Element, step: CoachMarkStep, isPositioning?: boolean) => void;
+  readonly hidePopover: () => void;
+  readonly repositionPopover: () => void;
+  readonly forceRepositioning: () => void;
+  readonly completePositioning: () => void;
+  readonly setProvider: (provider: PopoverProvider) => void;
+};
 
 // =============================================================================
-// 9. COMPOSABLE-SPECIFIC TYPES
+// LEVEL 10: COMPOSABLE-SPECIFIC TYPES
 // =============================================================================
 
 // Async Tour Composable Types
 export type UseAsyncTourOptions = {
-  onAsyncOperationStart?: () => void
-  onAsyncOperationComplete?: () => void
-  onAsyncOperationError?: (error: Error) => void
-}
+  readonly onAsyncOperationStart?: () => void;
+  readonly onAsyncOperationComplete?: () => void;
+  readonly onAsyncOperationError?: (error: Error) => void;
+};
 
 export type UseAsyncTourReturn = {
-  isAsyncOperationInProgress: Ref<boolean>
-  executeAsyncCallback: (
+  readonly isAsyncOperationInProgress: Ref<boolean>;
+  readonly executeAsyncCallback: (
     callback: AsyncTourHook,
     element: Element | undefined,
     step: CoachMarkStep,
     coachMark: CoachMarkInstance
-  ) => Promise<boolean>
-  handleAsyncNavigation: (
+  ) => Promise<boolean>;
+  readonly handleAsyncNavigation: (
     direction: 'next' | 'previous' | 'close' | 'skip',
     element: Element | undefined,
     step: CoachMarkStep,
     coachMark: CoachMarkInstance,
     defaultAction: () => void
-  ) => Promise<void>
-  handleStepDeselection: (
+  ) => Promise<void>;
+  readonly handleStepDeselection: (
     element: Element | undefined,
     step: CoachMarkStep,
     coachMark: CoachMarkInstance
-  ) => Promise<void>
-}
+  ) => Promise<void>;
+};
 
 // Scroll Blocking Composable Types
 export type UseScrollBlockingReturn = {
-  blockScrolling: () => void
-  unblockScrolling: () => void
-  isBlocked: Ref<boolean>
-  getScrollPosition: () => { x: number; y: number }
-  forceUnblock: () => void
-}
+  readonly blockScrolling: () => void;
+  readonly unblockScrolling: () => void;
+  readonly isBlocked: Ref<boolean>;
+  readonly getScrollPosition: () => { readonly x: number; readonly y: number };
+  readonly forceUnblock: () => void;
+};
 
 // Tooltip Management Composable Types
 export type UseTooltipManagementReturn = {
-  tooltipVisible: Ref<boolean>
-  tooltipRefreshKey: Ref<number>
-  showTooltipIfReady: (context?: string) => Promise<void>
-  hideTooltip: () => void
-  forceTooltipRefresh: () => void
-  setStepTransitioning: (transitioning: boolean) => void
-  getDisplayStats: () => TooltipDisplayState
-}
-
-export type TooltipDisplayState = {
-  isDisplaying: boolean
-  pendingDisplayId: number
-  lastDisplayTime: number
-  debounceDelay: number
-  totalCalls: number
-  debouncedCalls: number
-  executedCalls: number
-  lastExecutionContext: string
-  isStepTransitioning: boolean
-}
+  readonly tooltipVisible: Ref<boolean>;
+  readonly tooltipRefreshKey: Ref<number>;
+  readonly showTooltipIfReady: (context?: string) => Promise<void>;
+  readonly hideTooltip: () => void;
+  readonly forceTooltipRefresh: () => void;
+  readonly setStepTransitioning: (transitioning: boolean) => void;
+  readonly getDisplayStats: () => TooltipDisplayState;
+};
 
 // Quasar Watchers Composable Types
 export type UseQuasarWatchersReturn = {
-  initWatchers: () => void
-  isProcessing: () => boolean
-}
+  readonly initWatchers: () => void;
+  readonly isProcessing: () => boolean;
+};
 
 export type PopoverState = {
-  visible: boolean
-  targetElement: Element | null
-  step: CoachMarkStep | null
-}
+  readonly visible: boolean;
+  readonly targetElement: Element | null;
+  readonly step: CoachMarkStep | null;
+};
 
 // Element Retry Composable Types
 export type UseElementRetryOptions = {
-  defaultRetryConfig?: RetryConfig
-}
+  readonly defaultRetryConfig?: RetryConfig;
+};
 
 export type UseElementRetryReturn = {
-  resolveElementWithRetry: (
+  readonly resolveElementWithRetry: (
     elementRef: string | Element | (() => Element) | undefined,
     retryConfig?: boolean | RetryConfig,
     step?: CoachMarkStep
-  ) => Promise<Element | null>
-  isRetrying: Ref<boolean>
-  currentAttempt: Ref<number>
-  cancelRetry: () => void
-}
+  ) => Promise<Element | null>;
+  readonly isRetrying: Ref<boolean>;
+  readonly currentAttempt: Ref<number>;
+  readonly cancelRetry: () => void;
+};

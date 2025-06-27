@@ -367,11 +367,11 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       startStep(stepIndex, options)
     },
     setConfig: configure,
-    setSteps: (steps: CoachMarkStep[]) => {
+    setSteps: (steps: readonly CoachMarkStep[]) => {
       resetState()
       configure({
         ...getConfig(),
-        steps
+        steps: [...steps] // Convert readonly to mutable array
       })
     },
     getConfig,

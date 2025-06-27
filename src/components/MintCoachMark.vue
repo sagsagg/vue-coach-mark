@@ -202,8 +202,8 @@ const createCoachMarkInterface = (): CoachMarkInstance => {
     refresh: (): void => {}, // Will be implemented by highlight composable
     start,
     setConfig,
-    setSteps: (steps: CoachMarkStep[]): void => {
-      setConfig({ ...getConfig(), steps })
+    setSteps: (steps: readonly CoachMarkStep[]): void => {
+      setConfig({ ...getConfig(), steps: [...steps] })
     },
     getConfig,
     getState,
