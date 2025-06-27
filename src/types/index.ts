@@ -254,6 +254,30 @@ export type NavigationOptions = {
   autoScroll?: boolean
 }
 
+// Step lifecycle event context
+export type StepLifecycleEventContext = {
+  step: CoachMarkStep
+  nextStep: CoachMarkStep | undefined
+  previousStep: CoachMarkStep | undefined
+  stepIndex: number
+  isHighlighted: boolean
+  isLastStep: boolean
+  isFirstStep: boolean
+  coachMark: CoachMarkInstance
+}
+
+// Step interaction event context (extends lifecycle context with navigation flags)
+export type StepInteractionEventContext = {
+  step: CoachMarkStep
+  nextStep: CoachMarkStep | undefined
+  previousStep: CoachMarkStep | undefined
+  coachMark: CoachMarkInstance
+  stepIndex: number
+  hasNextStep: boolean
+  hasPreviousStep: boolean
+  isHighlighted: boolean
+}
+
 // CoachMark instance type (provides intuitive API for coach mark interactions)
 export type CoachMarkInstance = {
   isActive: () => boolean
@@ -302,6 +326,20 @@ export type MintCoachMarkEmits = {
   'highlight-started': [element: Element | undefined, step: CoachMarkStep]
   'highlighted': [element: Element | undefined, step: CoachMarkStep]
   'deselected': [element: Element | undefined, step: CoachMarkStep]
+
+  // Step lifecycle events with comprehensive context
+  'step-highlight-started': [context: StepLifecycleEventContext]
+  'step-highlighted': [context: StepLifecycleEventContext]
+  'step-deselected': [context: StepLifecycleEventContext]
+  'step-async-deselected': [context: StepLifecycleEventContext]
+
+  // Step interaction events with navigation context
+  'step-async-next-clicked': [context: StepInteractionEventContext]
+  'step-async-previous-clicked': [context: StepInteractionEventContext]
+  'step-changed': [context: StepInteractionEventContext]
+  'step-closed': [context: StepInteractionEventContext]
+  'step-next-clicked': [context: StepInteractionEventContext]
+  'step-previous-clicked': [context: StepInteractionEventContext]
 }
 
 // =============================================================================

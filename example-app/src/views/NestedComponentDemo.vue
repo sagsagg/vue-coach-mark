@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { type CoachMarkStep, type CoachMarkConfig } from 'mint-coach-mark'
+import { type CoachMarkStep, type CoachMarkConfig, type StepLifecycleEventContext, type StepInteractionEventContext } from 'mint-coach-mark'
 import { QuasarCoachMark } from 'mint-coach-mark'
 import ParentComponent from '../components/nested-demo/ParentComponent.vue'
 
@@ -178,21 +178,25 @@ const coachMarkConfig = computed((): CoachMarkConfig => ({
 
 // Event handlers for coach mark component
 const handleTourStart = (): void => {
+  console.log('handleTourStart')
   addLog('🎯 Tour started successfully')
 }
 
 const handleTourComplete = (): void => {
   addLog('✅ Tour completed successfully')
+  console.log('handleTourComplete')
   isTourActive.value = false
 }
 
 const handleTourSkipped = (step: CoachMarkStep, index: number): void => {
   addLog(`⏭️ Tour skipped at step ${index + 1}: ${step.element}`)
+  console.log('handleTourSkipped')
   isTourActive.value = false
 }
 
 const handleStepChange = (step: CoachMarkStep, index: number): void => {
   addLog(`📍 Step ${index + 1}: Moving to ${step.element}`)
+  console.log('handleStepChange')
 }
 
 const handleHighlightStarted = (element: Element | undefined, step: CoachMarkStep): void => {
@@ -200,6 +204,7 @@ const handleHighlightStarted = (element: Element | undefined, step: CoachMarkSte
   if (element) {
     addLog(`📍 Element position: ${element.getBoundingClientRect().top}px from top`)
   }
+  console.log('handleHighlightStarted')
 }
 
 const handleHighlighted = (element: Element | undefined, step: CoachMarkStep): void => {
@@ -209,10 +214,53 @@ const handleHighlighted = (element: Element | undefined, step: CoachMarkStep): v
     const isInView = rect.top >= 0 && rect.bottom <= window.innerHeight
     addLog(`👁️ Element visibility: ${isInView ? 'In viewport' : 'Outside viewport'} (${rect.top}px from top)`)
   }
+  console.log('handleHighlighted')
 }
 
 const handleDeselected = (element: Element | undefined, step: CoachMarkStep): void => {
   addLog(`👋 Element deselected: ${step.element}`)
+  console.log('handleDeselected')
+}
+
+// New step interaction event handlers
+const handleStepAsyncNextClicked = (context: StepInteractionEventContext): void => {
+  addLog(`🚀 [Interaction Event] Step ${context.stepIndex + 1} async next clicked: ${context.step.element}`)
+  addLog(`📊 [Interaction Event] Navigation: hasNext=${context.hasNextStep}, hasPrevious=${context.hasPreviousStep}`)
+  console.log('handleStepAsyncNextClicked')
+}
+
+const handleStepAsyncPreviousClicked = (context: StepInteractionEventContext): void => {
+  addLog(`⬅️ [Interaction Event] Step ${context.stepIndex + 1} async previous clicked: ${context.step.element}`)
+  addLog(`📊 [Interaction Event] Navigation: hasNext=${context.hasNextStep}, hasPrevious=${context.hasPreviousStep}`)
+  console.log('handleStepAsyncPreviousClicked')
+}
+
+const handleStepChanged = (context: StepInteractionEventContext): void => {
+  addLog(`🔄 [Interaction Event] Step changed to ${context.stepIndex + 1}: ${context.step.element}`)
+  addLog(`🎮 [Interaction Event] CoachMark instance available: ${typeof context.coachMark}`)
+  console.log('handleStepChanged')
+}
+
+const handleStepClosed = (context: StepInteractionEventContext): void => {
+  addLog(`❌ [Interaction Event] Step ${context.stepIndex + 1} closed: ${context.step.element}`)
+  addLog(`📊 [Interaction Event] Final step context: hasNext=${context.hasNextStep}, hasPrevious=${context.hasPreviousStep}`)
+  console.log('handleStepClosed')
+}
+
+const handleStepNextClicked = (context: StepInteractionEventContext): void => {
+  addLog(`➡️ [Interaction Event] Step ${context.stepIndex + 1} next clicked: ${context.step.element}`)
+  if (context.nextStep) {
+    addLog(`🎯 [Interaction Event] Moving to: ${context.nextStep.element}`)
+  }
+  console.log('handleStepNextClicked')
+}
+
+const handleStepPreviousClicked = (context: StepInteractionEventContext): void => {
+  addLog(`⬅️ [Interaction Event] Step ${context.stepIndex + 1} previous clicked: ${context.step.element}`)
+  if (context.previousStep) {
+    addLog(`🎯 [Interaction Event] Moving to: ${context.previousStep.element}`)
+  }
+  console.log('handleStepPreviousClicked')
 }
 
 onMounted(() => {
@@ -234,6 +282,12 @@ onMounted(() => {
       @highlight-started="handleHighlightStarted"
       @highlighted="handleHighlighted"
       @deselected="handleDeselected"
+      @step-async-next-clicked="handleStepAsyncNextClicked"
+      @step-async-previous-clicked="handleStepAsyncPreviousClicked"
+      @step-changed="handleStepChanged"
+      @step-closed="handleStepClosed"
+      @step-next-clicked="handleStepNextClicked"
+      @step-previous-clicked="handleStepPreviousClicked"
     />
 
     <!-- Header -->

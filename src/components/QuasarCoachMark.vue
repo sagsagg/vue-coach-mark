@@ -122,7 +122,9 @@ import type {
   MintCoachMarkProps,
   MintCoachMarkEmits,
   CoachMarkInstance,
-  NavigationOptions
+  NavigationOptions,
+  StepLifecycleEventContext,
+  StepInteractionEventContext
 } from '../types'
 import type { QTooltipProps } from 'quasar'
 
@@ -157,8 +159,89 @@ const {
   skipTour
 } = useCoachMark(props.config);
 
-// Set initial steps
+// Set initial steps (without enhancement to avoid DOM duplication)
 setSteps(props.steps)
+
+// Enhanced configuration with global lifecycle hooks that emit Vue events
+const enhancedConfig = computed(() => ({
+  ...props.config,
+  onHighlightStarted: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    // Call original global config hook if defined
+    if (props.config.onHighlightStarted) {
+      props.config.onHighlightStarted(element, step, context)
+    }
+
+    // Call step-level hook if defined
+    if (step.onHighlightStarted) {
+      step.onHighlightStarted(element, step, context)
+    }
+
+    // Emit Vue event with comprehensive context
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepLifecycleContext(step, stepIndex)
+      emit('step-highlight-started', eventContext)
+    }
+
+    // Emit legacy event for backward compatibility
+    emit('highlight-started', element, step)
+  },
+  onHighlighted: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    // Call original global config hook if defined
+    if (props.config.onHighlighted) {
+      props.config.onHighlighted(element, step, context)
+    }
+
+    // Call step-level hook if defined
+    if (step.onHighlighted) {
+      step.onHighlighted(element, step, context)
+    }
+
+    // Emit Vue event with comprehensive context
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepLifecycleContext(step, stepIndex)
+      emit('step-highlighted', eventContext)
+    }
+
+    // Emit legacy event for backward compatibility
+    emit('highlighted', element, step)
+  },
+  onDeselected: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    // Call original global config hook if defined
+    if (props.config.onDeselected) {
+      props.config.onDeselected(element, step, context)
+    }
+
+    // Call step-level hook if defined
+    if (step.onDeselected) {
+      step.onDeselected(element, step, context)
+    }
+
+    // Emit Vue event with comprehensive context
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepLifecycleContext(step, stepIndex)
+      emit('step-deselected', eventContext)
+    }
+
+    // Emit legacy event for backward compatibility
+    emit('deselected', element, step)
+  }
+}))
+
+// Apply enhanced configuration once
+setConfig(enhancedConfig.value)
+
+// Watch for config changes and update enhanced config
+watch(() => props.config, () => {
+  setConfig(enhancedConfig.value)
+}, { deep: true })
+
+// Watch for steps prop changes (only when parent component changes the steps array)
+watch(() => props.steps, (newSteps) => {
+  setSteps(newSteps)
+})
 
 // Computed config
 const mergedConfig = computed(() => getConfig());
@@ -176,6 +259,49 @@ const {
   handleAsyncNavigation,
   handleStepDeselection
 } = useAsyncTour()
+
+// Handle async deselected events by wrapping the handleStepDeselection function
+const wrappedHandleStepDeselection = async (
+  element: Element | undefined,
+  step: CoachMarkStep,
+  coachMark: CoachMarkInstance
+): Promise<void> => {
+  // Call original async deselection handling
+  await handleStepDeselection(element, step, coachMark)
+
+  // Emit Vue event for async deselection if the step has onAsyncDeselected
+  if (step.onAsyncDeselected) {
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepLifecycleContext(step, stepIndex)
+      emit('step-async-deselected', eventContext)
+    }
+  }
+}
+
+// Wrapper for async navigation to emit interaction events
+const wrappedHandleAsyncNavigation = async (
+  direction: 'next' | 'previous' | 'close' | 'skip',
+  element: Element,
+  step: CoachMarkStep,
+  coachMark: CoachMarkInstance,
+  callback: () => void
+): Promise<void> => {
+  // Emit interaction events before async operation
+  const stepIndex = findStepIndex(step)
+  if (stepIndex !== -1) {
+    const eventContext = createStepInteractionContext(step, stepIndex)
+
+    if (direction === 'next' && step.popover?.onAsyncNextClick) {
+      emit('step-async-next-clicked', eventContext)
+    } else if (direction === 'previous' && step.popover?.onAsyncPreviousClick) {
+      emit('step-async-previous-clicked', eventContext)
+    }
+  }
+
+  // Call original async navigation handling
+  await handleAsyncNavigation(direction, element, step, coachMark, callback)
+}
 
 // Initialize scroll blocking functionality
 const { blockScrolling, unblockScrolling } = useScrollBlocking();
@@ -451,6 +577,72 @@ const createCoachMarkInterface = (): CoachMarkInstance => {
   }
 }
 
+
+
+/**
+ * Find step index with robust fallback mechanisms
+ */
+const findStepIndex = (step: CoachMarkStep): number => {
+  // First try direct object reference comparison
+  let stepIndex = props.steps.findIndex(s => s === step)
+
+  // If direct comparison fails, try element selector comparison
+  if (stepIndex === -1 && step.element) {
+    stepIndex = props.steps.findIndex(s => s.element === step.element)
+  }
+
+  // If still not found, try using current step index as fallback
+  if (stepIndex === -1 && currentStepIndex.value !== undefined) {
+    const currentStepData = props.steps[currentStepIndex.value]
+    if (currentStepData && currentStepData.element === step.element) {
+      stepIndex = currentStepIndex.value
+    }
+  }
+  return stepIndex
+}
+
+/**
+ * Create step lifecycle event context
+ */
+const createStepLifecycleContext = (step: CoachMarkStep, stepIndex?: number): StepLifecycleEventContext => {
+  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step)
+  const steps = props.steps
+  const nextStep = steps[resolvedStepIndex + 1]
+  const previousStep = steps[resolvedStepIndex - 1]
+
+  return {
+    step,
+    nextStep,
+    previousStep,
+    stepIndex: resolvedStepIndex,
+    isHighlighted: currentStepIndex.value === resolvedStepIndex,
+    isLastStep: resolvedStepIndex === steps.length - 1,
+    isFirstStep: resolvedStepIndex === 0,
+    coachMark: createCoachMarkInterface()
+  }
+}
+
+/**
+ * Create step interaction event context
+ */
+const createStepInteractionContext = (step: CoachMarkStep, stepIndex?: number): StepInteractionEventContext => {
+  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step)
+  const steps = props.steps
+  const nextStep = steps[resolvedStepIndex + 1]
+  const previousStep = steps[resolvedStepIndex - 1]
+
+  return {
+    step,
+    nextStep,
+    previousStep,
+    coachMark: createCoachMarkInterface(),
+    stepIndex: resolvedStepIndex,
+    hasNextStep: resolvedStepIndex < steps.length - 1,
+    hasPreviousStep: resolvedStepIndex > 0,
+    isHighlighted: currentStepIndex.value === resolvedStepIndex
+  }
+}
+
 /**
  * Start the tour
  */
@@ -472,6 +664,14 @@ const startTour = (stepIndex?: number): void => {
  * Stop the tour
  */
 const stopTour = (): void => {
+  // Emit step-closed event if there's a current step
+  const currentStepData = currentStep.value
+  const currentIndex = currentStepIndex.value
+  if (currentStepData && currentIndex !== undefined) {
+    const eventContext = createStepInteractionContext(currentStepData, currentIndex)
+    emit('step-closed', eventContext)
+  }
+
   tooltipVisible.value = false
   hidePopoverCommunication()
   destroy()
@@ -505,7 +705,7 @@ const moveNext = async (options?: NavigationOptions): Promise<void> => {
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
+        await wrappedHandleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -516,6 +716,10 @@ const moveNext = async (options?: NavigationOptions): Promise<void> => {
 
       start(nextIndex, options)
       emit('step-change', props.steps[nextIndex], nextIndex)
+
+      // Emit step-changed event with interaction context
+      const eventContext = createStepInteractionContext(props.steps[nextIndex], nextIndex)
+      emit('step-changed', eventContext)
 
       // 6. Wait for all step processing to complete
       await ensureStepProcessingComplete()
@@ -564,7 +768,7 @@ const movePrevious = async (options?: NavigationOptions): Promise<void> => {
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
+        await wrappedHandleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -575,6 +779,10 @@ const movePrevious = async (options?: NavigationOptions): Promise<void> => {
 
       start(prevIndex, options)
       emit('step-change', props.steps[prevIndex], prevIndex)
+
+      // Emit step-changed event with interaction context
+      const eventContext = createStepInteractionContext(props.steps[prevIndex], prevIndex)
+      emit('step-changed', eventContext)
 
       // 6. Wait for all step processing to complete
       await ensureStepProcessingComplete()
@@ -619,7 +827,7 @@ const moveTo = async (stepIndex: number, options?: NavigationOptions): Promise<v
       const currentElement = popoverState.value.targetElement
       const currentStepData = currentStep.value
       if (currentElement && currentStepData) {
-        await handleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
+        await wrappedHandleStepDeselection(currentElement, currentStepData, createCoachMarkInterface())
       }
 
       // 4. Ensure QTooltip is completely hidden before step transition
@@ -628,6 +836,10 @@ const moveTo = async (stepIndex: number, options?: NavigationOptions): Promise<v
       // 5. Perform step change
       start(stepIndex, options)
       emit('step-change', props.steps[stepIndex], stepIndex)
+
+      // Emit step-changed event with interaction context
+      const eventContext = createStepInteractionContext(props.steps[stepIndex], stepIndex)
+      emit('step-changed', eventContext)
 
       // 6. Wait for all step processing to complete
       await ensureStepProcessingComplete()
@@ -657,8 +869,17 @@ const handleNext = async (): Promise<void> => {
   // Use popoverState.step as primary source since it's more reliable than currentStep computed
   const step = popoverState.value.step || currentStep.value
 
+  // Emit step-next-clicked event
+  if (step) {
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepInteractionContext(step, stepIndex)
+      emit('step-next-clicked', eventContext)
+    }
+  }
+
   if (element && step) {
-    await handleAsyncNavigation(
+    await wrappedHandleAsyncNavigation(
       'next',
       element,
       step,
@@ -675,8 +896,17 @@ const handlePrevious = async (): Promise<void> => {
   // Use popoverState.step as primary source since it's more reliable than currentStep computed
   const step = popoverState.value.step || currentStep.value
 
+  // Emit step-previous-clicked event
+  if (step) {
+    const stepIndex = findStepIndex(step)
+    if (stepIndex !== -1) {
+      const eventContext = createStepInteractionContext(step, stepIndex)
+      emit('step-previous-clicked', eventContext)
+    }
+  }
+
   if (element && step) {
-    await handleAsyncNavigation(
+    await wrappedHandleAsyncNavigation(
       'previous',
       element,
       step,
