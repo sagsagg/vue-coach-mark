@@ -21,9 +21,9 @@
  * ```
  */
 
-import { ref, type Ref } from 'vue'
-import type { UseScrollBlockingReturn } from '../types'
-import { getCurrentScrollPosition } from './utils'
+import { ref, type Ref } from 'vue';
+import type { UseScrollBlockingReturn } from '../types';
+import { getCurrentScrollPosition } from './utils';
 
 /**
  * Scroll blocking state interface
@@ -61,10 +61,10 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
     originalTop: '',
     originalLeft: '',
     scrollPosition: { x: 0, y: 0 }
-  }
+  };
 
   // Reactive state for external consumption
-  const isBlocked: Ref<boolean> = ref(false)
+  const isBlocked: Ref<boolean> = ref(false);
 
   /**
    * Block browser scrolling during step transitions
@@ -77,30 +77,30 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
    */
   const blockScrolling = (): void => {
     if (scrollBlockingState.isBlocked) {
-      return // Already blocked
+      return; // Already blocked
     }
 
     // Store current scroll position
-    scrollBlockingState.scrollPosition = getCurrentScrollPosition()
+    scrollBlockingState.scrollPosition = getCurrentScrollPosition();
 
     // Store original body styles
-    const body = document.body
-    scrollBlockingState.originalOverflow = body.style.overflow
-    scrollBlockingState.originalPosition = body.style.position
-    scrollBlockingState.originalTop = body.style.top
-    scrollBlockingState.originalLeft = body.style.left
+    const body = document.body;
+    scrollBlockingState.originalOverflow = body.style.overflow;
+    scrollBlockingState.originalPosition = body.style.position;
+    scrollBlockingState.originalTop = body.style.top;
+    scrollBlockingState.originalLeft = body.style.left;
 
     // Apply scroll blocking styles
-    body.style.overflow = 'hidden'
-    body.style.position = 'fixed'
-    body.style.top = `-${scrollBlockingState.scrollPosition.y}px`
-    body.style.left = `-${scrollBlockingState.scrollPosition.x}px`
-    body.style.width = '100%'
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollBlockingState.scrollPosition.y}px`;
+    body.style.left = `-${scrollBlockingState.scrollPosition.x}px`;
+    body.style.width = '100%';
 
     // Update state
-    scrollBlockingState.isBlocked = true
-    isBlocked.value = true
-  }
+    scrollBlockingState.isBlocked = true;
+    isBlocked.value = true;
+  };
 
   /**
    * Unblock browser scrolling after step transitions complete
@@ -112,24 +112,24 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
    */
   const unblockScrolling = (): void => {
     if (!scrollBlockingState.isBlocked) {
-      return // Not blocked
+      return; // Not blocked
     }
 
     // Restore original body styles
-    const body = document.body
-    body.style.overflow = scrollBlockingState.originalOverflow
-    body.style.position = scrollBlockingState.originalPosition
-    body.style.top = scrollBlockingState.originalTop
-    body.style.left = scrollBlockingState.originalLeft
-    body.style.width = ''
+    const body = document.body;
+    body.style.overflow = scrollBlockingState.originalOverflow;
+    body.style.position = scrollBlockingState.originalPosition;
+    body.style.top = scrollBlockingState.originalTop;
+    body.style.left = scrollBlockingState.originalLeft;
+    body.style.width = '';
 
     // Restore scroll position
-    window.scrollTo(scrollBlockingState.scrollPosition.x, scrollBlockingState.scrollPosition.y)
+    window.scrollTo(scrollBlockingState.scrollPosition.x, scrollBlockingState.scrollPosition.y);
 
     // Update state
-    scrollBlockingState.isBlocked = false
-    isBlocked.value = false
-  }
+    scrollBlockingState.isBlocked = false;
+    isBlocked.value = false;
+  };
 
   /**
    * Get current scroll position
@@ -137,8 +137,8 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
    * @returns Current scroll position coordinates
    */
   const getScrollPosition = (): { x: number; y: number } => {
-    return { ...scrollBlockingState.scrollPosition }
-  }
+    return { ...scrollBlockingState.scrollPosition };
+  };
 
   /**
    * Force unblock scrolling (emergency cleanup)
@@ -150,24 +150,24 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
 
 
     // Reset body styles to defaults
-    const body = document.body
-    body.style.overflow = ''
-    body.style.position = ''
-    body.style.top = ''
-    body.style.left = ''
-    body.style.width = ''
+    const body = document.body;
+    body.style.overflow = '';
+    body.style.position = '';
+    body.style.top = '';
+    body.style.left = '';
+    body.style.width = '';
 
     // Reset internal state
-    scrollBlockingState.isBlocked = false
-    scrollBlockingState.originalOverflow = ''
-    scrollBlockingState.originalPosition = ''
-    scrollBlockingState.originalTop = ''
-    scrollBlockingState.originalLeft = ''
-    scrollBlockingState.scrollPosition = { x: 0, y: 0 }
+    scrollBlockingState.isBlocked = false;
+    scrollBlockingState.originalOverflow = '';
+    scrollBlockingState.originalPosition = '';
+    scrollBlockingState.originalTop = '';
+    scrollBlockingState.originalLeft = '';
+    scrollBlockingState.scrollPosition = { x: 0, y: 0 };
 
     // Update reactive state
-    isBlocked.value = false
-  }
+    isBlocked.value = false;
+  };
 
   return {
     blockScrolling,
@@ -175,5 +175,5 @@ export const useScrollBlocking = (): UseScrollBlockingReturn => {
     isBlocked,
     getScrollPosition,
     forceUnblock
-  }
-}
+  };
+};

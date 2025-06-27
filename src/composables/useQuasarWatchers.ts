@@ -5,7 +5,7 @@
  * with proper separation of concerns and race condition prevention.
  */
 
-import { watch, nextTick } from 'vue'
+import { watch, nextTick } from 'vue';
 import type {
   CoachMarkStep,
   UseTooltipManagementReturn,
@@ -13,7 +13,7 @@ import type {
   UseQuasarWatchersReturn,
   PopoverState,
   CoachMarkState
-} from '../types'
+} from '../types';
 
 /**
  * Watcher management options
@@ -56,12 +56,12 @@ export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersRet
     isTransitioning,
     tooltipManagement,
     scrollBlocking
-  } = options
+  } = options;
   
   // Processing state management
-  let isProcessingRenderRequest = false
-  let isProcessingRepositionRequest = false
-  let renderRequestId = 0
+  let isProcessingRenderRequest = false;
+  let isProcessingRepositionRequest = false;
+  let renderRequestId = 0;
   
   /**
    * Initialize render watcher
@@ -70,88 +70,89 @@ export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersRet
     watch(() => getState('shouldRenderPopover'), async (renderData) => {
       // Prevent double-triggering when we clear the state or during repositioning
       if (!renderData || isProcessingRenderRequest || isProcessingRepositionRequest) {
-        return
+        return;
       }
       
       // Validate that we have proper data
       if (!renderData.element || !renderData.step) {
-        console.warn('Invalid render data received:', renderData)
-        return
+        console.warn('Invalid render data received:', renderData);
+        return;
       }
 
 
 
       // Check if we're already showing the same step
-      const currentPopoverStep = popoverState.value.step
+      const currentPopoverStep = popoverState.value.step;
+      const step = renderData.step as CoachMarkStep;
       if (tooltipManagement.tooltipVisible.value && currentPopoverStep &&
-          currentPopoverStep.element === renderData.step.element &&
-          currentPopoverStep.popover?.title === renderData.step.popover?.title) {
+          currentPopoverStep.element === step.element &&
+          currentPopoverStep.popover?.title === step.popover?.title) {
 
-        setState('shouldRenderPopover', undefined)
-        return
+        setState('shouldRenderPopover', undefined);
+        return;
       }
 
       // Immediately clear any existing popover state to prevent content flashing
       if (currentPopoverStep && currentPopoverStep !== renderData.step) {
 
-        showPopoverCommunication(renderData.element, renderData.step)
+        showPopoverCommunication(renderData.element, renderData.step);
       }
 
       try {
         // Mark as processing to prevent race conditions
-        isProcessingRenderRequest = true
-        const currentRequestId = ++renderRequestId
+        isProcessingRenderRequest = true;
+        const currentRequestId = ++renderRequestId;
         
         // Clear the state immediately to prevent re-triggering
-        setState('shouldRenderPopover', undefined)
+        setState('shouldRenderPopover', undefined);
         
         // Check if this request is still the latest
         if (currentRequestId !== renderRequestId) {
 
-          return
+          return;
         }
 
         // 1. Ensure tooltip is completely hidden first
-        await ensureTooltipHidden()
+        await ensureTooltipHidden();
         
         // Check if this request is still the latest after async operation
         if (currentRequestId !== renderRequestId) {
 
-          return
+          return;
         }
 
         // 2. Update popover communication state
-        showPopoverCommunication(renderData.element, renderData.step)
+        showPopoverCommunication(renderData.element, renderData.step);
 
         // 3. Wait for positioning calculations to complete
-        await ensureStepProcessingComplete()
+        await ensureStepProcessingComplete();
         
         // Check if this request is still the latest after processing
         if (currentRequestId !== renderRequestId) {
 
-          return
+          return;
         }
 
         // 4. Show tooltip if conditions are met
-        await tooltipManagement.showTooltipIfReady('render-watcher')
+        await tooltipManagement.showTooltipIfReady('render-watcher');
 
         // 5. Unblock scrolling after initial step is positioned (for tour start)
         if (scrollBlocking.isBlocked.value && !isTransitioning.value) {
-          scrollBlocking.unblockScrolling()
+          scrollBlocking.unblockScrolling();
         }
 
       } catch (error) {
-        console.error('Error during popover rendering:', error)
+        console.error('Error during popover rendering:', error);
         // Ensure scrolling is unblocked on error
         if (scrollBlocking.isBlocked.value && !isTransitioning.value) {
-          scrollBlocking.unblockScrolling()
+          scrollBlocking.unblockScrolling();
         }
       } finally {
         // Always clear the processing flag
-        isProcessingRenderRequest = false
+        isProcessingRenderRequest = false;
       }
-    })
-  }
+    });
+  };
   
   /**
    * Initialize reposition watcher
@@ -160,62 +161,60 @@ export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersRet
     watch(() => getState('shouldRepositionPopover'), async (repositionData) => {
       // Prevent double-triggering when we clear the state
       if (!repositionData || isProcessingRepositionRequest) {
-        return
+        return;
       }
       
       // Validate that we have proper data
       if (!repositionData.element || !repositionData.step) {
-        console.warn('Invalid reposition data received:', repositionData)
-        return
+        console.warn('Invalid reposition data received:', repositionData);
+        return;
       }
 
 
 
       try {
         // Mark as processing to prevent race conditions
-        isProcessingRepositionRequest = true
+        isProcessingRepositionRequest = true;
         
         // Clear the state immediately to prevent re-triggering
-        setState('shouldRepositionPopover', undefined)
+        setState('shouldRepositionPopover', undefined);
 
         // Only handle repositioning if tooltip is already visible
         if (tooltipManagement.tooltipVisible.value) {
 
           
           // Use QTooltip's built-in repositioning by briefly toggling visibility
-          tooltipManagement.hideTooltip()
-          await nextTick()
-          tooltipManagement.tooltipVisible.value = true
-        } else {
-
+          tooltipManagement.hideTooltip();
+          await nextTick();
+          tooltipManagement.tooltipVisible.value = true;
         }
 
       } catch (error) {
-        console.error('Error during popover repositioning:', error)
+        console.error('Error during popover repositioning:', error);
       } finally {
         // Always clear the processing flag
-        isProcessingRepositionRequest = false
+        isProcessingRepositionRequest = false;
       }
-    })
-  }
+    });
+  };
   
   /**
    * Initialize all watchers
    */
   const initWatchers = (): void => {
-    initRenderWatcher()
-    initRepositionWatcher()
-  }
+    initRenderWatcher();
+    initRepositionWatcher();
+  };
   
   /**
    * Check if watchers are processing
    */
   const isProcessing = (): boolean => {
-    return isProcessingRenderRequest || isProcessingRepositionRequest
-  }
+    return isProcessingRenderRequest || isProcessingRepositionRequest;
+  };
   
   return {
     initWatchers,
     isProcessing
-  }
-}
+  };
+};

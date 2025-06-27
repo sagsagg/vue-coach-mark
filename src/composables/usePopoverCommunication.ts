@@ -10,14 +10,14 @@ import {
   nextTick,
   type Ref,
   type ComputedRef
-} from 'vue'
+} from 'vue';
 import type {
   PopoverCommunication,
   PopoverProvider,
   CoachMarkStep,
   UsePopoverCommunicationReturn
-} from '../types'
-import { isValidElement, isValidStep, calculateElementCenter } from './utils'
+} from '../types';
+import { isValidElement, isValidStep, calculateElementCenter } from './utils';
 
 // Global popover state for communication between components
 const globalPopoverState: Ref<PopoverCommunication> = ref<PopoverCommunication>({
@@ -27,32 +27,32 @@ const globalPopoverState: Ref<PopoverCommunication> = ref<PopoverCommunication>(
   position: null,
   provider: 'mint',
   isPositioning: false
-})
+});
 
 // Track active popover instances to prevent conflicts
-const activeInstances: Set<string> = new Set()
+const activeInstances: Set<string> = new Set();
 
 /**
  * Composable for managing popover communication in a decoupled architecture
  */
 export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunicationReturn => {
-  const currentInstanceId: string = instanceId || `popover-${Date.now()}-${Math.random()}`
+  const currentInstanceId: string = instanceId || `popover-${Date.now()}-${Math.random()}`;
   
   // Register this instance
-  activeInstances.add(currentInstanceId)
+  activeInstances.add(currentInstanceId);
 
   // Local state for this instance
-  const localVisible: Ref<boolean> = ref(false)
-  const localTargetElement: Ref<Element | null> = ref(null)
-  const localStep: Ref<CoachMarkStep | null> = ref(null)
+  const localVisible: Ref<boolean> = ref(false);
+  const localTargetElement: Ref<Element | null> = ref(null);
+  const localStep: Ref<CoachMarkStep | null> = ref(null);
 
   // Computed properties for reactive state
-  const popoverState: ComputedRef<PopoverCommunication> = computed(() => globalPopoverState.value)
+  const popoverState: ComputedRef<PopoverCommunication> = computed(() => globalPopoverState.value);
 
   const isActiveInstance: ComputedRef<boolean> = computed(() => {
     return globalPopoverState.value.visible && 
-           globalPopoverState.value.targetElement === localTargetElement.value
-  })
+           globalPopoverState.value.targetElement === localTargetElement.value;
+  });
 
 
 
@@ -65,34 +65,34 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     // 2. When setting visibility to false (cleanup)
     // 3. When activating a new popover (visible: true with targetElement)
     const isActivatingNewPopover = updates.visible === true && updates.targetElement &&
-                                   updates.targetElement === localTargetElement.value
+                                   updates.targetElement === localTargetElement.value;
 
     if (!isActiveInstance.value && updates.visible !== false && !isActivatingNewPopover) {
-      return
+      return;
     }
 
     globalPopoverState.value = {
       ...globalPopoverState.value,
       ...updates
-    }
-  }
+    };
+  };
 
   /**
    * Show popover with element and step
    */
   const showPopover = (element: Element, step: CoachMarkStep, isPositioning: boolean = false): void => {
     if (!isValidElement(element) || !isValidStep(step)) {
-      console.warn('Invalid element or step provided to showPopover')
-      return
+      console.warn('Invalid element or step provided to showPopover');
+      return;
     }
 
     // Update local state
-    localVisible.value = true
-    localTargetElement.value = element
-    localStep.value = step
+    localVisible.value = true;
+    localTargetElement.value = element;
+    localStep.value = step;
 
     // Calculate position
-    const position = calculateElementCenter(element)
+    const position = calculateElementCenter(element);
 
     // Update global state
     updatePopoverState({
@@ -101,17 +101,17 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
       step,
       position,
       isPositioning
-    })
-  }
+    });
+  };
 
   /**
    * Hide popover
    */
   const hidePopover = (): void => {
     // Update local state
-    localVisible.value = false
-    localTargetElement.value = null
-    localStep.value = null
+    localVisible.value = false;
+    localTargetElement.value = null;
+    localStep.value = null;
 
     // Update global state
     updatePopoverState({
@@ -120,8 +120,8 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
       step: null,
       position: null,
       isPositioning: false
-    })
-  }
+    });
+  };
 
   /**
    * Complete positioning (mark positioning as finished)
@@ -130,27 +130,27 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     if (globalPopoverState.value.visible) {
       updatePopoverState({
         isPositioning: false
-      })
+      });
     }
-  }
+  };
 
   /**
    * Reposition popover based on current target element
    */
   const repositionPopover = (): void => {
-    const currentElement = globalPopoverState.value.targetElement
+    const currentElement = globalPopoverState.value.targetElement;
     if (!currentElement || !isValidElement(currentElement)) {
-      return
+      return;
     }
 
     nextTick(() => {
-      const position = calculateElementCenter(currentElement)
+      const position = calculateElementCenter(currentElement);
 
       updatePopoverState({
         position
-      })
-    })
-  }
+      });
+    });
+  };
 
   /**
    * Set the popover provider
@@ -158,20 +158,20 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
   const setProvider = (provider: PopoverProvider): void => {
     updatePopoverState({
       provider
-    })
-  }
+    });
+  };
 
   // Watch for window resize and scroll to reposition popover
   const handleReposition = (): void => {
     if (globalPopoverState.value.visible) {
-      repositionPopover()
+      repositionPopover();
     }
-  }
+  };
 
   // Set up event listeners for repositioning
   if (typeof window !== 'undefined') {
-    window.addEventListener('resize', handleReposition)
-    window.addEventListener('scroll', handleReposition, true)
+    window.addEventListener('resize', handleReposition);
+    window.addEventListener('scroll', handleReposition, true);
   }
 
   // Watch for global state changes to update local state
@@ -180,42 +180,42 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     (newState: PopoverCommunication) => {
       // Update local state if this instance is not the active one
       if (newState.targetElement !== localTargetElement.value) {
-        localVisible.value = false
-        localTargetElement.value = null
-        localStep.value = null
+        localVisible.value = false;
+        localTargetElement.value = null;
+        localStep.value = null;
       }
     },
     { deep: true }
-  )
+  );
 
   // Cleanup function
   const cleanup = (): void => {
-    activeInstances.delete(currentInstanceId)
+    activeInstances.delete(currentInstanceId);
     
     if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', handleReposition)
-      window.removeEventListener('scroll', handleReposition, true)
+      window.removeEventListener('resize', handleReposition);
+      window.removeEventListener('scroll', handleReposition, true);
     }
 
     // Hide popover if this instance was active
     if (isActiveInstance.value) {
-      hidePopover()
+      hidePopover();
     }
-  }
+  };
 
   // Auto-cleanup when no longer needed
   const cleanupTimer = setTimeout(() => {
     if (!localVisible.value && !isActiveInstance.value) {
-      cleanup()
+      cleanup();
     }
-  }, 5000)
+  }, 5000);
 
   // Clear cleanup timer if instance becomes active
   watch(isActiveInstance, (isActive: boolean) => {
     if (isActive) {
-      clearTimeout(cleanupTimer)
+      clearTimeout(cleanupTimer);
     }
-  })
+  });
 
   /**
    * Force popover repositioning (useful for custom implementations)
@@ -229,13 +229,13 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
           step: globalPopoverState.value.step,
           position: globalPopoverState.value.position
         }
-      })
-      window.dispatchEvent(event)
+      });
+      window.dispatchEvent(event);
 
       // Also update the position to trigger reactivity
-      repositionPopover()
+      repositionPopover();
     }
-  }
+  };
 
   return {
     popoverState,
@@ -246,15 +246,15 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     forceRepositioning,
     completePositioning,
     setProvider
-  } as const
-}
+  } as const;
+};
 
 /**
  * Get the current global popover state (read-only)
  */
 export const getGlobalPopoverState = (): ComputedRef<PopoverCommunication> => {
-  return computed(() => globalPopoverState.value)
-}
+  return computed(() => globalPopoverState.value);
+};
 
 /**
  * Reset global popover state (for testing or cleanup)
@@ -267,6 +267,6 @@ export const resetGlobalPopoverState = (): void => {
     position: null,
     provider: 'mint',
     isPositioning: false
-  }
-  activeInstances.clear()
-}
+  };
+  activeInstances.clear();
+};

@@ -5,8 +5,8 @@
  * context awareness, and performance optimizations.
  */
 
-import { ref, type Ref } from 'vue'
-import type { UseTooltipManagementReturn, TooltipDisplayState } from '../types'
+import { ref, type Ref } from 'vue';
+import type { UseTooltipManagementReturn, TooltipDisplayState } from '../types';
 
 /**
  * Tooltip management composable
@@ -25,8 +25,8 @@ export const useTooltipManagement = (
 ): UseTooltipManagementReturn => {
   
   // Reactive state
-  const tooltipVisible: Ref<boolean> = ref(false)
-  const tooltipRefreshKey: Ref<number> = ref(0)
+  const tooltipVisible: Ref<boolean> = ref(false);
+  const tooltipRefreshKey: Ref<number> = ref(0);
   
   // Internal state management
   const displayState: TooltipDisplayState = {
@@ -39,49 +39,49 @@ export const useTooltipManagement = (
     executedCalls: 0,
     lastExecutionContext: '',
     isStepTransitioning: false
-  }
+  };
   
   // Throttling for refresh operations
-  let lastRefreshTime = 0
+  let lastRefreshTime = 0;
   
   /**
    * Promise-based delay utility
    */
   const delay = (ms: number): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
   
   /**
    * Force tooltip refresh with throttling
    */
   const forceTooltipRefresh = (): void => {
-    const now = Date.now()
-    const timeSinceLastRefresh = now - lastRefreshTime
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
     
     // Throttle refresh to prevent excessive updates
     if (timeSinceLastRefresh < 50) {
-      return
+      return;
     }
     
     // tooltipRefreshKey.value += 1
-    lastRefreshTime = now
-  }
+    lastRefreshTime = now;
+  };
   
   /**
    * Debounced tooltip display with context awareness
    */
   const debouncedShowTooltip = async (context: string = 'unknown'): Promise<void> => {
-    displayState.totalCalls++
-    const displayId = ++displayState.pendingDisplayId
-    const now = Date.now()
+    displayState.totalCalls++;
+    const displayId = ++displayState.pendingDisplayId;
+    const now = Date.now();
     
     // During step transitions, only allow calls from step transition functions
     if (displayState.isStepTransitioning) {
-      const isStepTransitionContext = context.includes('step-transition')
+      const isStepTransitionContext = context.includes('step-transition');
       if (!isStepTransitionContext) {
-        displayState.debouncedCalls++
+        displayState.debouncedCalls++;
 
-        return
+        return;
       }
     }
     
@@ -91,73 +91,73 @@ export const useTooltipManagement = (
       
       // Wait for current operation to complete
       while (displayState.isDisplaying) {
-        await delay(25)
+        await delay(25);
       }
       
       // Check if this request is still the latest
       if (displayId !== displayState.pendingDisplayId) {
-        displayState.debouncedCalls++
+        displayState.debouncedCalls++;
 
-        return
+        return;
       }
     }
     
     // Debounce rapid successive calls
-    const timeSinceLastDisplay = now - displayState.lastDisplayTime
+    const timeSinceLastDisplay = now - displayState.lastDisplayTime;
     if (timeSinceLastDisplay < displayState.debounceDelay) {
-      const remainingDelay = displayState.debounceDelay - timeSinceLastDisplay
+      const remainingDelay = displayState.debounceDelay - timeSinceLastDisplay;
 
-      await delay(remainingDelay)
+      await delay(remainingDelay);
       
       // Check if this request is still the latest after debounce
       if (displayId !== displayState.pendingDisplayId) {
-        displayState.debouncedCalls++
+        displayState.debouncedCalls++;
 
-        return
+        return;
       }
     }
     
     // Mark as displaying and execute
-    displayState.isDisplaying = true
-    displayState.lastDisplayTime = Date.now()
-    displayState.executedCalls++
-    displayState.lastExecutionContext = context
+    displayState.isDisplaying = true;
+    displayState.lastDisplayTime = Date.now();
+    displayState.executedCalls++;
+    displayState.lastExecutionContext = context;
     
     try {
 
-      await showTooltipInternal()
+      await showTooltipInternal();
     } finally {
-      displayState.isDisplaying = false
+      displayState.isDisplaying = false;
     }
-  }
+  };
   
   /**
    * Public interface for showing tooltip
    */
   const showTooltipIfReady = async (context: string = 'unknown'): Promise<void> => {
-    await debouncedShowTooltip(context)
-  }
+    await debouncedShowTooltip(context);
+  };
   
   /**
    * Hide tooltip immediately
    */
   const hideTooltip = (): void => {
-    tooltipVisible.value = false
-  }
+    tooltipVisible.value = false;
+  };
   
   /**
    * Set step transition state
    */
   const setStepTransitioning = (transitioning: boolean): void => {
-    displayState.isStepTransitioning = transitioning
-  }
+    displayState.isStepTransitioning = transitioning;
+  };
   
   /**
    * Get display statistics for debugging
    */
   const getDisplayStats = (): TooltipDisplayState => {
-    return { ...displayState }
-  }
+    return { ...displayState };
+  };
   
   return {
     tooltipVisible,
@@ -167,5 +167,5 @@ export const useTooltipManagement = (
     forceTooltipRefresh,
     setStepTransitioning,
     getDisplayStats
-  }
-}
+  };
+};

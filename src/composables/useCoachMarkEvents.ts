@@ -10,16 +10,16 @@ import {
   onUnmounted,
   type Ref,
   type ComputedRef
-} from 'vue'
-import { getFocusableElements } from '../utils'
-import { useCoachMarkState } from './useCoachMarkState'
-import { useCoachMarkConfig } from './useCoachMarkConfig'
+} from 'vue';
+import { getFocusableElements } from '../utils';
+import { useCoachMarkState } from './useCoachMarkState';
+import { useCoachMarkConfig } from './useCoachMarkConfig';
 import {
   isElement,
   isHTMLElement,
   isMouseEvent,
   isPointerEvent
-} from './utils'
+} from './utils';
 
 // Event types with strict typing
 type AllowedEvents =
@@ -30,15 +30,15 @@ type AllowedEvents =
   | 'closeClick'
   | 'arrowRightPress'
   | 'arrowLeftPress'
-  | 'refreshRequired'
+  | 'refreshRequired';
 
-type EventCallback = () => void
+type EventCallback = () => void;
 
-type EventListenerMap = Record<AllowedEvents, EventCallback | undefined>
+type EventListenerMap = Record<AllowedEvents, EventCallback | undefined>;
 
-type KeyboardEventHandler = (event: KeyboardEvent) => void
-type GenericEventHandler = (event: Event) => void
-type PointerEventHandler = (event: MouseEvent | PointerEvent) => void
+type KeyboardEventHandler = (event: KeyboardEvent) => void;
+type GenericEventHandler = (event: Event) => void;
+type PointerEventHandler = (event: MouseEvent | PointerEvent) => void;
 
 
 
@@ -57,17 +57,17 @@ interface UseCoachMarkEventsReturn {
 }
 
 export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
-  const { getState, setState } = useCoachMarkState()
-  const { getConfig } = useCoachMarkConfig()
+  const { getState, setState } = useCoachMarkState();
+  const { getConfig } = useCoachMarkConfig();
 
   // Event listeners registry using Vue's reactive system
-  const registeredListeners: Ref<Partial<EventListenerMap>> = ref({})
+  const registeredListeners: Ref<Partial<EventListenerMap>> = ref({});
 
   // Track if events are initialized using Vue's reactive system
-  const eventsInitialized: Ref<boolean> = ref(false)
+  const eventsInitialized: Ref<boolean> = ref(false);
 
   // Computed property for events initialization status
-  const isEventsInitialized: ComputedRef<boolean> = computed(() => eventsInitialized.value)
+  const isEventsInitialized: ComputedRef<boolean> = computed(() => eventsInitialized.value);
 
 
 
@@ -75,103 +75,103 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
    * Register an event listener using Vue's reactive system
    */
   const listen = (event: AllowedEvents, callback: EventCallback): void => {
-    registeredListeners.value[event] = callback
-  }
+    registeredListeners.value[event] = callback;
+  };
 
   /**
    * Emit an event using Vue's reactive system
    */
   const emit = (event: AllowedEvents): void => {
-    const callback = registeredListeners.value[event]
+    const callback = registeredListeners.value[event];
     if (callback) {
-      callback()
+      callback();
     }
-  }
+  };
 
   /**
    * Handle keyboard events using Vue's reactive system
    */
   const handleKeyup: KeyboardEventHandler = (e: KeyboardEvent): void => {
-    const allowKeyboardControl = getConfig('allowKeyboardControl') ?? true
+    const allowKeyboardControl = getConfig('allowKeyboardControl') ?? true;
 
     if (!allowKeyboardControl) {
-      return
+      return;
     }
 
     if (e.key === 'Escape') {
-      emit('escapePress')
+      emit('escapePress');
     } else if (e.key === 'ArrowRight') {
-      emit('arrowRightPress')
+      emit('arrowRightPress');
     } else if (e.key === 'ArrowLeft') {
-      emit('arrowLeftPress')
+      emit('arrowLeftPress');
     }
-  }
+  };
 
   /**
    * Handle focus trapping for accessibility using Vue's reactive system
    */
   const handleFocusTrapping: KeyboardEventHandler = (e: KeyboardEvent): void => {
-    const isActivated = getState('isInitialized')
+    const isActivated = getState('isInitialized');
     if (!isActivated) {
-      return
+      return;
     }
 
-    const isTabKey = e.key === 'Tab'
+    const isTabKey = e.key === 'Tab';
     if (!isTabKey) {
-      return
+      return;
     }
 
-    const activeElement = getState('currentActiveElement')
-    const popoverEl = getState('popover')?.wrapper
+    const activeElement = getState('currentActiveElement');
+    const popoverEl = getState('popover')?.wrapper;
 
     const elementsToSearch: Element[] = [
       ...(popoverEl ? [popoverEl] : []),
       ...(activeElement ? [activeElement] : [])
-    ]
+    ];
 
-    const focusableEls: HTMLElement[] = getFocusableElements(elementsToSearch)
+    const focusableEls: HTMLElement[] = getFocusableElements(elementsToSearch);
 
-    const firstFocusableEl: HTMLElement | undefined = focusableEls[0]
-    const lastFocusableEl: HTMLElement | undefined = focusableEls[focusableEls.length - 1]
+    const firstFocusableEl: HTMLElement | undefined = focusableEls[0];
+    const lastFocusableEl: HTMLElement | undefined = focusableEls[focusableEls.length - 1];
 
     if (!firstFocusableEl || !lastFocusableEl) {
-      return
+      return;
     }
 
-    e.preventDefault()
+    e.preventDefault();
 
-    const currentActiveElement = document.activeElement
+    const currentActiveElement = document.activeElement;
     if (!isHTMLElement(currentActiveElement)) {
-      firstFocusableEl.focus()
-      return
+      firstFocusableEl.focus();
+      return;
     }
 
     if (e.shiftKey) {
-      const currentIndex: number = focusableEls.indexOf(currentActiveElement)
-      const previousFocusableEl: HTMLElement = currentIndex > 0 ? focusableEls[currentIndex - 1] : lastFocusableEl
-      previousFocusableEl.focus()
+      const currentIndex: number = focusableEls.indexOf(currentActiveElement);
+      const previousFocusableEl: HTMLElement = currentIndex > 0 ? focusableEls[currentIndex - 1] : lastFocusableEl;
+      previousFocusableEl.focus();
     } else {
-      const currentIndex: number = focusableEls.indexOf(currentActiveElement)
-      const nextFocusableEl: HTMLElement = currentIndex < focusableEls.length - 1 ? focusableEls[currentIndex + 1] : firstFocusableEl
-      nextFocusableEl.focus()
+      const currentIndex: number = focusableEls.indexOf(currentActiveElement);
+      const nextFocusableEl: HTMLElement = currentIndex < focusableEls.length - 1 ? focusableEls[currentIndex + 1] : firstFocusableEl;
+      nextFocusableEl.focus();
     }
-  }
+  };
 
   /**
    * Handle window resize and scroll events using Vue's reactive system
    */
   const handleRefreshRequired = (): void => {
-    const resizeTimeout = getState('internalResizeTimeout')
+    const resizeTimeout = getState('internalResizeTimeout');
     if (typeof resizeTimeout === 'number') {
-      window.cancelAnimationFrame(resizeTimeout)
+      window.cancelAnimationFrame(resizeTimeout);
     }
 
     // Use Vue's reactive system for timeout management
     const timeoutId: number = window.requestAnimationFrame(() => {
-      emit('refreshRequired')
-    })
-    setState('internalResizeTimeout', timeoutId)
-  }
+      emit('refreshRequired');
+    });
+    setState('internalResizeTimeout', timeoutId);
+  };
 
   /**
    * Handle clicks on coach mark elements with proper event handling using Vue patterns
@@ -182,131 +182,131 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
     shouldPreventDefault?: (target: HTMLElement) => boolean
   ): (() => void) => {
     const listenerWrapper = (e: MouseEvent | PointerEvent, actualListener?: PointerEventHandler): void => {
-      const target = e.target
+      const target = e.target;
       if (!target || !isElement(target)) {
-        return
+        return;
       }
 
       if (!element.contains(target)) {
-        return
+        return;
       }
 
       if (!isHTMLElement(target)) {
-        return
+        return;
       }
 
       if (!shouldPreventDefault || shouldPreventDefault(target)) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
       }
 
       if (actualListener) {
-        actualListener(e)
+        actualListener(e);
       }
-    }
+    };
 
     // We want to be the absolute first one to hear about the event
-    const useCapture = true
+    const useCapture = true;
 
     // Event handlers with proper type guards using Vue patterns
     const pointerDownHandler: GenericEventHandler = (e: Event): void => {
       if (isPointerEvent(e)) {
-        listenerWrapper(e)
+        listenerWrapper(e);
       }
-    }
+    };
 
     const mouseDownHandler: GenericEventHandler = (e: Event): void => {
       if (isMouseEvent(e)) {
-        listenerWrapper(e)
+        listenerWrapper(e);
       }
-    }
+    };
 
     const pointerUpHandler: GenericEventHandler = (e: Event): void => {
       if (isPointerEvent(e)) {
-        listenerWrapper(e)
+        listenerWrapper(e);
       }
-    }
+    };
 
     const mouseUpHandler: GenericEventHandler = (e: Event): void => {
       if (isMouseEvent(e)) {
-        listenerWrapper(e)
+        listenerWrapper(e);
       }
-    }
+    };
 
     const clickHandler: GenericEventHandler = (e: Event): void => {
       if (isMouseEvent(e)) {
-        listenerWrapper(e, listener)
+        listenerWrapper(e, listener);
       }
-    }
+    };
 
     // Add event listeners using Vue patterns
-    element.addEventListener('pointerdown', pointerDownHandler, useCapture)
-    element.addEventListener('mousedown', mouseDownHandler, useCapture)
-    element.addEventListener('pointerup', pointerUpHandler, useCapture)
-    element.addEventListener('mouseup', mouseUpHandler, useCapture)
-    element.addEventListener('click', clickHandler, useCapture)
+    element.addEventListener('pointerdown', pointerDownHandler, useCapture);
+    element.addEventListener('mousedown', mouseDownHandler, useCapture);
+    element.addEventListener('pointerup', pointerUpHandler, useCapture);
+    element.addEventListener('mouseup', mouseUpHandler, useCapture);
+    element.addEventListener('click', clickHandler, useCapture);
 
     // Return cleanup function following Vue patterns
     return (): void => {
-      element.removeEventListener('pointerdown', pointerDownHandler, useCapture)
-      element.removeEventListener('mousedown', mouseDownHandler, useCapture)
-      element.removeEventListener('pointerup', pointerUpHandler, useCapture)
-      element.removeEventListener('mouseup', mouseUpHandler, useCapture)
-      element.removeEventListener('click', clickHandler, useCapture)
-    }
-  }
+      element.removeEventListener('pointerdown', pointerDownHandler, useCapture);
+      element.removeEventListener('mousedown', mouseDownHandler, useCapture);
+      element.removeEventListener('pointerup', pointerUpHandler, useCapture);
+      element.removeEventListener('mouseup', mouseUpHandler, useCapture);
+      element.removeEventListener('click', clickHandler, useCapture);
+    };
+  };
 
   /**
    * Initialize global event listeners using Vue's lifecycle patterns
    */
   const initEvents = (): void => {
     if (eventsInitialized.value) {
-      return
+      return;
     }
 
-    window.addEventListener('keyup', handleKeyup, false)
-    window.addEventListener('keydown', handleFocusTrapping, false)
-    window.addEventListener('resize', handleRefreshRequired)
-    window.addEventListener('scroll', handleRefreshRequired)
+    window.addEventListener('keyup', handleKeyup, false);
+    window.addEventListener('keydown', handleFocusTrapping, false);
+    window.addEventListener('resize', handleRefreshRequired);
+    window.addEventListener('scroll', handleRefreshRequired);
 
-    eventsInitialized.value = true
-  }
+    eventsInitialized.value = true;
+  };
 
   /**
    * Destroy global event listeners using Vue's cleanup patterns
    */
   const destroyEvents = (): void => {
     if (!eventsInitialized.value) {
-      return
+      return;
     }
 
-    window.removeEventListener('keyup', handleKeyup)
-    window.removeEventListener('keydown', handleFocusTrapping)
-    window.removeEventListener('resize', handleRefreshRequired)
-    window.removeEventListener('scroll', handleRefreshRequired)
+    window.removeEventListener('keyup', handleKeyup);
+    window.removeEventListener('keydown', handleFocusTrapping);
+    window.removeEventListener('resize', handleRefreshRequired);
+    window.removeEventListener('scroll', handleRefreshRequired);
 
-    eventsInitialized.value = false
-  }
+    eventsInitialized.value = false;
+  };
 
   /**
    * Clear all event listeners and reset state using Vue's reactive system
    */
   const destroyEmitter = (): void => {
-    destroyEvents()
-    registeredListeners.value = {}
-  }
+    destroyEvents();
+    registeredListeners.value = {};
+  };
 
   // Use Vue's lifecycle hooks for proper cleanup
   onUnmounted(() => {
-    destroyEvents()
-    destroyEmitter()
-  })
+    destroyEvents();
+    destroyEmitter();
+  });
 
   // Watch for state changes using Vue's reactive system
   watch(eventsInitialized, () => {
     // Events state changed - no logging needed for production
-  })
+  });
 
   return {
     // Event management
@@ -319,5 +319,5 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
 
     // State using Vue's computed property
     eventsInitialized: isEventsInitialized
-  } as const
-}
+  } as const;
+};

@@ -164,7 +164,7 @@ const {
 setSteps(props.steps)
 
 // Computed config
-const mergedConfig = computed(() => getConfig());
+const mergedConfig: ComputedRef<CoachMarkConfig> = computed(() => getConfig());
 
 // Initialize popover communication
 const {
@@ -219,7 +219,7 @@ const quasarClass: ComputedRef<string> = computed(() => {
 // Quasar offset calculation with step-level configuration support
 const quasarOffset: ComputedRef<QTooltipProps['offset']> = computed(() => {
   // Get effective padding value (used for both step-specific and calculated offsets)
-  const config = getConfig()
+  const config: CoachMarkConfig = getConfig()
   const globalPadding = config.padding || 10
   const effectivePadding = getEffectivePadding(
     currentStep.value?.popover?.padding,

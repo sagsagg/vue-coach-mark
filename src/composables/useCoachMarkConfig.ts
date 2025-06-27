@@ -3,8 +3,8 @@
  * Manages reactive configuration with defaults
  */
 
-import { reactive, computed, type ComputedRef } from 'vue'
-import type { CoachMarkConfig, CoachMarkInstance } from '../types'
+import { reactive, computed, type ComputedRef } from 'vue';
+import type { CoachMarkConfig, CoachMarkInstance } from '../types';
 
 // Default configuration
 const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'retry' | 'onHighlightStarted' | 'onHighlighted' | 'onDeselected' | 'onDestroyStarted' | 'onDestroyed' | 'onNextClick' | 'onPrevClick' | 'onCloseClick' | 'onSkipClick' | 'onPopoverRender'>> = {
@@ -30,13 +30,13 @@ const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'retry' | 'onHighl
   doneBtnText: 'Done',
   skipBtnText: 'Skip Tour',
   allowSkip: true
-}
+};
 
 // Global configuration instance
-const globalConfig = reactive<CoachMarkConfig>({ ...defaultConfig })
+const globalConfig = reactive<CoachMarkConfig>({ ...defaultConfig });
 
 // Current coach mark instance
-let currentCoachMark: CoachMarkInstance | null = null
+let currentCoachMark: CoachMarkInstance | null = null;
 
 export const useCoachMarkConfig = () => {
   /**
@@ -44,68 +44,67 @@ export const useCoachMarkConfig = () => {
    */
   const configure = (config: CoachMarkConfig = {}): void => {
     // Merge with defaults and existing config
-    Object.assign(globalConfig, defaultConfig, config)
-  }
+    Object.assign(globalConfig, defaultConfig, config);
+  };
 
   /**
    * Get configuration value(s)
    */
-  const getConfig = ((key?: keyof CoachMarkConfig) => {
-    return key ? globalConfig[key] : globalConfig
-  }) as {
-    (): CoachMarkConfig
-    <K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K]
+  function getConfig(): CoachMarkConfig;
+  function getConfig<K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K];
+  function getConfig<K extends keyof CoachMarkConfig>(key?: K): CoachMarkConfig | CoachMarkConfig[K] {
+    return key ? globalConfig[key] : globalConfig;
   }
 
   /**
    * Set current coach mark instance
    */
   const setCurrentCoachMark = (coachMark: CoachMarkInstance): void => {
-    currentCoachMark = coachMark
-  }
+    currentCoachMark = coachMark;
+  };
 
   /**
    * Get current coach mark instance
    */
   const getCurrentCoachMark = (): CoachMarkInstance | null => {
-    return currentCoachMark
-  }
+    return currentCoachMark;
+  };
 
   // Computed properties for commonly used config values
-  const animate: ComputedRef<boolean> = computed(() => globalConfig.animate ?? true)
+  const animate: ComputedRef<boolean> = computed(() => globalConfig.animate ?? true);
   
-  const allowClose: ComputedRef<boolean> = computed(() => globalConfig.allowClose ?? true)
+  const allowClose: ComputedRef<boolean> = computed(() => globalConfig.allowClose ?? true);
   
   const overlayClickBehavior: ComputedRef<'close' | 'nextStep'> = computed(
     () => globalConfig.overlayClickBehavior ?? 'close'
-  )
+  );
   
   // Padding and radius options
   const padding: ComputedRef<number | string> = computed(() =>
     globalConfig.padding ?? 10
-  )
+  );
 
   const radius: ComputedRef<number | string> = computed(() =>
     globalConfig.radius ?? 5
-  )
+  );
   
-  const overlayColor: ComputedRef<string> = computed(() => globalConfig.overlayColor ?? '#000')
+  const overlayColor: ComputedRef<string> = computed(() => globalConfig.overlayColor ?? '#000');
   
-  const overlayOpacity: ComputedRef<number> = computed(() => globalConfig.overlayOpacity ?? 0.7)
+  const overlayOpacity: ComputedRef<number> = computed(() => globalConfig.overlayOpacity ?? 0.7);
   
-  const smoothScroll: ComputedRef<boolean> = computed(() => globalConfig.smoothScroll ?? false)
+  const smoothScroll: ComputedRef<boolean> = computed(() => globalConfig.smoothScroll ?? false);
   
   const allowKeyboardControl: ComputedRef<boolean> = computed(
     () => globalConfig.allowKeyboardControl ?? true
-  )
+  );
   
-  const showProgress: ComputedRef<boolean> = computed(() => globalConfig.showProgress ?? false)
+  const showProgress: ComputedRef<boolean> = computed(() => globalConfig.showProgress ?? false);
   
   const progressText: ComputedRef<string> = computed(
     () => globalConfig.progressText ?? '{{current}} of {{total}}'
-  )
+  );
   
-  const steps: ComputedRef<CoachMarkConfig['steps']> = computed(() => globalConfig.steps)
+  const steps: ComputedRef<CoachMarkConfig['steps']> = computed(() => globalConfig.steps);
 
   return {
     // Configuration management
@@ -130,5 +129,5 @@ export const useCoachMarkConfig = () => {
     showProgress,
     progressText,
     steps
-  }
-}
+  };
+};

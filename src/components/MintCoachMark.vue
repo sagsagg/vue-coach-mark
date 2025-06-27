@@ -244,7 +244,7 @@ watch(() => mergedConfig.value, (newConfig: CoachMarkConfig) => {
 
 // Event handlers using arrow functions with explicit return types
 const handleNext = (): void => {
-  const activeStep = getActiveStep()
+  const activeStep: CoachMarkStep | undefined = getActiveStep()
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onNextClick) {
@@ -261,7 +261,7 @@ const handleNext = (): void => {
 }
 
 const handlePrevious = (): void => {
-  const activeStep = getActiveStep()
+  const activeStep: CoachMarkStep | undefined = getActiveStep()
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onPrevClick) {
@@ -278,7 +278,7 @@ const handlePrevious = (): void => {
 }
 
 const handleClose = (): void => {
-  const activeStep = getActiveStep()
+  const activeStep: CoachMarkStep | undefined = getActiveStep()
   const activeElement = getActiveElement()
 
   if (activeStep?.popover?.onCloseClick) {
@@ -295,7 +295,7 @@ const handleClose = (): void => {
 }
 
 const handleSkip = (): void => {
-  const activeStep = getActiveStep()
+  const activeStep: CoachMarkStep | undefined = getActiveStep()
   const activeElement = getActiveElement()
   const currentIndex = currentStepIndex.value || 0
 
@@ -356,7 +356,7 @@ const handlePopoverRendered = (popover: HTMLElement): void => {
   setState('popover', popoverDOM)
 
   // Call onPopoverRender hook if provided
-  const config = getConfig()
+  const config: CoachMarkConfig = getConfig()
   const onPopoverRender = config.onPopoverRender
   if (onPopoverRender) {
     const coachMark = createCoachMarkInterface()

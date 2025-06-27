@@ -3,14 +3,14 @@
  * Handles retry logic for element resolution when elements are not immediately available
  */
 
-import { ref, type Ref } from 'vue'
-import { getElement } from '../utils'
+import { ref, type Ref } from 'vue';
+import { getElement } from '../utils';
 import type { 
   CoachMarkStep, 
   RetryConfig, 
   UseElementRetryOptions, 
   UseElementRetryReturn 
-} from '../types'
+} from '../types';
 
 /**
  * Default retry configuration
@@ -22,7 +22,7 @@ const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
   exponentialBackoff: false,
   onRetry: () => {},
   onMaxAttemptsReached: () => {}
-}
+};
 
 /**
  * Composable for handling element retry logic
@@ -31,15 +31,15 @@ const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
  * @returns Retry management API
  */
 export const useElementRetry = (options: UseElementRetryOptions = {}): UseElementRetryReturn => {
-  const { defaultRetryConfig = {} } = options
+  const { defaultRetryConfig = {} } = options;
 
   // Reactive state for retry operations
-  const isRetrying: Ref<boolean> = ref(false)
-  const currentAttempt: Ref<number> = ref(0)
+  const isRetrying: Ref<boolean> = ref(false);
+  const currentAttempt: Ref<number> = ref(0);
   
   // Internal state for cancellation
-  let retryTimeoutId: number | null = null
-  let isCancelled = false
+  let retryTimeoutId: number | null = null;
+  let isCancelled = false;
 
   /**
    * Merge retry configurations with defaults
@@ -50,7 +50,7 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
   ): Required<RetryConfig> => {
     // If step retry is explicitly false, disable retry
     if (stepRetryConfig === false) {
-      return { ...DEFAULT_RETRY_CONFIG, enabled: false }
+      return { ...DEFAULT_RETRY_CONFIG, enabled: false };
     }
 
     // If step retry is true, use defaults with global overrides
@@ -59,7 +59,7 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
         ...DEFAULT_RETRY_CONFIG,
         ...defaultRetryConfig,
         ...globalRetryConfig
-      }
+      };
     }
 
     // If step retry is an object, merge with defaults and global config
@@ -69,7 +69,7 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
         ...defaultRetryConfig,
         ...globalRetryConfig,
         ...stepRetryConfig
-      }
+      };
     }
 
     // If no step retry config, use global config or defaults
@@ -77,22 +77,22 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
       ...DEFAULT_RETRY_CONFIG,
       ...defaultRetryConfig,
       ...globalRetryConfig
-    }
-  }
+    };
+  };
 
   /**
    * Calculate delay for retry attempt with optional exponential backoff
    */
   const calculateDelay = (attempt: number, baseDelay: number, exponentialBackoff: boolean): number => {
     if (!exponentialBackoff) {
-      return baseDelay
+      return baseDelay;
     }
     
     // Exponential backoff: delay * (2 ^ (attempt - 1))
     // Capped at 30 seconds to prevent excessive delays
-    const exponentialDelay = baseDelay * Math.pow(2, attempt - 1)
-    return Math.min(exponentialDelay, 30000)
-  }
+    const exponentialDelay = baseDelay * Math.pow(2, attempt - 1);
+    return Math.min(exponentialDelay, 30000);
+  };
 
   /**
    * Sleep for specified duration
@@ -100,11 +100,11 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
   const sleep = (ms: number): Promise<void> => {
     return new Promise((resolve) => {
       retryTimeoutId = window.setTimeout(() => {
-        retryTimeoutId = null
-        resolve()
-      }, ms)
-    })
-  }
+        retryTimeoutId = null;
+        resolve();
+      }, ms);
+    });
+  };
 
   /**
    * Resolve element with retry mechanism
@@ -115,38 +115,38 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
     step?: CoachMarkStep
   ): Promise<Element | null> => {
     // Reset state
-    isCancelled = false
-    currentAttempt.value = 0
-    isRetrying.value = false
+    isCancelled = false;
+    currentAttempt.value = 0;
+    isRetrying.value = false;
 
     // Get merged retry configuration
-    const config = mergeRetryConfig(retryConfig, defaultRetryConfig)
+    const config = mergeRetryConfig(retryConfig, defaultRetryConfig);
 
     // If retry is disabled, try once and return
     if (!config.enabled) {
-      return getElement(elementRef)
+      return getElement(elementRef);
     }
 
     // Start retry process
-    isRetrying.value = true
+    isRetrying.value = true;
 
     for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
       // Check if retry was cancelled
       if (isCancelled) {
-        isRetrying.value = false
-        return null
+        isRetrying.value = false;
+        return null;
       }
 
-      currentAttempt.value = attempt
+      currentAttempt.value = attempt;
 
       // Try to resolve element
-      const element = getElement(elementRef)
+      const element = getElement(elementRef);
 
       if (element) {
         // Element found successfully
-        isRetrying.value = false
-        currentAttempt.value = 0
-        return element
+        isRetrying.value = false;
+        currentAttempt.value = 0;
+        return element;
       }
 
       // Element not found, check if we should retry
@@ -154,57 +154,57 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
         // Call retry callback if provided
         if (config.onRetry && step) {
           try {
-            config.onRetry(attempt, step)
+            config.onRetry(attempt, step);
 
             // Add extra delay after first retry to allow DOM updates
             if (attempt === 1) {
-              await sleep(200) // Extra time for DOM updates
+              await sleep(200); // Extra time for DOM updates
             }
           } catch (error) {
-            console.warn('Error in retry callback:', error)
+            console.warn('Error in retry callback:', error);
           }
         }
 
         // Calculate delay and wait
-        const delay = calculateDelay(attempt, config.delay, config.exponentialBackoff)
-        await sleep(delay)
+        const delay = calculateDelay(attempt, config.delay, config.exponentialBackoff);
+        await sleep(delay);
       }
     }
 
     // Max attempts reached
-    isRetrying.value = false
-    currentAttempt.value = 0
+    isRetrying.value = false;
+    currentAttempt.value = 0;
 
     // Call max attempts reached callback if provided
     if (config.onMaxAttemptsReached && step) {
       try {
-        config.onMaxAttemptsReached(step)
+        config.onMaxAttemptsReached(step);
       } catch (error) {
-        console.warn('Error in max attempts reached callback:', error)
+        console.warn('Error in max attempts reached callback:', error);
       }
     }
 
-    return null
-  }
+    return null;
+  };
 
   /**
    * Cancel ongoing retry operation
    */
   const cancelRetry = (): void => {
-    isCancelled = true
-    isRetrying.value = false
-    currentAttempt.value = 0
+    isCancelled = true;
+    isRetrying.value = false;
+    currentAttempt.value = 0;
     
     if (retryTimeoutId !== null) {
-      clearTimeout(retryTimeoutId)
-      retryTimeoutId = null
+      clearTimeout(retryTimeoutId);
+      retryTimeoutId = null;
     }
-  }
+  };
 
   return {
     resolveElementWithRetry,
     isRetrying,
     currentAttempt,
     cancelRetry
-  }
-}
+  };
+};

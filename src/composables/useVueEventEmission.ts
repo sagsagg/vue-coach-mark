@@ -1,11 +1,12 @@
-import type { SetupContext } from 'vue'
+import type { SetupContext } from 'vue';
 import type {
   CoachMarkConfig,
   CoachMarkStep,
   CoachMarkInstance,
-  MintCoachMarkEmits
-} from '../types'
-import { findStepIndex, createStepLifecycleContext, createStepInteractionContext } from '../utils/coachMarkHelpers'
+  MintCoachMarkEmits,
+  HookContext
+} from '../types';
+import { findStepIndex, createStepLifecycleContext, createStepInteractionContext } from '../utils/coachMarkHelpers';
 
 /**
  * Configuration object for enhanced config generation
@@ -16,7 +17,7 @@ export type EnhancedConfigParams = {
   currentStepIndex: number | undefined
   coachMark: () => CoachMarkInstance
   emit?: SetupContext<MintCoachMarkEmits>['emit']
-}
+};
 
 /**
  * Configuration object for event emitters
@@ -26,7 +27,7 @@ export type EventEmittersParams = {
   currentStepIndex: number | undefined
   coachMark: () => CoachMarkInstance
   emit?: SetupContext<MintCoachMarkEmits>['emit']
-}
+};
 
 /**
  * Pure function to generate enhanced configuration with global lifecycle hooks
@@ -41,71 +42,71 @@ export const getEnhancedConfig = ({
 }: EnhancedConfigParams): CoachMarkConfig => {
   return {
     ...config,
-    onHighlightStarted: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    onHighlightStarted: (element: Element | undefined, step: CoachMarkStep, context: HookContext) => {
       // Call original global config hook if defined
       if (config.onHighlightStarted) {
-        config.onHighlightStarted(element, step, context)
+        config.onHighlightStarted(element, step, context);
       }
 
       // Call step-level hook if defined
       if (step.onHighlightStarted) {
-        step.onHighlightStarted(element, step, context)
+        step.onHighlightStarted(element, step, context);
       }
 
       // Emit Vue event with comprehensive context
-      const stepIndex = findStepIndex(step, steps, currentStepIndex)
+      const stepIndex = findStepIndex(step, steps, currentStepIndex);
       if (stepIndex !== -1) {
-        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex)
-        emit?.('step-highlight-started', eventContext)
+        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex);
+        emit?.('step-highlight-started', eventContext);
       }
 
       // Emit legacy event for backward compatibility
-      emit?.('highlight-started', element, step)
+      emit?.('highlight-started', element, step);
     },
-    onHighlighted: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    onHighlighted: (element: Element | undefined, step: CoachMarkStep, context: HookContext) => {
       // Call original global config hook if defined
       if (config.onHighlighted) {
-        config.onHighlighted(element, step, context)
+        config.onHighlighted(element, step, context);
       }
 
       // Call step-level hook if defined
       if (step.onHighlighted) {
-        step.onHighlighted(element, step, context)
+        step.onHighlighted(element, step, context);
       }
 
       // Emit Vue event with comprehensive context
-      const stepIndex = findStepIndex(step, steps, currentStepIndex)
+      const stepIndex = findStepIndex(step, steps, currentStepIndex);
       if (stepIndex !== -1) {
-        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex)
-        emit?.('step-highlighted', eventContext)
+        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex);
+        emit?.('step-highlighted', eventContext);
       }
 
       // Emit legacy event for backward compatibility
-      emit?.('highlighted', element, step)
+      emit?.('highlighted', element, step);
     },
-    onDeselected: (element: Element | undefined, step: CoachMarkStep, context: any) => {
+    onDeselected: (element: Element | undefined, step: CoachMarkStep, context: HookContext) => {
       // Call original global config hook if defined
       if (config.onDeselected) {
-        config.onDeselected(element, step, context)
+        config.onDeselected(element, step, context);
       }
 
       // Call step-level hook if defined
       if (step.onDeselected) {
-        step.onDeselected(element, step, context)
+        step.onDeselected(element, step, context);
       }
 
       // Emit Vue event with comprehensive context
-      const stepIndex = findStepIndex(step, steps, currentStepIndex)
+      const stepIndex = findStepIndex(step, steps, currentStepIndex);
       if (stepIndex !== -1) {
-        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex)
-        emit?.('step-deselected', eventContext)
+        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex);
+        emit?.('step-deselected', eventContext);
       }
 
       // Emit legacy event for backward compatibility
-      emit?.('deselected', element, step)
+      emit?.('deselected', element, step);
     }
-  }
-}
+  };
+};
 
 /**
  * Pure function to create event emitters
@@ -125,27 +126,27 @@ export const createEventEmitters = ({
     step: CoachMarkStep,
     stepIndex?: number
   ): void => {
-    const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex)
+    const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex);
     if (resolvedStepIndex !== -1) {
-      const eventContext = createStepInteractionContext(step, steps, currentStepIndex, coachMark(), resolvedStepIndex)
+      const eventContext = createStepInteractionContext(step, steps, currentStepIndex, coachMark(), resolvedStepIndex);
 
       // Use proper type-safe event emission based on event name
       switch (eventName) {
         case 'step-next-clicked':
-          emit?.('step-next-clicked', eventContext)
-          break
+          emit?.('step-next-clicked', eventContext);
+          break;
         case 'step-previous-clicked':
-          emit?.('step-previous-clicked', eventContext)
-          break
+          emit?.('step-previous-clicked', eventContext);
+          break;
         case 'step-changed':
-          emit?.('step-changed', eventContext)
-          break
+          emit?.('step-changed', eventContext);
+          break;
         case 'step-closed':
-          emit?.('step-closed', eventContext)
-          break
+          emit?.('step-closed', eventContext);
+          break;
       }
     }
-  }
+  };
 
   /**
    * Emit async interaction event
@@ -155,38 +156,38 @@ export const createEventEmitters = ({
     step: CoachMarkStep,
     stepIndex?: number
   ): void => {
-    const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex)
+    const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex);
     if (resolvedStepIndex !== -1) {
-      const eventContext = createStepInteractionContext(step, steps, currentStepIndex, coachMark(), resolvedStepIndex)
+      const eventContext = createStepInteractionContext(step, steps, currentStepIndex, coachMark(), resolvedStepIndex);
 
       // Use proper type-safe event emission based on event name
       switch (eventName) {
         case 'step-async-next-clicked':
-          emit?.('step-async-next-clicked', eventContext)
-          break
+          emit?.('step-async-next-clicked', eventContext);
+          break;
         case 'step-async-previous-clicked':
-          emit?.('step-async-previous-clicked', eventContext)
-          break
+          emit?.('step-async-previous-clicked', eventContext);
+          break;
       }
     }
-  }
+  };
 
   /**
    * Emit async deselected event
    */
   const emitAsyncDeselectedEvent = (step: CoachMarkStep): void => {
     if (step.onAsyncDeselected) {
-      const stepIndex = findStepIndex(step, steps, currentStepIndex)
+      const stepIndex = findStepIndex(step, steps, currentStepIndex);
       if (stepIndex !== -1) {
-        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex)
-        emit?.('step-async-deselected', eventContext)
+        const eventContext = createStepLifecycleContext(step, steps, currentStepIndex, coachMark(), stepIndex);
+        emit?.('step-async-deselected', eventContext);
       }
     }
-  }
+  };
 
   return {
     emitStepInteractionEvent,
     emitAsyncInteractionEvent,
     emitAsyncDeselectedEvent
-  }
-}
+  };
+};

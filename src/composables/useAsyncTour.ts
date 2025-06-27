@@ -7,15 +7,15 @@
  * - Handle step lifecycle events with async operations
  */
 
-import { ref, type Ref } from 'vue'
+import { ref, type Ref } from 'vue';
 import type {
   CoachMarkStep,
   CoachMarkInstance,
   AsyncTourHook,
   UseAsyncTourOptions,
   UseAsyncTourReturn
-} from '../types'
-import { getAsyncCallbackForDirection, isError } from './utils'
+} from '../types';
+import { getAsyncCallbackForDirection, isError } from './utils';
 
 /**
  * Composable for handling async tour operations
@@ -25,10 +25,10 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     onAsyncOperationStart,
     onAsyncOperationComplete,
     onAsyncOperationError
-  } = options
+  } = options;
 
   // Track async operation state
-  const isAsyncOperationInProgress: Ref<boolean> = ref(false)
+  const isAsyncOperationInProgress: Ref<boolean> = ref(false);
 
   /**
    * Execute an async callback with proper error handling and state management
@@ -40,40 +40,40 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     coachMark: CoachMarkInstance
   ): Promise<boolean> => {
     try {
-      isAsyncOperationInProgress.value = true
-      onAsyncOperationStart?.()
+      isAsyncOperationInProgress.value = true;
+      onAsyncOperationStart?.();
 
       // Execute the callback (may be sync or async)
-      const result = callback({ element, step, coachMark })
+      const result = callback({ element, step, coachMark });
 
       // If it's a Promise, wait for it to complete
       if (result instanceof Promise) {
-        await result
+        await result;
         // Async callback completed successfully
       } else {
         // Sync callback completed successfully
       }
 
-      return true
+      return true;
 
     } catch (error) {
-      console.error('❌ Error executing async callback:', error)
+      console.error('❌ Error executing async callback:', error);
       if (isError(error)) {
-        onAsyncOperationError?.(error)
+        onAsyncOperationError?.(error);
       } else {
         // Create a proper Error object for non-Error exceptions
         const errorObj = new Error(
           typeof error === 'string' ? error : 'Unknown error occurred during async callback execution'
-        )
-        onAsyncOperationError?.(errorObj)
+        );
+        onAsyncOperationError?.(errorObj);
       }
-      return false
+      return false;
 
     } finally {
-      isAsyncOperationInProgress.value = false
-      onAsyncOperationComplete?.()
+      isAsyncOperationInProgress.value = false;
+      onAsyncOperationComplete?.();
     }
-  }
+  };
 
   /**
    * Handle async navigation with custom callbacks
@@ -86,7 +86,7 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     defaultAction: () => void
   ): Promise<void> => {
     // Get the appropriate async callback based on direction
-    const callback = getAsyncCallbackForDirection(direction, step)
+    const callback = getAsyncCallbackForDirection(direction, step);
 
     // If there's a custom callback, execute it instead of default action
     if (callback) {
@@ -95,8 +95,8 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
       const success = await executeAsyncCallback(callback, element, step, coachMark);
 
       if (!success) {
-        console.warn(`⚠️ Async ${direction} callback failed, falling back to default action`)
-        defaultAction()
+        console.warn(`⚠️ Async ${direction} callback failed, falling back to default action`);
+        defaultAction();
       }
       // Note: If callback succeeds, it's responsible for calling the appropriate coach mark method
       // (e.g., coachMark.moveNext(), coachMark.movePrevious(), coachMark.destroy())
@@ -104,9 +104,9 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     } else {
       // No custom callback, execute default action
 
-      defaultAction()
+      defaultAction();
     }
-  }
+  };
 
   /**
    * Handle step deselection with async cleanup
@@ -116,19 +116,19 @@ export const useAsyncTour = (options: UseAsyncTourOptions = {}): UseAsyncTourRet
     step: CoachMarkStep,
     coachMark: CoachMarkInstance
   ): Promise<void> => {
-    const callback = step.onAsyncDeselected
+    const callback = step.onAsyncDeselected;
 
     if (callback) {
-      await executeAsyncCallback(callback, element, step, coachMark)
+      await executeAsyncCallback(callback, element, step, coachMark);
     }
-  }
+  };
 
   return {
     isAsyncOperationInProgress,
     executeAsyncCallback,
     handleAsyncNavigation,
     handleStepDeselection
-  }
-}
+  };
+};
 
 
