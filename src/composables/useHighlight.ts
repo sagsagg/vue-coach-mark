@@ -1,6 +1,33 @@
 /**
  * Element highlighting composable for MintCoachMark
  * Manages element highlighting, transitions, and animations
+ *
+ * ANIMATION ARCHITECTURE EXPLANATION:
+ *
+ * This composable uses requestAnimationFrame for complex overlay morphing animations
+ * instead of Vue Transitions for the following critical reasons:
+ *
+ * 1. GEOMETRIC INTERPOLATION: The overlay system requires real-time calculation
+ *    of SVG path coordinates, morphing between different element shapes and sizes.
+ *    Vue Transitions cannot handle this level of geometric complexity.
+ *
+ * 2. PERFORMANCE REQUIREMENTS: 60fps smooth animations are essential for good UX.
+ *    requestAnimationFrame provides precise timing control and optimal performance
+ *    for complex mathematical calculations.
+ *
+ * 3. CUSTOM EASING FUNCTIONS: Uses specialized easing (easeInOutQuad) for smooth
+ *    morphing between different element geometries. Vue Transitions are limited
+ *    to CSS easing functions.
+ *
+ * 4. ASYNC COORDINATION: Must coordinate with async tour functionality, step
+ *    lifecycle hooks, and programmatic navigation timing. requestAnimationFrame
+ *    provides the imperative control needed for this coordination.
+ *
+ * 5. STATE SYNCHRONIZATION: Complex state management during animations requires
+ *    precise timing control that Vue's declarative transitions cannot provide.
+ *
+ * Vue Transitions are used for simple popover show/hide animations in the
+ * component layer, while this system handles the complex overlay morphing.
  */
 
 import { ref, nextTick } from 'vue';
@@ -92,17 +119,27 @@ export const useHighlight = () => {
       });
     }
 
-    // Set up animation state
+    // Set up animation state for complex overlay morphing
+    // This cannot use Vue Transitions due to the geometric complexity
     isAnimating.value = true;
     let isPopoverRendered = false;
     const hasDelayedPopover = isAnimatedTour && !isFirstHighlight && toStep.popover;
 
+    /**
+     * CRITICAL: requestAnimationFrame-based animation loop
+     *
+     * Why not Vue Transitions:
+     * - Requires real-time SVG path morphing calculations
+     * - Needs custom easing functions for smooth geometric interpolation
+     * - Must coordinate with async operations and step lifecycle
+     * - Requires 60fps performance for smooth visual experience
+     * - Handles complex state synchronization during transitions
+     */
     const animate = () => {
       const transitionCallback = getState('internalTransitionCallback');
 
-      // This makes sure that the repeated calls to transferHighlight
-      // don't interfere with each other. Only the last call will be
-      // executed.
+      // Prevent animation conflicts: ensure only the latest animation runs
+      // This is critical for preventing visual glitches during rapid navigation
       if (transitionCallback !== animate) {
         return;
       }
@@ -111,32 +148,35 @@ export const useHighlight = () => {
       const timeRemaining = duration - elapsed;
       const isHalfwayThrough = timeRemaining <= duration / 2;
 
-      // Render popover halfway through animation if delayed
+      // Coordinate popover rendering with overlay animation timing
+      // This precise timing control is not achievable with Vue Transitions
       if (toStep.popover && isHalfwayThrough && !isPopoverRendered && hasDelayedPopover) {
-        // We'll emit an event for the popover component to handle
+        // Emit event for Vue Transition-based popover to handle
         setState('shouldRenderPopover', { element: toElement, step: toStep });
         isPopoverRendered = true;
       }
 
       if (getConfig('animate') && elapsed < duration) {
+        // CORE ANIMATION: Complex geometric interpolation using custom easing
+        // This performs real-time SVG path morphing that Vue Transitions cannot handle
         transitionStage(elapsed, duration, fromElement, toElement, fromStep, toStep);
       } else {
-        // Animation complete
+        // Animation complete - finalize state and trigger callbacks
         trackActiveElement(toElement, toStep);
 
-        // Scroll element into view after overlay positioning is complete
-        // Check if autoScroll is explicitly enabled via options or if smoothScroll is globally enabled
+        // Coordinate scrolling with animation completion
         const shouldAutoScroll = !!options?.autoScroll || (options?.autoScroll && getConfig('smoothScroll'));
 
         if (!isToDummyElement && shouldAutoScroll) {
           const smoothScroll = getConfig('smoothScroll');
 
-          // Add a small delay to ensure overlay positioning is fully complete
+          // Delay ensures overlay positioning is fully complete before scrolling
           setTimeout(() => {
             bringInView(toElement, smoothScroll);
           }, 100);
         }
 
+        // Execute step lifecycle hooks after animation completion
         if (highlightedHook && coachMark) {
           highlightedHook(isToDummyElement ? undefined : toElement, toStep, {
             config: getConfig(),
@@ -145,19 +185,24 @@ export const useHighlight = () => {
           });
         }
 
+        // Clean up animation state and update element tracking
         setState('internalTransitionCallback', undefined);
         setState('internalPreviousStep', fromStep);
         setState('internalPreviousElement', fromElement);
         setState('currentActiveStep', toStep);
         setState('currentActiveElement', toElement);
-        
+
         isAnimating.value = false;
         return;
       }
 
+      // Continue animation loop for next frame
+      // This provides 60fps smooth animation that Vue Transitions cannot match
+      // for complex geometric calculations
       window.requestAnimationFrame(animate);
     };
 
+    // Initialize the animation loop
     setState('internalTransitionCallback', animate);
     window.requestAnimationFrame(animate);
 

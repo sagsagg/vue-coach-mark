@@ -6,7 +6,6 @@
 import {
   ref,
   computed,
-  watch,
   onUnmounted,
   type Ref,
   type ComputedRef
@@ -69,8 +68,6 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   // Computed property for events initialization status
   const isEventsInitialized: ComputedRef<boolean> = computed(() => eventsInitialized.value);
 
-
-
   /**
    * Register an event listener using Vue's reactive system
    */
@@ -92,18 +89,22 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
    * Handle keyboard events using Vue's reactive system
    */
   const handleKeyup: KeyboardEventHandler = (e: KeyboardEvent): void => {
-    const allowKeyboardControl = getConfig('allowKeyboardControl') ?? true;
+    try {
+      const allowKeyboardControl = getConfig('allowKeyboardControl') ?? true;
 
-    if (!allowKeyboardControl) {
-      return;
-    }
+      if (!allowKeyboardControl) {
+        return;
+      }
 
-    if (e.key === 'Escape') {
-      emit('escapePress');
-    } else if (e.key === 'ArrowRight') {
-      emit('arrowRightPress');
-    } else if (e.key === 'ArrowLeft') {
-      emit('arrowLeftPress');
+      if (e.key === 'Escape') {
+        emit('escapePress');
+      } else if (e.key === 'ArrowRight') {
+        emit('arrowRightPress');
+      } else if (e.key === 'ArrowLeft') {
+        emit('arrowLeftPress');
+      }
+    } catch (error) {
+      console.warn('Error in keyboard event handler:', error);
     }
   };
 
@@ -111,64 +112,88 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
    * Handle focus trapping for accessibility using Vue's reactive system
    */
   const handleFocusTrapping: KeyboardEventHandler = (e: KeyboardEvent): void => {
-    const isActivated = getState('isInitialized');
-    if (!isActivated) {
-      return;
-    }
+    try {
+      const isActivated = getState('isInitialized');
+      if (!isActivated) {
+        return;
+      }
 
-    const isTabKey = e.key === 'Tab';
-    if (!isTabKey) {
-      return;
-    }
+      const isTabKey = e.key === 'Tab';
+      if (!isTabKey) {
+        return;
+      }
 
-    const activeElement = getState('currentActiveElement');
-    const popoverEl = getState('popover')?.wrapper;
+      const activeElement = getState('currentActiveElement');
+      const popoverEl = getState('popover')?.wrapper;
 
-    const elementsToSearch: Element[] = [
-      ...(popoverEl ? [popoverEl] : []),
-      ...(activeElement ? [activeElement] : [])
-    ];
+      const elementsToSearch: Element[] = [
+        ...(popoverEl ? [popoverEl] : []),
+        ...(activeElement ? [activeElement] : [])
+      ];
 
-    const focusableEls: HTMLElement[] = getFocusableElements(elementsToSearch);
+      const focusableEls: HTMLElement[] = getFocusableElements(elementsToSearch);
 
-    const firstFocusableEl: HTMLElement | undefined = focusableEls[0];
-    const lastFocusableEl: HTMLElement | undefined = focusableEls[focusableEls.length - 1];
+      const firstFocusableEl: HTMLElement | undefined = focusableEls[0];
+      const lastFocusableEl: HTMLElement | undefined = focusableEls[focusableEls.length - 1];
 
-    if (!firstFocusableEl || !lastFocusableEl) {
-      return;
-    }
+      if (!firstFocusableEl || !lastFocusableEl) {
+        return;
+      }
 
-    e.preventDefault();
+      e.preventDefault();
 
-    const currentActiveElement = document.activeElement;
-    if (!isHTMLElement(currentActiveElement)) {
-      firstFocusableEl.focus();
-      return;
-    }
+      const currentActiveElement = document.activeElement;
+      if (!isHTMLElement(currentActiveElement)) {
+        firstFocusableEl.focus();
+        return;
+      }
 
-    if (e.shiftKey) {
-      const currentIndex: number = focusableEls.indexOf(currentActiveElement);
-      const previousFocusableEl: HTMLElement = currentIndex > 0 ? focusableEls[currentIndex - 1] : lastFocusableEl;
-      previousFocusableEl.focus();
-    } else {
-      const currentIndex: number = focusableEls.indexOf(currentActiveElement);
-      const nextFocusableEl: HTMLElement = currentIndex < focusableEls.length - 1 ? focusableEls[currentIndex + 1] : firstFocusableEl;
-      nextFocusableEl.focus();
+      if (e.shiftKey) {
+        const currentIndex: number = focusableEls.indexOf(currentActiveElement);
+        const previousFocusableEl: HTMLElement = currentIndex > 0 ? focusableEls[currentIndex - 1] : lastFocusableEl;
+        previousFocusableEl.focus();
+      } else {
+        const currentIndex: number = focusableEls.indexOf(currentActiveElement);
+        const nextFocusableEl: HTMLElement = currentIndex < focusableEls.length - 1 ? focusableEls[currentIndex + 1] : firstFocusableEl;
+        nextFocusableEl.focus();
+      }
+    } catch (error) {
+      console.warn('Error in focus trapping handler:', error);
     }
   };
 
   /**
    * Handle window resize and scroll events using Vue's reactive system
+   *
+   * MEMORY LEAK PREVENTION: This function demonstrates proper requestAnimationFrame
+   * cleanup patterns that are essential when mixing Vue Transitions with
+   * requestAnimationFrame-based animations.
    */
   const handleRefreshRequired = (): void => {
     const resizeTimeout = getState('internalResizeTimeout');
+
+    // CRITICAL: Cancel any pending animation frame to prevent memory leaks
+    // This is essential when using requestAnimationFrame alongside Vue Transitions
+    // to ensure proper cleanup and prevent callbacks from executing after
+    // component destruction
     if (typeof resizeTimeout === 'number') {
       window.cancelAnimationFrame(resizeTimeout);
     }
 
-    // Use Vue's reactive system for timeout management
+    // Check if events are still initialized before scheduling new frame
+    // This prevents scheduling new animations after component unmount
+    if (!eventsInitialized.value) {
+      return;
+    }
+
+    // Use requestAnimationFrame for debounced refresh operations
+    // This provides better performance than setTimeout for UI updates
     const timeoutId: number = window.requestAnimationFrame(() => {
-      emit('refreshRequired');
+      // Double-check state before emitting to prevent execution after component destruction
+      // This pattern is crucial for preventing memory leaks in hybrid animation systems
+      if (eventsInitialized.value) {
+        emit('refreshRequired');
+      }
     });
     setState('internalResizeTimeout', timeoutId);
   };
@@ -181,28 +206,42 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
     listener: PointerEventHandler,
     shouldPreventDefault?: (target: HTMLElement) => boolean
   ): (() => void) => {
+    // Add type guard and validation at the beginning
+    if (!isElement(element)) {
+      console.warn('Invalid element provided to onCoachMarkClick');
+      return () => {}; // Return no-op cleanup function
+    }
+
+    if (typeof listener !== 'function') {
+      console.warn('Invalid listener provided to onCoachMarkClick');
+      return () => {}; // Return no-op cleanup function
+    }
     const listenerWrapper = (e: MouseEvent | PointerEvent, actualListener?: PointerEventHandler): void => {
-      const target = e.target;
-      if (!target || !isElement(target)) {
-        return;
-      }
+      try {
+        const target = e.target;
+        if (!target || !isElement(target)) {
+          return;
+        }
 
-      if (!element.contains(target)) {
-        return;
-      }
+        if (!element.contains(target)) {
+          return;
+        }
 
-      if (!isHTMLElement(target)) {
-        return;
-      }
+        if (!isHTMLElement(target)) {
+          return;
+        }
 
-      if (!shouldPreventDefault || shouldPreventDefault(target)) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }
+        if (!shouldPreventDefault || shouldPreventDefault(target)) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+        }
 
-      if (actualListener) {
-        actualListener(e);
+        if (actualListener) {
+          actualListener(e);
+        }
+      } catch (error) {
+        console.warn('Error in coach mark click handler:', error);
       }
     };
 
@@ -265,12 +304,13 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
       return;
     }
 
+    // Set flag immediately to prevent race conditions
+    eventsInitialized.value = true;
+
     window.addEventListener('keyup', handleKeyup, false);
     window.addEventListener('keydown', handleFocusTrapping, false);
     window.addEventListener('resize', handleRefreshRequired);
     window.addEventListener('scroll', handleRefreshRequired);
-
-    eventsInitialized.value = true;
   };
 
   /**
@@ -298,15 +338,26 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
   };
 
   // Use Vue's lifecycle hooks for proper cleanup
+  // HYBRID ANIMATION CLEANUP: This demonstrates proper cleanup patterns
+  // when using both Vue Transitions and requestAnimationFrame animations
   onUnmounted(() => {
+    // CRITICAL: Cancel any pending animation frames to prevent memory leaks
+    // This is essential in hybrid animation systems where requestAnimationFrame
+    // callbacks might still be scheduled when Vue components are destroyed
+    const resizeTimeout = getState('internalResizeTimeout');
+    if (typeof resizeTimeout === 'number') {
+      window.cancelAnimationFrame(resizeTimeout);
+      setState('internalResizeTimeout', undefined);
+    }
+
+    // Clean up event listeners and reactive state
+    // Vue Transitions handle their own cleanup automatically,
+    // but we must manually clean up requestAnimationFrame-based animations
     destroyEvents();
     destroyEmitter();
   });
 
-  // Watch for state changes using Vue's reactive system
-  watch(eventsInitialized, () => {
-    // Events state changed - no logging needed for production
-  });
+
 
   return {
     // Event management
