@@ -24,7 +24,7 @@ const defaultConfig: Required<Omit<CoachMarkConfig, 'steps' | 'retry' | 'onHighl
   showButtons: ['next', 'previous', 'close'],
   disableButtons: [],
   showProgress: false,
-  progressText: '{{current}} of {{total}}',
+  progressText: '',
   nextBtnText: 'Next',
   prevBtnText: 'Previous',
   doneBtnText: 'Done',
@@ -101,7 +101,7 @@ export const useCoachMarkConfig = () => {
   const showProgress: ComputedRef<boolean> = computed(() => globalConfig.showProgress ?? false);
   
   const progressText: ComputedRef<string> = computed(
-    () => globalConfig.progressText ?? '{{current}} of {{total}}'
+    () => globalConfig.progressText ?? ''
   );
   
   const steps: ComputedRef<CoachMarkConfig['steps']> = computed(() => globalConfig.steps);

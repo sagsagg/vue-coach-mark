@@ -1,26 +1,26 @@
 // Main entry point for the MintCoachMark library
-export { default as MintCoachMark } from './components/MintCoachMark.vue'
-export { default as QuasarCoachMark } from './components/QuasarCoachMark.vue'
-export { default as MintPopover } from './components/MintPopover.vue'
+export { default as MintCoachMark } from './components/MintCoachMark.vue';
+export { default as QuasarCoachMark } from './components/QuasarCoachMark.vue';
+export { default as MintPopover } from './components/MintPopover.vue';
 
 // Composables
-export { useCoachMark } from './composables/useCoachMark'
-export { useCoachMarkState } from './composables/useCoachMarkState'
-export { useCoachMarkEvents } from './composables/useCoachMarkEvents'
-export { useOverlay } from './composables/useOverlay'
-export { useHighlight } from './composables/useHighlight'
+export { useCoachMark } from './composables/useCoachMark';
+export { useCoachMarkState } from './composables/useCoachMarkState';
+export { useCoachMarkEvents } from './composables/useCoachMarkEvents';
+export { useOverlay } from './composables/useOverlay';
+export { useHighlight } from './composables/useHighlight';
 export {
   usePopoverCommunication,
   getGlobalPopoverState,
   resetGlobalPopoverState
-} from './composables/usePopoverCommunication'
-export { useAsyncTour } from './composables/useAsyncTour'
-export { useElementRetry } from './composables/useElementRetry'
+} from './composables/usePopoverCommunication';
+export { useAsyncTour } from './composables/useAsyncTour';
+export { useElementRetry } from './composables/useElementRetry';
 export {
   hasAsyncNavigationCallbacks,
   hasAsyncLifecycleCallbacks,
   hasAsyncCallbacks
-} from './composables/utils'
+} from './composables/utils';
 
 
 // Types
@@ -44,10 +44,10 @@ export type {
   RetryConfig,
   UseElementRetryOptions,
   UseElementRetryReturn
-} from './types'
+} from './types';
 
 // Utilities
-export * from './utils'
+export * from './utils';
 
 // CSS
-import './styles/coach-mark.css'
+import './styles/coach-mark.css';

@@ -412,7 +412,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
               showButtons: [],
               showProgress: false,
               progressText: '1 / 1',
-              ...step.popover!
+              ...step.popover,
             }
           : undefined
       });

@@ -3,7 +3,7 @@
  * These functions provide type-safe alternatives to any-typed state operations
  */
 
-import type { CoachMarkState } from '../../types'
+import type { CoachMarkState } from '../../types';
 
 /**
  * Type guard to check if a value is a valid state key
@@ -27,5 +27,5 @@ export const isValidStateKey = (key: unknown): key is keyof CoachMarkState => {
     currentActiveStagePosition: true,
     internalOverlaySvg: true,
     shouldRenderPopover: true
-  }
-}
+  };
+};
