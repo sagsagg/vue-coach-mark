@@ -88,12 +88,18 @@ export const useTooltipManagement = (
     // If another display operation is in progress, wait for it to complete
     if (displayState.isDisplaying) {
 
-      
-      // Wait for current operation to complete
-      while (displayState.isDisplaying) {
-        await delay(25);
-      }
-      
+      // Wait for current operation to complete using Promise-based polling
+      await new Promise<void>((resolve) => {
+        const checkDisplayState = (): void => {
+          if (!displayState.isDisplaying) {
+            resolve();
+          } else {
+            setTimeout(checkDisplayState, 25);
+          }
+        };
+        checkDisplayState();
+      });
+
       // Check if this request is still the latest
       if (displayId !== displayState.pendingDisplayId) {
         displayState.debouncedCalls++;

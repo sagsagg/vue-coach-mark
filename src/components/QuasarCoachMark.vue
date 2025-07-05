@@ -179,8 +179,6 @@ const {
   handleStepDeselection
 } = useAsyncTour()
 
-
-
 // Initialize scroll blocking functionality
 const { blockScrolling, unblockScrolling } = useScrollBlocking();
 
