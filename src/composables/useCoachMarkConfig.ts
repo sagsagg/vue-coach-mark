@@ -50,11 +50,14 @@ export const useCoachMarkConfig = () => {
   /**
    * Get configuration value(s)
    */
-  function getConfig(): CoachMarkConfig;
-  function getConfig<K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K];
-  function getConfig<K extends keyof CoachMarkConfig>(key?: K): CoachMarkConfig | CoachMarkConfig[K] {
-    return key ? globalConfig[key] : globalConfig;
-  }
+  const getConfig: {
+    (): CoachMarkConfig;
+    <K extends keyof CoachMarkConfig>(key: K): CoachMarkConfig[K];
+  } = <KeyType extends keyof CoachMarkConfig>(
+    key?: KeyType,
+  ): CoachMarkConfig | CoachMarkConfig[KeyType] => (key
+    ? globalConfig[key]
+    : globalConfig);
 
   /**
    * Set current coach mark instance

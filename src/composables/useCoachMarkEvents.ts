@@ -123,8 +123,8 @@ export const useCoachMarkEvents = (): UseCoachMarkEventsReturn => {
         return;
       }
 
-      const activeElement = getState('currentActiveElement');
-      const popoverEl = getState('popover')?.wrapper;
+      const activeElement: Element | undefined = getState('currentActiveElement');
+      const popoverEl: HTMLElement | undefined = getState('popover')?.wrapper;
 
       const elementsToSearch: Element[] = [
         ...(popoverEl ? [popoverEl] : []),

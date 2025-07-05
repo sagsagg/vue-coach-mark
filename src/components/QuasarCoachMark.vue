@@ -124,7 +124,6 @@ import type {
   CoachMarkInstance,
   NavigationOptions
 } from '../types'
-import { findStepIndex } from '../utils/coachMarkHelpers'
 import { getEnhancedConfig, createEventEmitters } from '../composables/useVueEventEmission'
 import { createNavigationWrappers } from '../composables/useCoachMarkNavigation'
 import type { QTooltipProps } from 'quasar'

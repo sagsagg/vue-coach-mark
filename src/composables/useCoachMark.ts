@@ -12,6 +12,19 @@ import { useHighlight } from './useHighlight';
 import { isFocusableElement, isAllowedButton } from './utils';
 import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons, NavigationOptions } from '../types';
 
+/**
+ * Main coach mark composable that orchestrates all functionality and provides an intuitive API for coach mark interactions
+ * @param initialConfig - Initial configuration object for the coach mark system
+ * @returns Coach mark instance with reactive state and control methods
+ * @example
+ * ```typescript
+ * const coachMark = useCoachMark({
+ *   steps: [{ element: '#step1', popover: { title: 'Welcome' } }],
+ *   animate: true
+ * });
+ * coachMark.start();
+ * ```
+ */
 export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const { getState, setState, resetState } = useCoachMarkState();
   const { configure, getConfig, setCurrentCoachMark, getCurrentCoachMark } = useCoachMarkConfig();
@@ -26,8 +39,10 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const isActive = ref(false);
   const currentStepIndex = ref<number | undefined>(undefined);
 
-   /**
-   * Destroy the coach mark
+  /**
+   * Destroy the coach mark instance and clean up all resources including event listeners, overlays, and state
+   * @param withOnDestroyStartedHook - Whether to call the onDestroyStarted hook before destruction (default: true)
+   * @returns void
    */
   const destroy = (withOnDestroyStartedHook = true): void => {
     const activeElement = getState('currentActiveElement');
@@ -90,7 +105,11 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Start the tour at a specific step
+   * Start the tour at a specific step index with optional navigation configuration
+   * @param stepIndex - Zero-based index of the step to start from (default: 0)
+   * @param options - Optional navigation options for controlling scroll behavior and callbacks
+   * @returns Promise that resolves when the step is successfully highlighted and displayed
+   * @throws Will log error and destroy tour if no steps are configured or step index is invalid
    */
   const startStep = async (stepIndex: number = 0, options?: NavigationOptions): Promise<void> => {
     const steps = getConfig('steps');
@@ -144,13 +163,17 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
       );
     });
 
+    // Type-safe button arrays without type assertions
+    const previousButtonDisabled: AllowedButtons[] = ['previous'];
+    const noButtonsDisabled: AllowedButtons[] = [];
+
     // Prepare step with calculated popover properties
     const stepWithPopover = {
       ...currentStep,
       popover: currentStep.popover ? {
         showButtons: calculatedButtons,
         nextBtnText: !hasNextStep ? doneBtnText : currentStep.popover.nextBtnText,
-        disableButtons: !hasPreviousStep ? (['previous'] as AllowedButtons[]) : ([] as AllowedButtons[]),
+        disableButtons: !hasPreviousStep ? previousButtonDisabled : noButtonsDisabled,
         showProgress: showProgress,
         progressText: progressText,
         ...currentStep.popover
@@ -160,8 +183,10 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     await highlight(stepWithPopover, options);
   };
 
-   /**
-   * Move to next step
+  /**
+   * Move to the next step in the tour sequence or destroy the tour if at the last step
+   * @param options - Optional navigation options for controlling scroll behavior and callbacks
+   * @returns void
    */
   const moveNext = (options?: NavigationOptions): void => {
     const activeIndex = getState('activeIndex');
@@ -179,7 +204,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Handle close action
+   * Handle close action triggered by user interaction (ESC key, close button, etc.)
+   * @returns void - Only destroys the tour if allowClose configuration is enabled
    */
   const handleClose = (): void => {
     if (!getConfig('allowClose')) {
@@ -189,7 +215,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Handle overlay click
+   * Handle overlay click based on configured behavior (close tour or move to next step)
+   * @returns void - Behavior depends on overlayClickBehavior configuration setting
    */
   const handleOverlayClick = (): void => {
     const overlayClickBehavior = getConfig('overlayClickBehavior');
@@ -205,7 +232,9 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Move to previous step
+   * Move to the previous step in the tour sequence or destroy the tour if at the first step
+   * @param options - Optional navigation options for controlling scroll behavior and callbacks
+   * @returns void
    */
   const movePrevious = (options?: NavigationOptions): void => {
     const activeIndex = getState('activeIndex');
@@ -223,7 +252,10 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Move to specific step index
+   * Move directly to a specific step by its zero-based index
+   * @param index - Zero-based index of the target step
+   * @param options - Optional navigation options for controlling scroll behavior and callbacks
+   * @returns void - Destroys the tour if the specified index is invalid
    */
   const moveTo = (index: number, options?: NavigationOptions): void => {
     const steps = getConfig('steps') || [];
@@ -236,7 +268,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Skip the entire tour
+   * Skip the entire tour and trigger the onSkipClick hook if configured
+   * @returns void - Destroys the tour without calling onDestroyStarted hook
    */
   const skipTour = (): void => {
     const activeStep = getState('currentActiveStep');
@@ -268,7 +301,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Handle arrow key navigation
+   * Handle left arrow key navigation to move to the previous step
+   * @returns void - Calls onPrevClick hook if configured, otherwise moves to previous step
    */
   const handleArrowLeft = (): void => {
     const isTransitioning = getState('internalTransitionCallback');
@@ -300,7 +334,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Handle arrow key navigation
+   * Handle right arrow key navigation to move to the next step
+   * @returns void - Calls onNextClick hook if configured, otherwise moves to next step
    */
   const handleArrowRight = (): void => {
     const isTransitioning = getState('internalTransitionCallback');
@@ -332,7 +367,8 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   };
 
   /**
-   * Initialize the coach mark system
+   * Initialize the coach mark system by setting up event listeners and applying CSS classes
+   * @returns void - Sets up the coach mark environment and marks system as initialized
    */
   const init = (): void => {
     if (getState('isInitialized')) {

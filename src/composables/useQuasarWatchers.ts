@@ -8,6 +8,7 @@
 import { watch, nextTick } from 'vue';
 import type {
   CoachMarkStep,
+  TempCoachMarkStep,
   UseTooltipManagementReturn,
   UseScrollBlockingReturn,
   UseQuasarWatchersReturn,
@@ -83,10 +84,19 @@ export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersRet
 
       // Check if we're already showing the same step
       const currentPopoverStep = popoverState.value.step;
-      const step = renderData.step as CoachMarkStep;
+      const step = renderData.step;
+
+      // Type guard function to safely check if step has popover properties
+      const isCoachMarkStep = (step: TempCoachMarkStep): step is CoachMarkStep => {
+        return 'popover' in step;
+      };
+
+      // Type-safe access to popover properties
+      const stepPopoverTitle = isCoachMarkStep(step) ? step.popover?.title : undefined;
+
       if (tooltipManagement.tooltipVisible.value && currentPopoverStep &&
           currentPopoverStep.element === step.element &&
-          currentPopoverStep.popover?.title === step.popover?.title) {
+          currentPopoverStep.popover?.title === stepPopoverTitle) {
 
         setState('shouldRenderPopover', undefined);
         return;

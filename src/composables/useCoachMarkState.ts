@@ -39,11 +39,12 @@ export const useCoachMarkState = () => {
   /**
    * Get a state value or the entire state
    */
-  function getState(): CoachMarkState;
-  function getState<K extends keyof CoachMarkState>(key: K): CoachMarkState[K];
-  function getState<K extends keyof CoachMarkState>(key?: K): CoachMarkState | CoachMarkState[K] {
-    return key ? globalState[key] : globalState;
-  }
+  const getState: {
+    (): CoachMarkState;
+    <K extends keyof CoachMarkState>(key: K): CoachMarkState[K];
+  } = <K extends keyof CoachMarkState>(key?: K): CoachMarkState | CoachMarkState[K] => (key
+    ? globalState[key]
+    : globalState);
 
   /**
    * Reset all state to initial values

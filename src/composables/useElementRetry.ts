@@ -130,7 +130,10 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
     // Start retry process
     isRetrying.value = true;
 
-    for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
+    /**
+     * Recursive retry function to avoid await-in-loop ESLint violations
+     */
+    const attemptResolve = async (attempt: number): Promise<Element | null> => {
       // Check if retry was cancelled
       if (isCancelled) {
         isRetrying.value = false;
@@ -151,6 +154,9 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
 
       // Element not found, check if we should retry
       if (attempt < config.maxAttempts) {
+        // Handle retry callback and delays
+        const delays: number[] = [];
+
         // Call retry callback if provided
         if (config.onRetry && step) {
           try {
@@ -158,33 +164,42 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
 
             // Add extra delay after first retry to allow DOM updates
             if (attempt === 1) {
-              await sleep(200); // Extra time for DOM updates
+              delays.push(200); // Extra time for DOM updates
             }
           } catch (error) {
             console.warn('Error in retry callback:', error);
           }
         }
 
-        // Calculate delay and wait
+        // Calculate main retry delay
         const delay = calculateDelay(attempt, config.delay, config.exponentialBackoff);
-        await sleep(delay);
+        delays.push(delay);
+
+        // Chain delays and continue with next attempt
+        return delays.reduce(
+          (promise, delayMs) => promise.then(() => sleep(delayMs)),
+          Promise.resolve()
+        ).then(() => attemptResolve(attempt + 1));
       }
-    }
 
-    // Max attempts reached
-    isRetrying.value = false;
-    currentAttempt.value = 0;
+      // Max attempts reached
+      isRetrying.value = false;
+      currentAttempt.value = 0;
 
-    // Call max attempts reached callback if provided
-    if (config.onMaxAttemptsReached && step) {
-      try {
-        config.onMaxAttemptsReached(step);
-      } catch (error) {
-        console.warn('Error in max attempts reached callback:', error);
+      // Call max attempts reached callback if provided
+      if (config.onMaxAttemptsReached && step) {
+        try {
+          config.onMaxAttemptsReached(step);
+        } catch (error) {
+          console.warn('Error in max attempts reached callback:', error);
+        }
       }
-    }
 
-    return null;
+      return null;
+    };
+
+    // Start the recursive retry process
+    return attemptResolve(1);
   };
 
   /**
