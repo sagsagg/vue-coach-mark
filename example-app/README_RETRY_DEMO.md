@@ -86,7 +86,7 @@ retry: {
 }
 
 // Global configuration
-const coachMark = new MintCoachMark({
+const coachMark = new QuasarCoachMark({
   retry: { maxAttempts: 5, delay: 1000 }, // Global default
   steps: [
     { element: '#el1', retry: true },      // Uses global
@@ -221,7 +221,7 @@ npm install mint-coach-mark
 
 ### **2. Basic Implementation**
 ```typescript
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 
 const steps = [
   {
@@ -238,13 +238,13 @@ const steps = [
   }
 ]
 
-const coachMark = new MintCoachMark({ steps })
+const coachMark = new QuasarCoachMark({ steps })
 coachMark.start()
 ```
 
 ### **3. Advanced Configuration**
 ```typescript
-const coachMark = new MintCoachMark({
+const coachMark = new QuasarCoachMark({
   // Global retry configuration
   retry: {
     maxAttempts: 5,

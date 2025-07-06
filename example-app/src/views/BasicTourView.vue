@@ -4,7 +4,7 @@
     <div class="page-header">
       <h1>🎯 Basic Tour Demo</h1>
       <p>
-        This demo shows the basic functionality of MintCoachMark with a simple step-by-step tour.
+        This demo shows the basic functionality of QuasarCoachMark with a simple step-by-step tour.
         Click "Start Tour" to begin the guided experience.
       </p>
     </div>
@@ -121,8 +121,8 @@
       </div>
     </div>
 
-    <!-- MintCoachMark Component -->
-    <MintCoachMark
+    <!-- QuasarCoachMark Component -->
+    <QuasarCoachMark
       v-model="showTour"
       :steps="steps"
       :config="config"
@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 import 'mint-coach-mark/dist/style.css'
 

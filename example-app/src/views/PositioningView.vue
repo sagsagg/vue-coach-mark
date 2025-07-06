@@ -110,8 +110,8 @@
       </div>
     </div>
 
-    <!-- MintCoachMark Component -->
-    <MintCoachMark
+    <!-- QuasarCoachMark Component -->
+    <QuasarCoachMark
       v-model="showTour"
       :steps="currentSteps"
       :config="config"
@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 import 'mint-coach-mark/dist/style.css'
 

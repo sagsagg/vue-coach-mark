@@ -1,7 +1,7 @@
 <template>
   <div class="padding-radius-demo">
     <!-- Coach Mark Component -->
-    <MintCoachMark
+    <QuasarCoachMark
       v-model="showTour"
       :steps="tourSteps"
       :config="tourConfig"
@@ -228,7 +228,7 @@ const steps: CoachMarkStep[] = [
 
 <script setup lang="ts">
 import { ref, computed, reactive, type Ref, type ComputedRef } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 
 // Reactive state

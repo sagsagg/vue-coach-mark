@@ -1,4 +1,4 @@
-import type { CoachMarkStep, StepLifecycleEventContext, StepInteractionEventContext, CoachMarkInstance } from '../types'
+import type { CoachMarkStep, StepLifecycleEventContext, StepInteractionEventContext, CoachMarkInstance } from '../types';
 
 /**
  * Find step index with robust fallback mechanisms
@@ -10,23 +10,23 @@ export const findStepIndex = (
   currentStepIndex?: number
 ): number => {
   // First try direct object reference comparison
-  let stepIndex = steps.findIndex(s => s === step)
+  let stepIndex = steps.findIndex(s => s === step);
   
   // If direct comparison fails, try element selector comparison
   if (stepIndex === -1 && step.element) {
-    stepIndex = steps.findIndex(s => s.element === step.element)
+    stepIndex = steps.findIndex(s => s.element === step.element);
   }
   
   // If still not found, try using current step index as fallback
   if (stepIndex === -1 && currentStepIndex !== undefined) {
-    const currentStepData = steps[currentStepIndex]
+    const currentStepData = steps[currentStepIndex];
     if (currentStepData && currentStepData.element === step.element) {
-      stepIndex = currentStepIndex
+      stepIndex = currentStepIndex;
     }
   }
   
-  return stepIndex
-}
+  return stepIndex;
+};
 
 /**
  * Create step lifecycle event context
@@ -39,9 +39,9 @@ export const createStepLifecycleContext = (
   coachMark: CoachMarkInstance,
   stepIndex?: number
 ): StepLifecycleEventContext => {
-  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex)
-  const nextStep = steps[resolvedStepIndex + 1]
-  const previousStep = steps[resolvedStepIndex - 1]
+  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex);
+  const nextStep = steps[resolvedStepIndex + 1];
+  const previousStep = steps[resolvedStepIndex - 1];
   
   return {
     step,
@@ -52,8 +52,8 @@ export const createStepLifecycleContext = (
     isLastStep: resolvedStepIndex === steps.length - 1,
     isFirstStep: resolvedStepIndex === 0,
     coachMark
-  }
-}
+  };
+};
 
 /**
  * Create step interaction event context
@@ -66,9 +66,9 @@ export const createStepInteractionContext = (
   coachMark: CoachMarkInstance,
   stepIndex?: number
 ): StepInteractionEventContext => {
-  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex)
-  const nextStep = steps[resolvedStepIndex + 1]
-  const previousStep = steps[resolvedStepIndex - 1]
+  const resolvedStepIndex = stepIndex !== undefined ? stepIndex : findStepIndex(step, steps, currentStepIndex);
+  const nextStep = steps[resolvedStepIndex + 1];
+  const previousStep = steps[resolvedStepIndex - 1];
   
   return {
     step,
@@ -79,5 +79,5 @@ export const createStepInteractionContext = (
     hasNextStep: resolvedStepIndex < steps.length - 1,
     hasPreviousStep: resolvedStepIndex > 0,
     isHighlighted: currentStepIndex === resolvedStepIndex
-  }
-}
+  };
+};

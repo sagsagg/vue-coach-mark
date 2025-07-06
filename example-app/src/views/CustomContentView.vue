@@ -61,8 +61,8 @@
       </button>
     </div>
 
-    <!-- MintCoachMark Component with Custom Slots -->
-    <MintCoachMark
+    <!-- QuasarCoachMark Component with Custom Slots -->
+    <QuasarCoachMark
       v-model="showTour"
       :steps="steps"
       :config="config"
@@ -224,13 +224,13 @@
           ⬅️ Back
         </button>
       </template>
-    </MintCoachMark>
+    </QuasarCoachMark>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 import 'mint-coach-mark/dist/style.css'
 

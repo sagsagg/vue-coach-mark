@@ -53,9 +53,9 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     const coachMark = getCurrentCoachMark();
 
     // `onDestroyStarted` is used to confirm the exit of tour
-    if (withOnDestroyStartedHook && onDestroyStarted && coachMark) {
+    if (withOnDestroyStartedHook && onDestroyStarted && coachMark && activeStep) {
       const isActiveDummyElement = !activeElement || activeElement?.id === 'mint-coach-mark-dummy-element';
-      onDestroyStarted(isActiveDummyElement ? undefined : activeElement, activeStep!, {
+      onDestroyStarted(isActiveDummyElement ? undefined : activeElement, activeStep, {
         config: getConfig(),
         state: getState(),
         coachMark

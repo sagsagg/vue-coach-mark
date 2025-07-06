@@ -4,7 +4,7 @@
     <div class="page-header">
       <h1>🌟 Real-world Scenarios</h1>
       <p>
-        Explore practical applications of MintCoachMark in real-world scenarios including
+        Explore practical applications of QuasarCoachMark in real-world scenarios including
         user onboarding, feature announcements, help systems, and interactive tutorials.
       </p>
     </div>
@@ -183,8 +183,8 @@
       </main>
     </div>
 
-    <!-- MintCoachMark Component -->
-    <MintCoachMark
+    <!-- QuasarCoachMark Component -->
+    <QuasarCoachMark
       v-model="showTour"
       :steps="currentSteps"
       :config="currentConfig"
@@ -240,13 +240,13 @@
           <p>{{ step.popover?.description }}</p>
         </div>
       </template>
-    </MintCoachMark>
+    </QuasarCoachMark>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 import 'mint-coach-mark/dist/style.css'
 

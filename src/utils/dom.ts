@@ -3,33 +3,33 @@
  */
 
 /**
+ * Check if an element is visible
+ * @param el - HTML element to check
+ * @returns True if element is visible
+ */
+export function isElementVisible(el: HTMLElement): boolean {
+  return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+}
+
+/**
  * Get all focusable elements within parent elements
  * @param parentEls - Array of parent elements to search within
  * @returns Array of focusable HTML elements
  */
 export function getFocusableElements(parentEls: Element[] | HTMLElement[]): HTMLElement[] {
   const focusableQuery =
-    'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])'
+    'a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])';
 
   return parentEls
     .flatMap(parentEl => {
-      const isParentFocusable = parentEl.matches(focusableQuery)
-      const focusableEls: HTMLElement[] = Array.from(parentEl.querySelectorAll(focusableQuery))
+      const isParentFocusable = parentEl.matches(focusableQuery);
+      const focusableEls: HTMLElement[] = Array.from(parentEl.querySelectorAll(focusableQuery));
 
-      return [...(isParentFocusable ? [parentEl as HTMLElement] : []), ...focusableEls]
+      return [...(isParentFocusable ? [parentEl as HTMLElement] : []), ...focusableEls];
     })
     .filter(el => {
-      return getComputedStyle(el).pointerEvents !== 'none' && isElementVisible(el)
-    })
-}
-
-/**
- * Check if an element is visible
- * @param el - HTML element to check
- * @returns True if element is visible
- */
-export function isElementVisible(el: HTMLElement): boolean {
-  return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)
+      return getComputedStyle(el).pointerEvents !== 'none' && isElementVisible(el);
+    });
 }
 
 /**
@@ -38,14 +38,14 @@ export function isElementVisible(el: HTMLElement): boolean {
  * @returns True if element is in viewport
  */
 export function isElementInView(element: Element): boolean {
-  const rect = element.getBoundingClientRect()
+  const rect = element.getBoundingClientRect();
 
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
     rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-  )
+  );
 }
 
 /**
@@ -55,11 +55,11 @@ export function isElementInView(element: Element): boolean {
  */
 export function hasScrollableParent(element: Element): boolean {
   if (!element || !element.parentElement) {
-    return false
+    return false;
   }
 
-  const parent = element.parentElement as HTMLElement & { scrollTopMax?: number }
-  return parent.scrollHeight > parent.clientHeight
+  const parent = element.parentElement as HTMLElement & { scrollTopMax?: number };
+  return parent.scrollHeight > parent.clientHeight;
 }
 
 /**
@@ -69,70 +69,70 @@ export function hasScrollableParent(element: Element): boolean {
  */
 export function bringInView(element: Element, shouldSmoothScroll = false): void {
   if (!element) {
-    return
+    return;
   }
 
-  const isInView = isElementInView(element)
+  const isInView = isElementInView(element);
 
   if (isInView) {
-    return
+    return;
   }
 
-  const body = document.body
-  const isScrollBlocked = body.style.overflow === 'hidden' && body.style.position === 'fixed'
+  const body = document.body;
+  const isScrollBlocked = body.style.overflow === 'hidden' && body.style.position === 'fixed';
 
   if (isScrollBlocked) {
     // Temporarily restore scrolling to allow scrollIntoView to work
-    const originalOverflow = body.style.overflow
-    const originalPosition = body.style.position
-    const originalTop = body.style.top
-    const originalLeft = body.style.left
+    const originalOverflow = body.style.overflow;
+    const originalPosition = body.style.position;
+    const originalTop = body.style.top;
+    const originalLeft = body.style.left;
 
     // Restore normal scrolling temporarily
-    body.style.overflow = ''
-    body.style.position = ''
-    body.style.top = ''
-    body.style.left = ''
+    body.style.overflow = '';
+    body.style.position = '';
+    body.style.top = '';
+    body.style.left = '';
 
     // Get current scroll position from the fixed positioning
-    const currentScrollY = originalTop ? Math.abs(parseInt(originalTop)) : 0
-    const currentScrollX = originalLeft ? Math.abs(parseInt(originalLeft)) : 0
+    const currentScrollY = originalTop ? Math.abs(parseInt(originalTop)) : 0;
+    const currentScrollX = originalLeft ? Math.abs(parseInt(originalLeft)) : 0;
 
     // Restore the scroll position
-    window.scrollTo(currentScrollX, currentScrollY)
+    window.scrollTo(currentScrollX, currentScrollY);
 
     // Now scroll the element into view
-    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight
+    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight;
     const scrollOptions = {
       behavior: !shouldSmoothScroll || hasScrollableParent(element) ? 'auto' : 'smooth',
       inline: 'center',
       block: isTallerThanViewport ? 'start' : 'center'
-    } as ScrollIntoViewOptions
+    } as ScrollIntoViewOptions;
 
-    element.scrollIntoView(scrollOptions)
+    element.scrollIntoView(scrollOptions);
 
     // Wait a moment for scroll to complete, then re-apply scroll blocking
     setTimeout(() => {
-      const newScrollY = window.scrollY
-      const newScrollX = window.scrollX
+      const newScrollY = window.scrollY;
+      const newScrollX = window.scrollX;
 
       // Re-apply scroll blocking with new scroll position
-      body.style.overflow = originalOverflow
-      body.style.position = originalPosition
-      body.style.top = `-${newScrollY}px`
-      body.style.left = `-${newScrollX}px`
-    }, shouldSmoothScroll ? 300 : 50)
+      body.style.overflow = originalOverflow;
+      body.style.position = originalPosition;
+      body.style.top = `-${newScrollY}px`;
+      body.style.left = `-${newScrollX}px`;
+    }, shouldSmoothScroll ? 300 : 50);
 
   } else {
     // Normal scrolling when not blocked
-    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight
+    const isTallerThanViewport = (element as HTMLElement).offsetHeight > window.innerHeight;
     const scrollOptions = {
       behavior: !shouldSmoothScroll || hasScrollableParent(element) ? 'auto' : 'smooth',
       inline: 'center',
       block: isTallerThanViewport ? 'start' : 'center'
-    } as ScrollIntoViewOptions
+    } as ScrollIntoViewOptions;
 
-    element.scrollIntoView(scrollOptions)
+    element.scrollIntoView(scrollOptions);
   }
 }
 
@@ -142,17 +142,17 @@ export function bringInView(element: Element, shouldSmoothScroll = false): void 
  * @returns Element or null
  */
 export function getElement(elementRef?: string | Element | (() => Element)): Element | null {
-  if (!elementRef) return null
+  if (!elementRef) return null;
   
   if (typeof elementRef === 'function') {
-    return elementRef()
+    return elementRef();
   }
   
   if (typeof elementRef === 'string') {
-    return document.querySelector(elementRef)
+    return document.querySelector(elementRef);
   }
   
-  return elementRef
+  return elementRef;
 }
 
 /**
@@ -160,24 +160,24 @@ export function getElement(elementRef?: string | Element | (() => Element)): Ele
  * @returns Created dummy element
  */
 export function createDummyElement(): HTMLElement {
-  const dummyElement = document.createElement('div')
-  dummyElement.id = 'mint-coach-mark-dummy-element'
-  dummyElement.style.width = '1px'
-  dummyElement.style.height = '1px'
-  dummyElement.style.position = 'fixed'
-  dummyElement.style.top = '50%'
-  dummyElement.style.left = '50%'
-  dummyElement.style.zIndex = '-1'
-  dummyElement.style.opacity = '0'
-  dummyElement.style.pointerEvents = 'none'
+  const dummyElement = document.createElement('div');
+  dummyElement.id = 'mint-coach-mark-dummy-element';
+  dummyElement.style.width = '1px';
+  dummyElement.style.height = '1px';
+  dummyElement.style.position = 'fixed';
+  dummyElement.style.top = '50%';
+  dummyElement.style.left = '50%';
+  dummyElement.style.zIndex = '-1';
+  dummyElement.style.opacity = '0';
+  dummyElement.style.pointerEvents = 'none';
   
-  document.body.appendChild(dummyElement)
-  return dummyElement
+  document.body.appendChild(dummyElement);
+  return dummyElement;
 }
 
 /**
  * Remove dummy element from DOM
  */
 export function removeDummyElement(): void {
-  document.getElementById('mint-coach-mark-dummy-element')?.remove()
+  document.getElementById('mint-coach-mark-dummy-element')?.remove();
 }

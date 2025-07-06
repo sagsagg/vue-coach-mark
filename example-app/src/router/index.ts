@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Home',
     component: () => import('../views/HomeView.vue'),
     meta: {
-      title: 'MintCoachMark Demo - Home'
+      title: 'QuasarCoachMark Demo - Home'
     }
   },
   {

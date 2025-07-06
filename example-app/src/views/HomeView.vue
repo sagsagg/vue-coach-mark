@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- Skip Tour Feature Demo -->
-    <MintCoachMark
+    <QuasarCoachMark
       v-model="showTour"
       :steps="tourSteps"
       :config="tourConfig"
@@ -14,7 +14,7 @@
     <!-- Hero Section -->
     <section id="hero-section" class="hero">
       <div class="hero-content">
-        <h1 class="hero-title">🌿 MintCoachMark</h1>
+        <h1 class="hero-title">🌿 QuasarCoachMark</h1>
         <p class="hero-subtitle">
           Skip Tour Feature Demo
         </p>
@@ -172,7 +172,7 @@
         <div v-if="activeCodeTab === 'basic'" class="code-example">
           <h3>Basic Skip Tour Configuration</h3>
           <pre><code>&lt;template&gt;
-  &lt;MintCoachMark
+  &lt;QuasarCoachMark
     v-model="showTour"
     :steps="steps"
     :config="config"
@@ -183,7 +183,7 @@
 
 &lt;script setup lang="ts"&gt;
 import { ref } from 'vue'
-import { MintCoachMark, type CoachMarkStep, type CoachMarkConfig } from 'mint-coach-mark'
+import { QuasarCoachMark, type CoachMarkStep, type CoachMarkConfig } from 'mint-coach-mark'
 
 const showTour = ref(false)
 
@@ -255,7 +255,7 @@ function handleStepChange(step: CoachMarkStep, index: number) {
         <div v-if="activeCodeTab === 'custom'" class="code-example">
           <h3>Custom Skip Button Styling</h3>
           <pre><code>&lt;template&gt;
-  &lt;MintCoachMark
+  &lt;QuasarCoachMark
     v-model="showTour"
     :steps="steps"
     :config="config"
@@ -267,7 +267,7 @@ function handleStepChange(step: CoachMarkStep, index: number) {
         Not Now
       &lt;/button&gt;
     &lt;/template&gt;
-  &lt;/MintCoachMark&gt;
+  &lt;/QuasarCoachMark&gt;
 &lt;/template&gt;
 
 &lt;style&gt;
@@ -359,7 +359,7 @@ function handleStepChange(step: CoachMarkStep, index: number) {
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, type Ref } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 
 // Reactive state

@@ -9,7 +9,7 @@ import '@quasar/extras/material-icons/material-icons.css'
 // Import Quasar css
 import 'quasar/src/css/index.sass'
 
-// Import MintCoachMark styles
+// Import QuasarCoachMark styles
 import 'mint-coach-mark/dist/style.css'
 
 import App from './App.vue'

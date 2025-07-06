@@ -1,5 +1,5 @@
 /**
- * TypeScript type definitions for MintCoachMark
+ * TypeScript type definitions for QuasarCoachMark
  *
  * DEPENDENCY-ORDERED TYPE ORGANIZATION:
  * ====================================
@@ -565,34 +565,7 @@ export type PopoverCommunication = {
   readonly isPositioning: boolean;
 };
 
-// Popover component props for decoupled architecture
-export type MintPopoverProps = {
-  readonly visible?: boolean;
-  readonly targetElement?: Element | null;
-  readonly step?: CoachMarkStep | null;
-  readonly title?: string;
-  readonly description?: string;
-  readonly side?: Side;
-  readonly showButtons?: readonly AllowedButtons[];
-  readonly disableButtons?: readonly AllowedButtons[];
-  readonly showProgress?: boolean;
-  readonly progressText?: string;
-  readonly nextBtnText?: string;
-  readonly prevBtnText?: string;
-  readonly skipBtnText?: string;
-  readonly popoverClass?: string;
-  readonly offset?: number;
-};
 
-// Popover component emits
-export type MintPopoverEmits = {
-  readonly next: readonly [];
-  readonly previous: readonly [];
-  readonly close: readonly [];
-  readonly skip: readonly [];
-  readonly rendered: readonly [popover: HTMLElement];
-  readonly destroyed: readonly [];
-};
 
 // Communication composable return type
 export type UsePopoverCommunicationReturn = {

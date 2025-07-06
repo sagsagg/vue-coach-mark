@@ -1,7 +1,5 @@
-// Main entry point for the MintCoachMark library
-export { default as MintCoachMark } from './components/MintCoachMark.vue';
+// Main entry point for the QuasarCoachMark library
 export { default as QuasarCoachMark } from './components/QuasarCoachMark.vue';
-export { default as MintPopover } from './components/MintPopover.vue';
 
 // Composables
 export { useCoachMark } from './composables/useCoachMark';
@@ -37,8 +35,6 @@ export type {
   PopoverProvider,
   PopoverProviderConfig,
   PopoverCommunication,
-  MintPopoverProps,
-  MintPopoverEmits,
   UsePopoverCommunicationReturn,
   CoachMarkInstance,
   RetryConfig,

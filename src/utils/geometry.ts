@@ -2,7 +2,7 @@
  * Pure utility functions for geometric calculations
  */
 
-import type { StageDefinition } from '../types'
+import type { StageDefinition } from '../types';
 
 /**
  * Calculate stage definition from element with padding
@@ -11,14 +11,14 @@ import type { StageDefinition } from '../types'
  * @returns Stage definition with position and dimensions
  */
 export function calculateStageDefinition(element: Element, padding = 10): StageDefinition {
-  const rect = element.getBoundingClientRect()
+  const rect = element.getBoundingClientRect();
   
   return {
     x: rect.x - padding,
     y: rect.y - padding,
     width: rect.width + padding * 2,
     height: rect.height + padding * 2
-  }
+  };
 }
 
 /**
@@ -30,7 +30,7 @@ export function getRectCenter(rect: DOMRect | StageDefinition): { x: number; y: 
   return {
     x: rect.x + rect.width / 2,
     y: rect.y + rect.height / 2
-  }
+  };
 }
 
 /**
@@ -43,9 +43,9 @@ export function getDistance(
   point1: { x: number; y: number },
   point2: { x: number; y: number }
 ): number {
-  const dx = point2.x - point1.x
-  const dy = point2.y - point1.y
-  return Math.sqrt(dx * dx + dy * dy)
+  const dx = point2.x - point1.x;
+  const dy = point2.y - point1.y;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 /**
@@ -63,7 +63,7 @@ export function isPointInRect(
     point.x <= rect.x + rect.width &&
     point.y >= rect.y &&
     point.y <= rect.y + rect.height
-  )
+  );
 }
 
 /**
@@ -83,7 +83,7 @@ export function calculatePopoverPosition(
   const viewport = {
     width: window.innerWidth,
     height: window.innerHeight
-  }
+  };
 
   const positions = {
     top: {
@@ -111,15 +111,15 @@ export function calculatePopoverPosition(
       y: targetRect.y + targetRect.height / 2 - popoverSize.height / 2,
       side: 'over' as const
     }
-  }
+  };
 
   // Handle 'over' positioning (modal-like, centered on element)
   if (preferredSide === 'over') {
-    return positions.over
+    return positions.over;
   }
 
   // Check if preferred position fits in viewport
-  const preferred = positions[preferredSide as keyof typeof positions]
+  const preferred = positions[preferredSide as keyof typeof positions];
   if (
     preferred &&
     preferred.x >= 0 &&
@@ -127,39 +127,39 @@ export function calculatePopoverPosition(
     preferred.x + popoverSize.width <= viewport.width &&
     preferred.y + popoverSize.height <= viewport.height
   ) {
-    return preferred
+    return preferred;
   }
 
   // Try other positions
-  const sides: Array<'top' | 'right' | 'bottom' | 'left'> = ['bottom', 'top', 'right', 'left']
+  const sides: Array<'top' | 'right' | 'bottom' | 'left'> = ['bottom', 'top', 'right', 'left'];
   for (const side of sides) {
-    const position = positions[side]
+    const position = positions[side];
     if (
       position.x >= 0 &&
       position.y >= 0 &&
       position.x + popoverSize.width <= viewport.width &&
       position.y + popoverSize.height <= viewport.height
     ) {
-      return position
+      return position;
     }
   }
 
   // Fallback to preferred position with adjustments, or bottom if preferred is invalid
-  const fallback = { ...(preferred || positions.bottom) }
+  const fallback = { ...(preferred || positions.bottom) };
   
   // Adjust horizontal position
   if (fallback.x < 0) {
-    fallback.x = 10
+    fallback.x = 10;
   } else if (fallback.x + popoverSize.width > viewport.width) {
-    fallback.x = viewport.width - popoverSize.width - 10
+    fallback.x = viewport.width - popoverSize.width - 10;
   }
   
   // Adjust vertical position
   if (fallback.y < 0) {
-    fallback.y = 10
+    fallback.y = 10;
   } else if (fallback.y + popoverSize.height > viewport.height) {
-    fallback.y = viewport.height - popoverSize.height - 10
+    fallback.y = viewport.height - popoverSize.height - 10;
   }
 
-  return fallback
+  return fallback;
 }

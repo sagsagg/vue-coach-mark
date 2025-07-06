@@ -4,7 +4,7 @@
     <div class="page-header">
       <h1>🎭 Custom Theming Demo</h1>
       <p>
-        This demo showcases different themes and styling options for MintCoachMark.
+        This demo showcases different themes and styling options for QuasarCoachMark.
         Switch between themes to see how CSS custom properties can transform the appearance.
       </p>
     </div>
@@ -101,8 +101,8 @@
       </button>
     </div>
 
-    <!-- MintCoachMark Component -->
-    <MintCoachMark
+    <!-- QuasarCoachMark Component -->
+    <QuasarCoachMark
       v-model="showTour"
       :steps="steps"
       :config="config"
@@ -113,7 +113,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { MintCoachMark } from 'mint-coach-mark'
+import { QuasarCoachMark } from 'mint-coach-mark'
 import type { CoachMarkStep, CoachMarkConfig } from 'mint-coach-mark'
 import 'mint-coach-mark/dist/style.css'
 
@@ -143,7 +143,7 @@ const themes: Theme[] = [
     id: 'default',
     name: 'Default',
     icon: '🌟',
-    description: 'The default MintCoachMark theme with clean, modern styling.',
+    description: 'The default QuasarCoachMark theme with clean, modern styling.',
     preview: {
       primary: '#667eea',
       secondary: '#764ba2',

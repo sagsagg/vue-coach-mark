@@ -17,9 +17,9 @@ export function easeInOutQuad(
   duration: number
 ): number {
   if ((elapsed /= duration / 2) < 1) {
-    return (amountOfChange / 2) * elapsed * elapsed + initialValue
+    return (amountOfChange / 2) * elapsed * elapsed + initialValue;
   }
-  return (-amountOfChange / 2) * (--elapsed * (elapsed - 2) - 1) + initialValue
+  return (-amountOfChange / 2) * (--elapsed * (elapsed - 2) - 1) + initialValue;
 }
 
 /**
@@ -29,7 +29,7 @@ export function easeInOutQuad(
  * @returns Progress percentage (0-1)
  */
 export function getAnimationProgress(elapsed: number, duration: number): number {
-  return Math.min(elapsed / duration, 1)
+  return Math.min(elapsed / duration, 1);
 }
 
 /**
@@ -40,7 +40,7 @@ export function getAnimationProgress(elapsed: number, duration: number): number 
  * @returns Interpolated value
  */
 export function lerp(start: number, end: number, progress: number): number {
-  return start + (end - start) * progress
+  return start + (end - start) * progress;
 }
 
 /**
@@ -60,5 +60,5 @@ export function lerpRect(
     lerp(from.y, to.y, progress),
     lerp(from.width, to.width, progress),
     lerp(from.height, to.height, progress)
-  )
+  );
 }

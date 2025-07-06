@@ -5,7 +5,7 @@
       <h1>🔧 Multi-Implementation Coach Mark Demo</h1>
       <p>
         This demo showcases three different approaches to implementing coach marks:
-        Default MintPopover, QuasarCoachMark (built-in QTooltip), and custom slot-based QTooltip implementations.
+        Default QuasarCoachMark, QuasarCoachMark (built-in QTooltip), and custom slot-based QTooltip implementations.
       </p>
     </div>
 
@@ -73,7 +73,7 @@
       <div class="slot-benefits">
         <h4>✅ Implementation Approaches:</h4>
         <ul>
-          <li><strong>Default MintPopover:</strong> Custom-built popover with full control and styling</li>
+          <li><strong>Default QuasarCoachMark:</strong> Custom-built popover with full control and styling</li>
           <li><strong>QuasarCoachMark:</strong> Built-in QTooltip integration with simplified architecture</li>
           <li><strong>Custom Slot:</strong> Slot-based approach for maximum flexibility with any library</li>
           <li>All approaches maintain identical tour functionality and API</li>
@@ -87,7 +87,7 @@
           <li><strong>Z-Index:</strong> Add <code>mint-coach-mark-custom-popover</code> class for proper layering</li>
           <li><strong>Pointer Events:</strong> Custom popovers automatically receive pointer events</li>
           <li><strong>Event Handling:</strong> Use slot props (<code>onNext</code>, <code>onPrevious</code>, <code>onClose</code>) for tour navigation</li>
-          <li><strong>Positioning:</strong> Map MintCoachMark sides to your library's positioning system</li>
+          <li><strong>Positioning:</strong> Map QuasarCoachMark sides to your library's positioning system</li>
           <li><strong>Smooth Rendering:</strong> Use <code>v-if="visible && targetElement && !isPositioning"</code> for flash-free positioning</li>
           <li><strong>Repositioning:</strong> Use <code>positioningKey</code> as Vue key for automatic repositioning</li>
           <li><strong>Hidden During Positioning:</strong> Popover remains hidden until positioning calculations complete</li>
@@ -118,8 +118,8 @@
       </div>
     </div>
 
-    <!-- Default MintCoachMark Implementation -->
-    <MintCoachMark
+    <!-- Default QuasarCoachMark Implementation -->
+    <QuasarCoachMark
       v-if="implementationType === 'default'"
       ref="coachMarkRef"
       v-model="showTour"
@@ -142,8 +142,8 @@
       @step-change="onStepChange"
     />
 
-    <!-- MintCoachMark with Custom QTooltip Slot Implementation -->
-    <MintCoachMark
+    <!-- QuasarCoachMark with Custom QTooltip Slot Implementation -->
+    <QuasarCoachMark
       v-else-if="implementationType === 'custom'"
       ref="coachMarkRef"
       v-model="showTour"
@@ -230,13 +230,13 @@
           </div>
         </QTooltip>
       </template>
-    </MintCoachMark>
+    </QuasarCoachMark>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, type Ref, type ComputedRef } from 'vue'
-import { MintCoachMark, QuasarCoachMark, getGlobalPopoverState, type CoachMarkStep, type CoachMarkConfig, type Side } from 'mint-coach-mark'
+import { QuasarCoachMark, getGlobalPopoverState, type CoachMarkStep, type CoachMarkConfig, type Side } from 'mint-coach-mark'
 import { QTooltip } from 'quasar'
 import 'mint-coach-mark/dist/style.css'
 
@@ -244,7 +244,7 @@ import 'mint-coach-mark/dist/style.css'
 const showTour: Ref<boolean> = ref(false)
 const implementationType: Ref<'default' | 'custom' | 'quasar'> = ref('default')
 const tooltipVisible: Ref<boolean> = ref(false)
-const coachMarkRef: Ref<InstanceType<typeof MintCoachMark> | InstanceType<typeof QuasarCoachMark> | undefined> = ref()
+const coachMarkRef: Ref<InstanceType<typeof QuasarCoachMark> | undefined> = ref()
 const dynamicElementVisible: Ref<boolean> = ref(false)
 const isAsyncTour: Ref<boolean> = ref(false)
 
@@ -459,7 +459,7 @@ const toggleImplementation = (): void => {
 
 const getImplementationName = (): string => {
   switch (implementationType.value) {
-    case 'default': return 'Default MintPopover'
+    case 'default': return 'Default QuasarCoachMark'
     case 'quasar': return 'QuasarCoachMark (Built-in QTooltip)'
     case 'custom': return 'Custom QTooltip Slot'
     default: return 'Unknown'

@@ -42,21 +42,21 @@ const navigationCategories: NavigationCategory[] = [
         name: 'Basic Tour', 
         path: '/basic-tour', 
         icon: '🎯', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Simple step-by-step tour'
       },
       { 
         name: 'Custom Content', 
         path: '/custom-content', 
         icon: '🎨', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Rich HTML content in popovers'
       },
       { 
         name: 'Positioning', 
         path: '/positioning', 
         icon: '📍', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Popover placement options'
       }
     ]
@@ -68,7 +68,7 @@ const navigationCategories: NavigationCategory[] = [
         name: 'Padding & Radius',
         path: '/padding-radius',
         icon: '📐',
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Element highlighting customization'
       },
       {
@@ -82,28 +82,28 @@ const navigationCategories: NavigationCategory[] = [
         name: 'Retry Mechanism',
         path: '/retry-mechanism',
         icon: '🔄',
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Element retry for dynamic content'
       },
       {
         name: 'Nested Component Demo',
         path: '/nested-component',
         icon: '🏗️',
-        component: 'MintCoachMark',
+        component: 'QuasarCoachMark',
         description: 'Async load in nested components'
       },
       { 
         name: 'Programmatic', 
         path: '/programmatic', 
         icon: '⚙️', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'API-driven tour control'
       },
       { 
         name: 'Theming', 
         path: '/theming', 
         icon: '🎭', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Custom styling and themes'
       }
     ]
@@ -115,14 +115,14 @@ const navigationCategories: NavigationCategory[] = [
         name: 'Scenarios', 
         path: '/scenarios', 
         icon: '🌟', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Real-world use cases'
       },
       { 
         name: 'Popover Test', 
         path: '/popover-test', 
         icon: '🔧', 
-        component: 'MintPopover',
+        component: 'QuasarCoachMark',
         description: 'Persistence and behavior testing'
       }
     ]
@@ -529,7 +529,7 @@ onUnmounted(() => {
   line-height: 1.2;
 }
 
-.component-badge--mintpopover {
+.component-badge--quasarcoachmark {
   background: #e3f2fd;
   color: #1976d2;
 }
@@ -539,7 +539,7 @@ onUnmounted(() => {
   color: #7b1fa2;
 }
 
-.nav-link.active .component-badge--mintpopover {
+.nav-link.active .component-badge--quasarcoachmark {
   background: #667eea;
   color: white;
 }
