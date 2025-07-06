@@ -11,6 +11,7 @@ import {
   type Ref,
   type ComputedRef
 } from 'vue';
+import { useTimeout } from 'quasar';
 import type {
   PopoverCommunication,
   PopoverProvider,
@@ -37,7 +38,10 @@ const activeInstances: Set<string> = new Set();
  */
 export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunicationReturn => {
   const currentInstanceId: string = instanceId || `popover-${Date.now()}-${Math.random()}`;
-  
+
+  // Quasar timeout management with automatic cleanup
+  const { registerTimeout, removeTimeout } = useTimeout();
+
   // Register this instance
   activeInstances.add(currentInstanceId);
 
@@ -203,8 +207,8 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     }
   };
 
-  // Auto-cleanup when no longer needed
-  const cleanupTimer = setTimeout(() => {
+  // Auto-cleanup when no longer needed using Quasar's useTimeout
+  registerTimeout(() => {
     if (!localVisible.value && !isActiveInstance.value) {
       cleanup();
     }
@@ -213,7 +217,8 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
   // Clear cleanup timer if instance becomes active
   watch(isActiveInstance, (isActive: boolean) => {
     if (isActive) {
-      clearTimeout(cleanupTimer);
+      // Quasar's useTimeout automatically handles cleanup
+      removeTimeout();
     }
   });
 

@@ -6,6 +6,7 @@
  */
 
 import { ref, type Ref } from 'vue';
+import { useTimeout } from 'quasar';
 import type { UseTooltipManagementReturn, TooltipDisplayState } from '../types';
 
 /**
@@ -23,7 +24,10 @@ import type { UseTooltipManagementReturn, TooltipDisplayState } from '../types';
 export const useTooltipManagement = (
   showTooltipInternal: () => Promise<void>
 ): UseTooltipManagementReturn => {
-  
+
+  // Quasar timeout management for automatic cleanup
+  const { registerTimeout } = useTimeout();
+
   // Reactive state
   const tooltipVisible: Ref<boolean> = ref(false);
   const tooltipRefreshKey: Ref<number> = ref(0);
@@ -45,10 +49,12 @@ export const useTooltipManagement = (
   let lastRefreshTime = 0;
   
   /**
-   * Promise-based delay utility
+   * Promise-based delay utility using Quasar's useTimeout for automatic cleanup
    */
   const delay = (ms: number): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => {
+      registerTimeout(resolve, ms);
+    });
   };
   
   /**
@@ -94,7 +100,7 @@ export const useTooltipManagement = (
           if (!displayState.isDisplaying) {
             resolve();
           } else {
-            setTimeout(checkDisplayState, 25);
+            registerTimeout(checkDisplayState, 25);
           }
         };
         checkDisplayState();

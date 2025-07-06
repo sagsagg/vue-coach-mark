@@ -4,12 +4,13 @@
  */
 
 import { ref, type Ref } from 'vue';
+import { useTimeout } from 'quasar';
 import { getElement } from '../utils';
-import type { 
-  CoachMarkStep, 
-  RetryConfig, 
-  UseElementRetryOptions, 
-  UseElementRetryReturn 
+import type {
+  CoachMarkStep,
+  RetryConfig,
+  UseElementRetryOptions,
+  UseElementRetryReturn
 } from '../types';
 
 /**
@@ -36,9 +37,9 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
   // Reactive state for retry operations
   const isRetrying: Ref<boolean> = ref(false);
   const currentAttempt: Ref<number> = ref(0);
-  
-  // Internal state for cancellation
-  let retryTimeoutId: number | null = null;
+
+  // Quasar timeout management with automatic cleanup
+  const { registerTimeout, removeTimeout } = useTimeout();
   let isCancelled = false;
 
   /**
@@ -95,14 +96,11 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
   };
 
   /**
-   * Sleep for specified duration
+   * Sleep for specified duration using Quasar's useTimeout for automatic cleanup
    */
   const sleep = (ms: number): Promise<void> => {
     return new Promise((resolve) => {
-      retryTimeoutId = window.setTimeout(() => {
-        retryTimeoutId = null;
-        resolve();
-      }, ms);
+      registerTimeout(resolve, ms);
     });
   };
 
@@ -203,17 +201,15 @@ export const useElementRetry = (options: UseElementRetryOptions = {}): UseElemen
   };
 
   /**
-   * Cancel ongoing retry operation
+   * Cancel ongoing retry operation using Quasar's removeTimeout
    */
   const cancelRetry = (): void => {
     isCancelled = true;
     isRetrying.value = false;
     currentAttempt.value = 0;
-    
-    if (retryTimeoutId !== null) {
-      clearTimeout(retryTimeoutId);
-      retryTimeoutId = null;
-    }
+
+    // Quasar's useTimeout automatically handles cleanup
+    removeTimeout();
   };
 
   return {
