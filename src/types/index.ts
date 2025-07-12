@@ -10,7 +10,7 @@
  * DEPENDENCY LEVELS (REORGANIZED TO ELIMINATE FORWARD REFERENCES):
  *
  * Level 1: Basic primitive types (no dependencies)
- *   - Side, Alignment, AllowedButtons, PopoverProvider
+ *   - Side, Alignment, AllowedButtons
  *   - These are simple string unions with no dependencies
  *
  * Level 2: Core interfaces (no dependencies)
@@ -83,7 +83,7 @@ import { type Ref, type ComputedRef } from 'vue';
 export type Side = 'top' | 'right' | 'bottom' | 'left' | 'over';
 export type Alignment = 'start' | 'center' | 'end';
 export type AllowedButtons = 'next' | 'previous' | 'close' | 'skip';
-export type PopoverProvider = 'mint' | 'quasar';
+
 
 // =============================================================================
 // LEVEL 2: CORE INTERFACES (NO DEPENDENCIES)
@@ -546,11 +546,7 @@ export type MintCoachMarkEmits = {
 // LEVEL 9: POPOVER SYSTEM TYPES
 // =============================================================================
 
-// Popover provider configuration
-export type PopoverProviderConfig = {
-  readonly provider: PopoverProvider;
-  readonly quasarOptions?: Record<string, unknown>;
-};
+
 
 // Enhanced popover communication type
 export type PopoverCommunication = {
@@ -561,7 +557,6 @@ export type PopoverCommunication = {
     readonly x: number;
     readonly y: number;
   } | null;
-  readonly provider: PopoverProvider;
   readonly isPositioning: boolean;
 };
 
@@ -570,13 +565,8 @@ export type PopoverCommunication = {
 // Communication composable return type
 export type UsePopoverCommunicationReturn = {
   readonly popoverState: ComputedRef<PopoverCommunication>;
-  readonly updatePopoverState: (updates: Partial<PopoverCommunication>) => void;
   readonly showPopover: (element: Element, step: CoachMarkStep, isPositioning?: boolean) => void;
   readonly hidePopover: () => void;
-  readonly repositionPopover: () => void;
-  readonly forceRepositioning: () => void;
-  readonly completePositioning: () => void;
-  readonly setProvider: (provider: PopoverProvider) => void;
 };
 
 // =============================================================================
@@ -635,7 +625,6 @@ export type UseTooltipManagementReturn = {
 // Quasar Watchers Composable Types
 export type UseQuasarWatchersReturn = {
   readonly initWatchers: () => void;
-  readonly isProcessing: () => boolean;
 };
 
 export type PopoverState = {

@@ -19,7 +19,6 @@ export {
   isHTMLElement,
   isMouseEvent,
   isPointerEvent,
-  isKeyboardEvent,
   shouldPreventDefault,
   isSVGPathElement,
   isFocusableElement,
@@ -33,9 +32,7 @@ export {
 export {
   calculateElementCenter,
   calculatePositionWithPadding,
-  getCurrentScrollPosition,
-  doRectsOverlap,
-  calculateDistance
+  getCurrentScrollPosition
 } from './positionUtils';
 
 // State management utilities

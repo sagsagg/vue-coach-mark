@@ -7,14 +7,12 @@ import {
   ref,
   computed,
   watch,
-  nextTick,
   type Ref,
   type ComputedRef
 } from 'vue';
 import { useTimeout } from 'quasar';
 import type {
   PopoverCommunication,
-  PopoverProvider,
   CoachMarkStep,
   UsePopoverCommunicationReturn
 } from '../types';
@@ -26,7 +24,6 @@ const globalPopoverState: Ref<PopoverCommunication> = ref<PopoverCommunication>(
   targetElement: null,
   step: null,
   position: null,
-  provider: 'mint',
   isPositioning: false
 });
 
@@ -127,48 +124,17 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     });
   };
 
-  /**
-   * Complete positioning (mark positioning as finished)
-   */
-  const completePositioning = (): void => {
-    if (globalPopoverState.value.visible) {
-      updatePopoverState({
-        isPositioning: false
-      });
-    }
-  };
 
-  /**
-   * Reposition popover based on current target element
-   */
-  const repositionPopover = (): void => {
-    const currentElement = globalPopoverState.value.targetElement;
-    if (!currentElement || !isValidElement(currentElement)) {
-      return;
-    }
 
-    nextTick(() => {
-      const position = calculateElementCenter(currentElement);
 
-      updatePopoverState({
-        position
-      });
-    });
-  };
 
-  /**
-   * Set the popover provider
-   */
-  const setProvider = (provider: PopoverProvider): void => {
-    updatePopoverState({
-      provider
-    });
-  };
+
 
   // Watch for window resize and scroll to reposition popover
   const handleReposition = (): void => {
-    if (globalPopoverState.value.visible) {
-      repositionPopover();
+    if (globalPopoverState.value.visible && globalPopoverState.value.targetElement) {
+      const position = calculateElementCenter(globalPopoverState.value.targetElement);
+      updatePopoverState({ position });
     }
   };
 
@@ -222,35 +188,12 @@ export const usePopoverCommunication = (instanceId?: string): UsePopoverCommunic
     }
   });
 
-  /**
-   * Force popover repositioning (useful for custom implementations)
-   */
-  const forceRepositioning = (): void => {
-    if (globalPopoverState.value.visible && globalPopoverState.value.targetElement) {
-      // Emit a repositioning event that custom popovers can listen to
-      const event = new CustomEvent('mint-coach-mark-reposition', {
-        detail: {
-          targetElement: globalPopoverState.value.targetElement,
-          step: globalPopoverState.value.step,
-          position: globalPopoverState.value.position
-        }
-      });
-      window.dispatchEvent(event);
 
-      // Also update the position to trigger reactivity
-      repositionPopover();
-    }
-  };
 
   return {
     popoverState,
-    updatePopoverState,
     showPopover,
-    hidePopover,
-    repositionPopover,
-    forceRepositioning,
-    completePositioning,
-    setProvider
+    hidePopover
   } as const;
 };
 
@@ -270,7 +213,6 @@ export const resetGlobalPopoverState = (): void => {
     targetElement: null,
     step: null,
     position: null,
-    provider: 'mint',
     isPositioning: false
   };
   activeInstances.clear();

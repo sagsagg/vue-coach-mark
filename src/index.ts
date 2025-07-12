@@ -32,8 +32,6 @@ export type {
   Side,
   Alignment,
   StageDefinition,
-  PopoverProvider,
-  PopoverProviderConfig,
   PopoverCommunication,
   UsePopoverCommunicationReturn,
   CoachMarkInstance,

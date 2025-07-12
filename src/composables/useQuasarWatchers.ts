@@ -216,15 +216,7 @@ export const useQuasarWatchers = (options: WatcherOptions): UseQuasarWatchersRet
     initRepositionWatcher();
   };
   
-  /**
-   * Check if watchers are processing
-   */
-  const isProcessing = (): boolean => {
-    return isProcessingRenderRequest || isProcessingRepositionRequest;
-  };
-  
   return {
-    initWatchers,
-    isProcessing
+    initWatchers
   };
 };

@@ -51,12 +51,7 @@ export const isPointerEvent = (event: Event): event is PointerEvent => {
   return event instanceof PointerEvent;
 };
 
-/**
- * Type guard for keyboard events
- */
-export const isKeyboardEvent = (event: Event): event is KeyboardEvent => {
-  return event instanceof KeyboardEvent;
-};
+
 
 /**
  * Check if a target element should prevent default behavior
