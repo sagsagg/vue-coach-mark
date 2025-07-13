@@ -627,6 +627,13 @@ export type UseQuasarWatchersReturn = {
   readonly initWatchers: () => void;
 };
 
+// Step navigation composable return type
+export type UseStepNavigationReturn = {
+  readonly moveNext: () => Promise<void>;
+  readonly movePrevious: () => Promise<void>;
+  readonly moveTo: (stepIndex: number, options?: NavigationOptions) => Promise<void>;
+};
+
 export type PopoverState = {
   readonly visible: boolean;
   readonly targetElement: Element | null;

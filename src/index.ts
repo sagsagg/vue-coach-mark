@@ -15,6 +15,22 @@ export {
 export { useAsyncTour } from './composables/useAsyncTour';
 export { useElementRetry } from './composables/useElementRetry';
 export {
+  getQuasarAnchor,
+  getQuasarSelf,
+  getQuasarOffset,
+  getQuasarClass
+} from './composables/useQuasarTooltipConfig';
+export {
+  useCoachMarkUIState,
+  checkIsLastStep,
+  getShowButtons,
+  checkShouldShowSkipButton,
+  getProgressText,
+  checkShouldShowTooltip
+} from './composables/useCoachMarkUIState';
+export { useStepNavigation } from './composables/useStepNavigation';
+export { useCoachMarkEventHandlers } from './composables/useCoachMarkEventHandlers';
+export {
   hasAsyncNavigationCallbacks,
   hasAsyncLifecycleCallbacks,
   hasAsyncCallbacks
