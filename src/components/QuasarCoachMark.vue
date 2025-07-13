@@ -395,17 +395,17 @@ const createCoachMarkInterface = (): CoachMarkInstance => {
     moveNext: (options?: NavigationOptions) => moveNext({
       currentStepIndex: currentStepIndex.value,
       totalSteps: totalSteps.value,
-      options
+      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
     }, getConfig()),
     movePrevious: (options?: NavigationOptions) => movePrevious({
       currentStepIndex: currentStepIndex.value,
-      options
+      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
     }, getConfig()),
     moveTo: (index: number, options?: NavigationOptions) => moveTo({
       stepIndex: index,
       currentStepIndex: currentStepIndex.value,
       totalSteps: totalSteps.value,
-      options
+      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
     }, getConfig()),
     skipTour: () => handleSkip(),
     hasNextStep: () => currentStepIndex.value !== undefined && currentStepIndex.value < totalSteps.value - 1,
@@ -568,14 +568,16 @@ const { moveNext, movePrevious, moveTo } = useStepNavigation({
   createCoachMarkInterface
 });
 
-// Create wrapper functions for event handlers
+// Create wrapper functions for event handlers with auto-scroll enabled
 const moveNextForEventHandlers = () => moveNext({
   currentStepIndex: currentStepIndex.value,
-  totalSteps: totalSteps.value
+  totalSteps: totalSteps.value,
+  options: { autoScroll: true } // Enable auto-scroll for button clicks
 }, getConfig());
 
 const movePreviousForEventHandlers = () => movePrevious({
-  currentStepIndex: currentStepIndex.value
+  currentStepIndex: currentStepIndex.value,
+  options: { autoScroll: true } // Enable auto-scroll for button clicks
 }, getConfig());
 
 // Initialize event handlers
@@ -609,23 +611,23 @@ interface QuasarCoachMarkExposed {
   getCurrentStepIndex: () => number | undefined
 }
 
-// Create wrapper functions for backward compatibility
+// Create wrapper functions for backward compatibility with auto-scroll enabled by default
 const moveNextWrapper = (options?: NavigationOptions) => moveNext({
   currentStepIndex: currentStepIndex.value,
   totalSteps: totalSteps.value,
-  options
+  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
 }, getConfig());
 
 const movePreviousWrapper = (options?: NavigationOptions) => movePrevious({
   currentStepIndex: currentStepIndex.value,
-  options
+  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
 }, getConfig());
 
 const moveToWrapper = (index: number, options?: NavigationOptions) => moveTo({
   stepIndex: index,
   currentStepIndex: currentStepIndex.value,
   totalSteps: totalSteps.value,
-  options
+  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
 }, getConfig());
 
 // Expose public API
