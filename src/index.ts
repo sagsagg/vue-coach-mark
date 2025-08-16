@@ -58,6 +58,7 @@ export type {
 
 // Utilities
 export * from './utils';
+export * from './utils/quasarTooltip';
 
 // CSS
 import './styles/coach-mark.css';

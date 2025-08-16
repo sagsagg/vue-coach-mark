@@ -1,98 +1,52 @@
 <template>
   <div class="quasar-coach-mark">
-    <!-- QTooltip-based popover implementation -->
-    <QTooltip
+    <MintCoachMarkPopover
       v-if="shouldShowTooltip"
-      :key="`tooltip-${tooltipRefreshKey}`"
       v-model="tooltipVisible"
+      :refresh-key="tooltipRefreshKey"
       :target="popoverState.targetElement || undefined"
       :anchor="quasarAnchor"
       :self="quasarSelf"
       :offset="quasarOffset"
-      :delay="1000"
-      :hide-delay="50"
-      no-parent-event
-      class="mint-coach-mark-quasar-tooltip"
-      :class="quasarClass"
+      :class-name="quasarClass"
+      :step="currentStep"
+      :step-index="currentStepIndex"
+      :total-steps="totalSteps"
+      :is-last-step="isLastStep"
+      :show-buttons="showButtons"
+      :disable-buttons="disableButtons"
+      :should-show-skip-button="shouldShowSkipButton"
+      :skip-btn-text="skipBtnText"
+      :progress-text="progressText"
       @show="handleTooltipShow"
       @hide="handleTooltipHide"
+      @next="handleNext"
+      @previous="handlePrevious"
+      @skip="handleSkip"
+      @close="handleClose"
     >
-      <div class="mint-coach-mark-quasar-wrapper">
-        <!-- Title -->
-        <div v-if="currentStep?.popover?.title" class="mint-coach-mark-quasar-title">
-          <slot name="title" :step="currentStep" :index="currentStepIndex">
-            {{ currentStep.popover.title }}
-          </slot>
-        </div>
-        
-        <!-- Description -->
-        <div v-if="currentStep?.popover?.description" class="mint-coach-mark-quasar-description">
-          <slot name="content" :step="currentStep" :index="currentStepIndex">
-            {{ currentStep.popover.description }}
-          </slot>
-        </div>
-        
-        <!-- Progress -->
-        <div
-          v-if="currentStep?.popover?.showProgress"
-          class="mint-coach-mark-quasar-progress"
-        >
-          <slot name="progress" :step="currentStep" :index="currentStepIndex" :total="totalSteps">
-            <div class="mint-coach-mark-quasar-progress-text">
-              {{ progressText }}
-            </div>
-          </slot>
-        </div>
-        
-        <!-- Buttons -->
-        <div class="mint-coach-mark-quasar-footer">
-          <slot name="skip-button" :step="currentStep" :index="currentStepIndex">
-            <button
-              v-if="shouldShowSkipButton"
-              @click="handleSkip"
-              class="mint-coach-mark-quasar-btn mint-coach-mark-quasar-btn--skip"
-              :disabled="disableButtons.includes('skip')"
-            >
-              {{ skipBtnText }}
-            </button>
-          </slot>
-
-          <slot name="prev-button" :step="currentStep" :index="currentStepIndex">
-            <button
-              v-if="showButtons.includes('previous')"
-              @click="handlePrevious"
-              class="mint-coach-mark-quasar-btn mint-coach-mark-quasar-btn--prev"
-              :disabled="disableButtons.includes('previous') || (currentStepIndex || 0) === 0"
-            >
-              {{ currentStep?.popover?.prevBtnText || 'Previous' }}
-            </button>
-          </slot>
-
-          <slot name="next-button" :step="currentStep" :index="currentStepIndex">
-            <button
-              v-if="showButtons.includes('next')"
-              @click="handleNext"
-              class="mint-coach-mark-quasar-btn mint-coach-mark-quasar-btn--next"
-              :disabled="disableButtons.includes('next')"
-            >
-              {{ currentStep?.popover?.nextBtnText || (isLastStep ? 'Done' : 'Next') }}
-            </button>
-          </slot>
-
-          <slot name="close-icon">
-            <button
-              v-if="showButtons.includes('close')"
-              @click="handleClose"
-              class="mint-coach-mark-quasar-btn mint-coach-mark-quasar-btn--close"
-              :disabled="disableButtons.includes('close')"
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </slot>
-        </div>
-      </div>
-    </QTooltip>
+      <template #title="slotProps">
+        <slot name="title" v-bind="slotProps" />
+      </template>
+      <template #content="slotProps">
+        <slot name="content" v-bind="slotProps" />
+      </template>
+      <template #progress="slotProps">
+        <slot name="progress" v-bind="slotProps" />
+      </template>
+      <template #skip-button="slotProps">
+        <slot name="skip-button" v-bind="slotProps" />
+      </template>
+      <template #prev-button="slotProps">
+        <slot name="prev-button" v-bind="slotProps" />
+      </template>
+      <template #next-button="slotProps">
+        <slot name="next-button" v-bind="slotProps" />
+      </template>
+      <template #close-icon>
+        <slot name="close-icon" />
+      </template>
+    </MintCoachMarkPopover>
   </div>
 </template>
 
@@ -108,7 +62,7 @@ import {
   type Ref,
   type ComputedRef
 } from 'vue';
-import { QTooltip } from 'quasar';
+import MintCoachMarkPopover from './MintCoachMarkPopover.vue';
 import { useCoachMark } from '../composables/useCoachMark';
 import { useCoachMarkState } from '../composables/useCoachMarkState';
 import { usePopoverCommunication } from '../composables/usePopoverCommunication';
@@ -121,9 +75,8 @@ import {
   getQuasarSelf,
   getQuasarOffset,
   getQuasarClass
-} from '../composables/useQuasarTooltipConfig';
+} from '../utils/quasarTooltip';
 import { useCoachMarkUIState } from '../composables/useCoachMarkUIState';
-import { useStepNavigation } from '../composables/useStepNavigation';
 import { useCoachMarkEventHandlers } from '../composables/useCoachMarkEventHandlers';
 import type {
   CoachMarkConfig,
@@ -134,7 +87,6 @@ import type {
   NavigationOptions
 } from '../types';
 import { getEnhancedConfig, createEventEmitters } from '../composables/useVueEventEmission';
-import { createNavigationWrappers } from '../composables/useCoachMarkNavigation';
 
 // Define props with same interface as MintCoachMark
 const props = withDefaults(defineProps<MintCoachMarkProps>(), {
@@ -164,7 +116,10 @@ const {
   setSteps,
   setConfig,
   getConfig,
-  skipTour
+  skipTour,
+  moveNext,
+  movePrevious,
+  moveTo
 } = useCoachMark(props.config);
 
 // Set initial steps (without enhancement to avoid DOM duplication)
@@ -183,8 +138,7 @@ const {
 // Initialize async tour functionality
 const {
   isAsyncOperationInProgress,
-  handleAsyncNavigation,
-  handleStepDeselection
+  handleAsyncNavigation
 } = useAsyncTour();
 
 // Initialize scroll blocking functionality
@@ -198,10 +152,10 @@ const currentStep: ComputedRef<CoachMarkStep | undefined> = computed(() => getAc
 const totalSteps: ComputedRef<number> = computed(() => props.steps?.length || 0);
 
 // QTooltip configuration computed properties
-const quasarAnchor = computed(() => getQuasarAnchor({ currentStep: currentStep.value }));
-const quasarSelf = computed(() => getQuasarSelf({ currentStep: currentStep.value }));
-const quasarOffset = computed(() => getQuasarOffset({ currentStep: currentStep.value, config: getConfig() }));
-const quasarClass = computed(() => getQuasarClass({ currentStep: currentStep.value }));
+const quasarAnchor = computed(() => getQuasarAnchor(currentStep.value));
+const quasarSelf = computed(() => getQuasarSelf(currentStep.value));
+const quasarOffset = computed(() => getQuasarOffset(currentStep.value, getConfig()));
+const quasarClass = computed(() => getQuasarClass(currentStep.value));
 
 // Initialize UI state management functions
 const uiStateFunctions = useCoachMarkUIState();
@@ -244,17 +198,16 @@ const skipBtnText: ComputedRef<string> = computed(() =>
 );
 
 // Initialize tooltip management with internal display function
-const tooltipManagement = useTooltipManagement({
+const tooltipManagement = useTooltipManagement(() => ({
   popoverState,
   currentStep,
-  isTransitioning 
-});
+  isTransitioning
+}));
 
 const {
   tooltipVisible,
   tooltipRefreshKey,
-  showTooltipIfReady,
-  setStepTransitioning
+  showTooltipIfReady
 } = tooltipManagement;
 
 /**
@@ -291,35 +244,7 @@ const ensureStepProcessingComplete = async (): Promise<void> => {
   }
 };
 
-/**
- * Internal implementation - show tooltip only if all conditions are met
- */
-const showTooltipIfReadyInternal = async (): Promise<void> => {
-  // Verify all conditions are met before showing
-  const hasValidStep = !!(popoverState.value.step || currentStep.value);
-  const isReady = popoverState.value.visible &&
-                  popoverState.value.targetElement &&
-                  hasValidStep &&
-                  !isTransitioning.value;    
-
-  if (isReady) {
-    // Use QTooltip's native delay handling - just set visibility
-    if (!tooltipVisible.value) {
-      await nextTick();
-      tooltipVisible.value = true;
-    }
-  } else {
-    // Simple retry for missing step data
-    if (popoverState.value.visible && popoverState.value.targetElement && !isTransitioning.value && !hasValidStep) {
-      await nextTick();
-
-      const retryHasValidStep = !!(popoverState.value.step || currentStep.value);
-      if (retryHasValidStep && !tooltipVisible.value) {
-        tooltipVisible.value = true;
-      }
-    }
-  }
-};
+// Tooltip management functions removed - handled by useTooltipManagement
 
 // Initialize watcher management after function declarations
 const watchers = useQuasarWatchers({
@@ -343,37 +268,7 @@ const watchers = useQuasarWatchers({
 // Initialize all watchers
 watchers.initWatchers();
 
-// Watch for model value changes
-watch(() => props.modelValue, (newValue) => {
-  if (newValue && !isActive.value) {
-    startTour();
-  } else if (!newValue && isActive.value) {
-    stopTour();
-  }
-});
-
-// Watch for step changes to ensure tooltip synchronization
-watch(() => currentStep.value, async (newStep, oldStep) => {
-  // Only handle step changes if we're not already transitioning
-  if (newStep && oldStep && newStep !== oldStep && tooltipVisible.value && !isTransitioning.value) {
-    try {
-      // 1. Immediately hide tooltip to prevent content flashing
-      tooltipVisible.value = false;
-
-      // 2. Ensure tooltip is completely hidden
-      await ensureTooltipHidden();
-
-      // 3. Wait for content to be updated
-      await ensureStepProcessingComplete();
-
-      // 4. Show tooltip if conditions are met
-      await showTooltipIfReady('step-change-watcher');
-
-    } catch (error) {
-      console.error('Error during step change synchronization:', error);
-    }
-  }
-});
+// Watchers moved after function definitions
 
 /**
  * Create a coach mark interface for hook callbacks
@@ -394,22 +289,10 @@ const createCoachMarkInterface = (): CoachMarkInstance => {
     getActiveElement: () => popoverState.value.targetElement || undefined,
     getPreviousElement: () => undefined,
     getPreviousStep: () => undefined,
-    moveNext: (options?: NavigationOptions) => moveNext({
-      currentStepIndex: currentStepIndex.value,
-      totalSteps: totalSteps.value,
-      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-    }, getConfig()),
-    movePrevious: (options?: NavigationOptions) => movePrevious({
-      currentStepIndex: currentStepIndex.value,
-      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-    }, getConfig()),
-    moveTo: (index: number, options?: NavigationOptions) => moveTo({
-      stepIndex: index,
-      currentStepIndex: currentStepIndex.value,
-      totalSteps: totalSteps.value,
-      options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-    }, getConfig()),
-    skipTour: () => handleSkip(),
+    moveNext: (options?: NavigationOptions) => moveNext({ autoScroll: true, ...options }),
+    movePrevious: (options?: NavigationOptions) => movePrevious({ autoScroll: true, ...options }),
+    moveTo: (index: number, options?: NavigationOptions) => moveTo(index, { autoScroll: true, ...options }),
+    skipTour: () => skipTour(),
     hasNextStep: () => currentStepIndex.value !== undefined && currentStepIndex.value < totalSteps.value - 1,
     hasPreviousStep: () => currentStepIndex.value !== undefined && currentStepIndex.value > 0,
     highlight: (step) => start(props.steps.indexOf(step)),
@@ -434,7 +317,7 @@ const eventEmitters = createEventEmitters({
   emit
 });
 
-const { emitStepInteractionEvent, emitAsyncInteractionEvent, emitAsyncDeselectedEvent } = eventEmitters;
+const { emitStepInteractionEvent } = eventEmitters;
 
 
 
@@ -451,15 +334,7 @@ watch(() => props.steps, (newSteps) => {
   setSteps(newSteps);
 });
 
-// Initialize navigation wrapper functions (pure functions)
-const navigationWrappers = createNavigationWrappers({
-  handleStepDeselection,
-  handleAsyncNavigation,
-  emitAsyncDeselectedEvent,
-  emitAsyncInteractionEvent
-});
-
-const { wrappedHandleStepDeselection, wrappedHandleAsyncNavigation } = navigationWrappers;
+// Navigation wrappers removed - using direct async tour functions
 
 /**
  * Start the tour
@@ -500,7 +375,37 @@ const stopTour = (): void => {
   emit('tour-complete');
 };
 
+// Watch for model value changes
+watch(() => props.modelValue, (newValue) => {
+  if (newValue && !isActive.value) {
+    startTour();
+  } else if (!newValue && isActive.value) {
+    stopTour();
+  }
+});
 
+// Watch for step changes to ensure tooltip synchronization
+watch(() => currentStep.value, async (newStep, oldStep) => {
+  // Only handle step changes if we're not already transitioning
+  if (newStep && oldStep && newStep !== oldStep && tooltipVisible.value && !isTransitioning.value) {
+    try {
+      // 1. Immediately hide tooltip to prevent content flashing
+      tooltipVisible.value = false;
+
+      // 2. Ensure tooltip is completely hidden
+      await ensureTooltipHidden();
+
+      // 3. Wait for content to be updated
+      await ensureStepProcessingComplete();
+
+      // 4. Show tooltip if conditions are met
+      await showTooltipIfReady('step-change-watcher');
+
+    } catch (error) {
+      console.error('Error during step change synchronization:', error);
+    }
+  }
+});
 
 // Type guards for runtime validation (used by emitStepInteractionEventWrapper)
 const isNumber = (value: unknown): value is number => {
@@ -548,39 +453,15 @@ const emitStepInteractionEventWrapper = (...args: unknown[]): void => {
   }
 };
 
-// Initialize step navigation
-const { moveNext, movePrevious, moveTo } = useStepNavigation({
-  currentStep,
-  currentStepIndex,
-  isTransitioning,
-  popoverState,
-  steps: props.steps,
-  start,
-  emit,
-  emitStepInteractionEvent,
-  handleStepDeselection: wrappedHandleStepDeselection,
-  blockScrolling,
-  unblockScrolling,
-  setStepTransitioning,
-  hidePopoverCommunication,
-  ensureTooltipHidden,
-  ensureStepProcessingComplete,
-  showTooltipIfReady,
-  stopTour,
-  createCoachMarkInterface
-});
+// Navigation functions are now provided directly from useCoachMark
 
 // Create wrapper functions for event handlers with auto-scroll enabled
-const moveNextForEventHandlers = () => moveNext({
-  currentStepIndex: currentStepIndex.value,
-  totalSteps: totalSteps.value,
-  options: { autoScroll: true } // Enable auto-scroll for button clicks
-}, getConfig());
-
-const movePreviousForEventHandlers = () => movePrevious({
-  currentStepIndex: currentStepIndex.value,
-  options: { autoScroll: true } // Enable auto-scroll for button clicks
-}, getConfig());
+const moveNextForEventHandlers = async () => {
+  moveNext({ autoScroll: true });
+};
+const movePreviousForEventHandlers = async () => {
+  movePrevious({ autoScroll: true });
+};
 
 // Initialize event handlers
 const { handleNext, handlePrevious, handleClose, handleSkip, handleTooltipShow, handleTooltipHide } = useCoachMarkEventHandlers({
@@ -590,7 +471,7 @@ const { handleNext, handlePrevious, handleClose, handleSkip, handleTooltipShow, 
   isActive,
   emit,
   emitStepInteractionEvent: emitStepInteractionEventWrapper,
-  handleAsyncNavigation: wrappedHandleAsyncNavigation,
+  handleAsyncNavigation,
   moveNext: moveNextForEventHandlers,
   movePrevious: movePreviousForEventHandlers,
   hidePopoverCommunication,
@@ -614,23 +495,9 @@ interface QuasarCoachMarkExposed {
 }
 
 // Create wrapper functions for backward compatibility with auto-scroll enabled by default
-const moveNextWrapper = (options?: NavigationOptions) => moveNext({
-  currentStepIndex: currentStepIndex.value,
-  totalSteps: totalSteps.value,
-  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-}, getConfig());
-
-const movePreviousWrapper = (options?: NavigationOptions) => movePrevious({
-  currentStepIndex: currentStepIndex.value,
-  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-}, getConfig());
-
-const moveToWrapper = (index: number, options?: NavigationOptions) => moveTo({
-  stepIndex: index,
-  currentStepIndex: currentStepIndex.value,
-  totalSteps: totalSteps.value,
-  options: { autoScroll: true, ...options } // Enable auto-scroll by default, allow override
-}, getConfig());
+const moveNextWrapper = (options?: NavigationOptions) => moveNext({ autoScroll: true, ...options });
+const movePreviousWrapper = (options?: NavigationOptions) => movePrevious({ autoScroll: true, ...options });
+const moveToWrapper = (index: number, options?: NavigationOptions) => moveTo(index, { autoScroll: true, ...options });
 
 // Expose public API
 defineExpose<QuasarCoachMarkExposed>({
