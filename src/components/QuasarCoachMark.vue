@@ -244,8 +244,10 @@ const skipBtnText: ComputedRef<string> = computed(() =>
 );
 
 // Initialize tooltip management with internal display function
-const tooltipManagement = useTooltipManagement(async () => {
-  await showTooltipIfReadyInternal();
+const tooltipManagement = useTooltipManagement({
+  popoverState,
+  currentStep,
+  isTransitioning 
 });
 
 const {

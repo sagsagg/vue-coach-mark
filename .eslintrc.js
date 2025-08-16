@@ -15,12 +15,13 @@ module.exports = {
     sourceType: 'module'
   },
   plugins: [
-    '@typescript-eslint'
+    '@typescript-eslint',
+    'import'
   ],
   rules: {
     // TypeScript specific rules
     '@typescript-eslint/no-explicit-any': 'error', // Prevent any type usage
-    '@typescript-eslint/no-unused-vars': ['error', { 
+    '@typescript-eslint/no-unused-vars': ['error', {
       argsIgnorePattern: '^_',
       varsIgnorePattern: '^_'
     }],
@@ -28,6 +29,14 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/no-redeclare': 'error',
+
+    // Code quality rules
+    '@typescript-eslint/no-use-before-define': ['error', {
+      functions: false,  // Allow function hoisting
+      classes: true,     // Disallow class usage before definition
+      variables: true,   // Disallow variable usage before definition
+      allowNamedExports: false
+    }],
     
 
     
@@ -36,11 +45,18 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'prefer-const': 'error',
     'no-var': 'error',
-    'no-use-before-define': 'error',
+    'no-use-before-define': 'off', // Disabled in favor of TypeScript version
+    'no-unused-vars': 'off', // Disabled in favor of TypeScript version
     semi: 'off',
     '@typescript-eslint/semi': 'error',
     camelcase: 'off',
     'no-redeclare': 'off',
+
+    // Import/Export rules
+    'import/no-cycle': ['error', {
+      maxDepth: 10,
+      ignoreExternal: true
+    }],
   },
   overrides: [
     {

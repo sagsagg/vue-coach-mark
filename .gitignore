@@ -137,3 +137,6 @@ dist
 
 # SvelteKit build / generate output
 .svelte-kit
+
+# ESLint test examples (for demonstration purposes)
+eslint-test-examples/
