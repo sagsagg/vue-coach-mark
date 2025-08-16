@@ -114,7 +114,7 @@ import { useCoachMarkState } from '../composables/useCoachMarkState';
 import { usePopoverCommunication } from '../composables/usePopoverCommunication';
 import { useAsyncTour } from '../composables/useAsyncTour';
 import { useScrollBlocking } from '../composables/useScrollBlocking';
-import { useTooltipManagement } from '../composables/useTooltipManagement';
+import useTooltipManagement from '../composables/useTooltipManagement';
 import { useQuasarWatchers } from '../composables/useQuasarWatchers';
 import {
   getQuasarAnchor,
