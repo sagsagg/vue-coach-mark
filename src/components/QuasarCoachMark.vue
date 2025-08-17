@@ -230,12 +230,23 @@ const ensureStepProcessingComplete = async (): Promise<void> => {
   await nextTick();
 
   // Extra safety for tour start - wait if currentStep is still not available
-  let retryCount = 0;
-  const maxRetries = 3;
+  // Use a single Promise-based timeout instead of a loop with await
+  if (!currentStep.value && popoverState.value.step) {
+    await new Promise<void>((resolve) => {
+      const maxWaitTime = 150; // 3 * 50ms equivalent to 3 nextTick calls
+      const startTime = Date.now();
 
-  while (retryCount < maxRetries && !currentStep.value && popoverState.value.step) {
-    await nextTick();
-    retryCount++;
+      const checkStep = () => {
+        if (currentStep.value || !popoverState.value.step || Date.now() - startTime > maxWaitTime) {
+          resolve();
+        } else {
+          // Use requestAnimationFrame for better performance than nextTick in a loop
+          requestAnimationFrame(checkStep);
+        }
+      };
+
+      checkStep();
+    });
   }
 
   // Additional wait for async operations
