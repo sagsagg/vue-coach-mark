@@ -34,7 +34,7 @@ import { ref, nextTick } from 'vue';
 import { createDummyElement, removeDummyElement, bringInView } from '../utils';
 import { useCoachMarkState } from './useCoachMarkState';
 import { useCoachMarkConfig } from './useCoachMarkConfig';
-import { useOverlay } from './useOverlay';
+
 import { useElementRetry } from './useElementRetry';
 import { extractRetryConfig } from './utils';
 import type { CoachMarkStep, NavigationOptions } from '../types';
@@ -42,7 +42,7 @@ import type { CoachMarkStep, NavigationOptions } from '../types';
 export const useHighlight = () => {
   const { getState, setState } = useCoachMarkState();
   const { getConfig, getCurrentCoachMark } = useCoachMarkConfig();
-  const { trackActiveElement, transitionStage, refreshOverlay } = useOverlay();
+  // Overlay functionality now handled by MintCoachMarkOverlay component
 
   // Initialize element retry with global configuration
   const globalRetryConfig = getConfig('retry');
@@ -79,8 +79,7 @@ export const useHighlight = () => {
    * Transfer highlight from current element to new element
    */
   const transferHighlight = async (toElement: Element, toStep: CoachMarkStep, options?: NavigationOptions): Promise<void> => {
-    const duration = 400;
-    const start = Date.now();
+    // Animation timing is now handled by CSS path morphing
 
     const fromStep: CoachMarkStep | undefined = getState('currentActiveStep');
     const fromElement = getState('currentActiveElement') || toElement;
@@ -135,76 +134,47 @@ export const useHighlight = () => {
      * - Requires 60fps performance for smooth visual experience
      * - Handles complex state synchronization during transitions
      */
-    const animate = () => {
-      const transitionCallback = getState('internalTransitionCallback');
-
-      // Prevent animation conflicts: ensure only the latest animation runs
-      // This is critical for preventing visual glitches during rapid navigation
-      if (transitionCallback !== animate) {
-        return;
-      }
-
-      const elapsed = Date.now() - start;
-      const timeRemaining = duration - elapsed;
-      const isHalfwayThrough = timeRemaining <= duration / 2;
-
-      // Coordinate popover rendering with overlay animation timing
-      // This precise timing control is not achievable with Vue Transitions
-      if (toStep.popover && isHalfwayThrough && !isPopoverRendered && hasDelayedPopover) {
-        // Emit event for Vue Transition-based popover to handle
+    // CSS path morphing handles animations, so we just finalize state immediately
+    const finalize = () => {
+      // Render popover if delayed
+      if (!isPopoverRendered && hasDelayedPopover) {
         setState('shouldRenderPopover', { element: toElement, step: toStep });
         isPopoverRendered = true;
       }
 
-      if (getConfig('animate') && elapsed < duration) {
-        // CORE ANIMATION: Complex geometric interpolation using custom easing
-        // This performs real-time SVG path morphing that Vue Transitions cannot handle
-        transitionStage(elapsed, duration, fromElement, toElement, fromStep, toStep);
-      } else {
-        // Animation complete - finalize state and trigger callbacks
-        trackActiveElement(toElement, toStep);
+      // Coordinate scrolling
+      const shouldAutoScroll = !!options?.autoScroll || (options?.autoScroll && getConfig('smoothScroll'));
 
-        // Coordinate scrolling with animation completion
-        const shouldAutoScroll = !!options?.autoScroll || (options?.autoScroll && getConfig('smoothScroll'));
+      if (!isToDummyElement && shouldAutoScroll) {
+        const smoothScroll = getConfig('smoothScroll');
 
-        if (!isToDummyElement && shouldAutoScroll) {
-          const smoothScroll = getConfig('smoothScroll');
-
-          // Delay ensures overlay positioning is fully complete before scrolling
-          setTimeout(() => {
-            bringInView(toElement, smoothScroll);
-          }, 100);
-        }
-
-        // Execute step lifecycle hooks after animation completion
-        if (highlightedHook && coachMark) {
-          highlightedHook(isToDummyElement ? undefined : toElement, toStep, {
-            config: getConfig(),
-            state: getState(),
-            coachMark
-          });
-        }
-
-        // Clean up animation state and update element tracking
-        setState('internalTransitionCallback', undefined);
-        setState('internalPreviousStep', fromStep);
-        setState('internalPreviousElement', fromElement);
-        setState('currentActiveStep', toStep);
-        setState('currentActiveElement', toElement);
-
-        isAnimating.value = false;
-        return;
+        // Delay ensures overlay positioning is fully complete before scrolling
+        setTimeout(() => {
+          bringInView(toElement, smoothScroll);
+        }, 100);
       }
 
-      // Continue animation loop for next frame
-      // This provides 60fps smooth animation that Vue Transitions cannot match
-      // for complex geometric calculations
-      window.requestAnimationFrame(animate);
+      // Execute step lifecycle hooks
+      if (highlightedHook && coachMark) {
+        highlightedHook(isToDummyElement ? undefined : toElement, toStep, {
+          config: getConfig(),
+          state: getState(),
+          coachMark
+        });
+      }
+
+      // Update element tracking state
+      setState('internalTransitionCallback', undefined);
+      setState('internalPreviousStep', fromStep);
+      setState('internalPreviousElement', fromElement);
+      setState('currentActiveStep', toStep);
+      setState('currentActiveElement', toElement);
+
+      isAnimating.value = false;
     };
 
-    // Initialize the animation loop
-    setState('internalTransitionCallback', animate);
-    window.requestAnimationFrame(animate);
+    // Execute the highlight logic immediately since CSS handles animations
+    finalize();
 
 
 
@@ -249,8 +219,7 @@ export const useHighlight = () => {
       return;
     }
 
-    trackActiveElement(activeHighlight, activeStep);
-    refreshOverlay();
+    // Element tracking and overlay updates are now handled by MintCoachMarkOverlay component
 
     // Emit event for popover repositioning
     setState('shouldRepositionPopover', { element: activeHighlight, step: activeStep });

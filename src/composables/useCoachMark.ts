@@ -7,7 +7,7 @@ import { ref } from 'vue';
 import { useCoachMarkState } from './useCoachMarkState';
 import { useCoachMarkConfig } from './useCoachMarkConfig';
 import { useCoachMarkEvents } from './useCoachMarkEvents';
-import { useOverlay } from './useOverlay';
+
 import { useHighlight } from './useHighlight';
 import { isFocusableElement, isAllowedButton } from './utils';
 import type { CoachMarkConfig, CoachMarkStep, CoachMarkInstance, AllowedButtons, NavigationOptions } from '../types';
@@ -29,7 +29,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
   const { getState, setState, resetState } = useCoachMarkState();
   const { configure, getConfig, setCurrentCoachMark, getCurrentCoachMark } = useCoachMarkConfig();
   const { listen, initEvents, destroyEvents, destroyEmitter } = useCoachMarkEvents();
-  const { destroyOverlay } = useOverlay();
+  // Overlay is now handled by MintCoachMarkOverlay component
   const { highlight, refreshActiveHighlight, destroyHighlight } = useHighlight();
 
   // Initialize configuration
@@ -70,7 +70,7 @@ export const useCoachMark = (initialConfig: CoachMarkConfig = {}) => {
     document.body.classList.remove('mint-coach-mark-active', 'mint-coach-mark-fade', 'mint-coach-mark-simple');
 
     destroyEvents();
-    destroyOverlay();
+    // Overlay is now handled by MintCoachMarkOverlay component lifecycle
     destroyHighlight();
     destroyEmitter();
 

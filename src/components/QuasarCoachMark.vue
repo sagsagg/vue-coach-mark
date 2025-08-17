@@ -1,5 +1,26 @@
 <template>
   <div class="quasar-coach-mark">
+    <!-- Overlay Component -->
+    <MintCoachMarkOverlay
+      :visible="shouldShowOverlay"
+      :stage="overlayStage"
+      :step="currentStep"
+      :step-index="currentStepIndex"
+      :config="getConfig()"
+      :is-active="isActive"
+      :clickable="overlayClickable"
+      :animation-enabled="animationEnabled"
+      @overlay-click="handleOverlayClick"
+      @show="handleOverlayShow"
+      @hide="handleOverlayHide"
+      @stage-update="handleStageUpdate"
+    >
+      <template #overlay-content="slotProps">
+        <slot name="overlay-content" v-bind="slotProps" />
+      </template>
+    </MintCoachMarkOverlay>
+
+    <!-- Popover Component -->
     <MintCoachMarkPopover
       v-if="shouldShowTooltip"
       v-model="tooltipVisible"
@@ -63,6 +84,7 @@ import {
   type ComputedRef
 } from 'vue';
 import MintCoachMarkPopover from './MintCoachMarkPopover.vue';
+import MintCoachMarkOverlay from './MintCoachMarkOverlay.vue';
 import { useCoachMark } from '../composables/useCoachMark';
 import { useCoachMarkState } from '../composables/useCoachMarkState';
 import { usePopoverCommunication } from '../composables/usePopoverCommunication';
@@ -76,6 +98,7 @@ import {
   getQuasarOffset,
   getQuasarClass
 } from '../utils/quasarTooltip';
+import { getEffectivePadding } from '../utils';
 import { useCoachMarkUIState } from '../composables/useCoachMarkUIState';
 import { useCoachMarkEventHandlers } from '../composables/useCoachMarkEventHandlers';
 import type {
@@ -84,7 +107,8 @@ import type {
   MintCoachMarkProps,
   MintCoachMarkEmits,
   CoachMarkInstance,
-  NavigationOptions
+  NavigationOptions,
+  StageDefinition
 } from '../types';
 import { getEnhancedConfig, createEventEmitters } from '../composables/useVueEventEmission';
 
@@ -98,6 +122,26 @@ const props = withDefaults(defineProps<MintCoachMarkProps>(), {
 
 // Define emits with same interface as MintCoachMark
 const emit = defineEmits<MintCoachMarkEmits>();
+
+// Define slots interface
+interface QuasarCoachMarkSlots {
+  title?: (scope: { step: CoachMarkStep | undefined; index: number | undefined }) => unknown;
+  content?: (scope: { step: CoachMarkStep | undefined; index: number | undefined }) => unknown;
+  progress?: (scope: { step: CoachMarkStep | undefined; index: number | undefined; total: number }) => unknown;
+  'skip-button'?: (scope: { step: CoachMarkStep | undefined; index: number | undefined }) => unknown;
+  'prev-button'?: (scope: { step: CoachMarkStep | undefined; index: number | undefined }) => unknown;
+  'next-button'?: (scope: { step: CoachMarkStep | undefined; index: number | undefined }) => unknown;
+  'close-icon'?: () => unknown;
+  'overlay-content'?: (scope: {
+    stage: StageDefinition | undefined;
+    step: CoachMarkStep | undefined;
+    stepIndex: number | undefined;
+    visible: boolean;
+    isActive: boolean;
+  }) => unknown;
+}
+
+defineSlots<QuasarCoachMarkSlots>();
 
 // Initialize coach mark state
 const {
@@ -196,6 +240,46 @@ const skipBtnText: ComputedRef<string> = computed(() =>
   mergedConfig.value.skipBtnText ||
   'Skip'
 );
+
+// Overlay-related computed properties
+const shouldShowOverlay = computed(() => {
+  return Boolean(
+    isActive.value &&
+    currentStep.value &&
+    popoverState.value.targetElement &&
+    !isTransitioning.value
+  );
+});
+
+const overlayStage = computed(() => {
+  const targetElement = popoverState.value.targetElement;
+  if (!targetElement || !currentStep.value) {
+    return undefined;
+  }
+
+  const rect = targetElement.getBoundingClientRect();
+  const globalPadding = 10; // Default padding
+  const effectivePadding = getEffectivePadding(
+    currentStep.value.popover?.padding,
+    globalPadding,
+    10
+  );
+
+  return {
+    x: rect.x - effectivePadding,
+    y: rect.y - effectivePadding,
+    width: rect.width + effectivePadding * 2,
+    height: rect.height + effectivePadding * 2
+  };
+});
+
+const overlayClickable = computed(() => {
+  return getConfig().allowClose !== false;
+});
+
+const animationEnabled = computed(() => {
+  return getConfig().animate !== false;
+});
 
 // Initialize tooltip management with internal display function
 const tooltipManagement = useTooltipManagement(() => ({
@@ -490,6 +574,39 @@ const { handleNext, handlePrevious, handleClose, handleSkip, handleTooltipShow, 
   skipTour,
   createCoachMarkInterface
 });
+
+// Overlay event handlers
+const handleOverlayClick = (event: MouseEvent): void => {
+  // Emit overlay click event
+  emit('overlay-click', event);
+
+  // Handle overlay click behavior based on configuration
+  const overlayClickBehavior = getConfig().overlayClickBehavior;
+
+  if (getConfig().allowClose && overlayClickBehavior === 'close') {
+    stopTour();
+    return;
+  }
+
+  if (overlayClickBehavior === 'nextStep') {
+    moveNext({ autoScroll: true });
+  }
+};
+
+const handleOverlayShow = (): void => {
+  // Overlay is now visible
+  emit('overlay-show');
+};
+
+const handleOverlayHide = (): void => {
+  // Overlay is now hidden
+  emit('overlay-hide');
+};
+
+const handleStageUpdate = (stage: StageDefinition): void => {
+  // Update internal state if needed
+  setState('currentActiveStagePosition', stage);
+};
 
 // Define the exposed API interface
 interface QuasarCoachMarkExposed {

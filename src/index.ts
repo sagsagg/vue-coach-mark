@@ -1,11 +1,13 @@
 // Main entry point for the QuasarCoachMark library
 export { default as QuasarCoachMark } from './components/QuasarCoachMark.vue';
+export { default as MintCoachMarkOverlay } from './components/MintCoachMarkOverlay.vue';
 
 // Composables
 export { useCoachMark } from './composables/useCoachMark';
 export { useCoachMarkState } from './composables/useCoachMarkState';
 export { useCoachMarkEvents } from './composables/useCoachMarkEvents';
-export { useOverlay } from './composables/useOverlay';
+
+
 export { useHighlight } from './composables/useHighlight';
 export {
   usePopoverCommunication,

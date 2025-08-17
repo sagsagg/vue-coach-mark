@@ -540,6 +540,11 @@ export type MintCoachMarkEmits = {
   readonly 'step-closed': readonly [context: StepInteractionEventContext];
   readonly 'step-next-clicked': readonly [context: StepInteractionEventContext];
   readonly 'step-previous-clicked': readonly [context: StepInteractionEventContext];
+
+  // Overlay events
+  readonly 'overlay-click': readonly [event: MouseEvent];
+  readonly 'overlay-show': readonly [];
+  readonly 'overlay-hide': readonly [];
 };
 
 // =============================================================================
